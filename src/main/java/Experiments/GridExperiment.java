@@ -7,6 +7,5 @@ public class GridExperiment extends A_Experiment {
     }
 
     public void runExperiment() {
-
     }
 }
