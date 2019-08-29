@@ -1,0 +1,15 @@
+Commenting:
+  General:
+    add standard Javadoc documentaion to classes and methods.
+  Tags:
+    todo - general todo tag.
+    imp - needs to be implemented.
+    BLOCKING - unimplemented code is blocking work elsewhere.
+    
+Naming:
+  general:
+    The naming of classes, methods, fields, etc. will follow standard Java conventions.
+  Interfaces:
+    Interface names will be prefaced with an 'I'. e.g. I_Name.
+  Abstract classes:
+    Abstract class names will be prefaced with an 'A'. e.g. A_Name.
