@@ -1,14 +1,15 @@
 package Instances;
 
 import Instances.Maps.Coordinate_2D;
-import jdk.internal.net.http.common.Pair;
+import Instances.Maps.I_Coordinate;
 
 public class Scenario {
-    private final String name;
-    private Pair<Coordinate_2D,Coordinate_2D> startAndGoalPairs;
-
-    public Scenario(String name, Pair<Coordinate_2D, Coordinate_2D> startAndGoalPairs) {
-        this.name = name;
-        this.startAndGoalPairs = startAndGoalPairs;
-    }
+    private String name;
+    // Fixme - Pair needs to be changed
+//    private Pair<I_Coordinate,I_Coordinate> startAndGoalPairs;
+//
+//    public Scenario(String name, Pair<I_Coordinate, I_Coordinate> startAndGoalPairs) {
+//        this.name = name;
+//        this.startAndGoalPairs = startAndGoalPairs;
+//    }
 }

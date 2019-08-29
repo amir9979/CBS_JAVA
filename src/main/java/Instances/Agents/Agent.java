@@ -1,13 +1,13 @@
 package Instances.Agents;
 
-import Instances.Maps.Coordinate_2D;
+import Instances.Maps.I_Coordinate;
 
 public class Agent {
     private int iD;
-    private final Coordinate_2D source;
-    private final Coordinate_2D target;
+    private final I_Coordinate source;
+    private final I_Coordinate target;
 
-    public Agent(int iD, Coordinate_2D source, Coordinate_2D target) {
+    public Agent(int iD, I_Coordinate source, I_Coordinate target) {
         this.iD = iD;
         this.source = source;
         this.target = target;
