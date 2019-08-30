@@ -5,12 +5,14 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Reader {
-    // imp - not ready to use
+    // Testme - ready to be tested
 
-    protected File file;
-    protected Scanner scanner;
+    private File file;
+    private Scanner scanner;
+    private IO_Manager io_manager;
 
     public Reader(){
+        this.io_manager = IO_Manager.getInstance();
     }
 
 
@@ -33,24 +35,24 @@ public class Reader {
             return Enum_IO.ALREADY_OPENED;
         }
 
+        this.file = new File(filePath);
 
-        // Imp - check if filePath exists
-        if ( !IO_Manager.pathExists(filePath) ){
+        if ( !IO_Manager.pathExists(this.file) ){
             return Enum_IO.INVALID_PATH;
         }
 
-        this.file = new File(filePath);
 
         // Try to create Scanner
         try {
             this.scanner = new Scanner(this.file);
-            return Enum_IO.OPENED;
+
+           // if ( this.io_manager.addOpenPath(this.file.getPath()) )
+                return Enum_IO.OPENED;
+
         } catch (FileNotFoundException exception){
             exception.printStackTrace();
         }
-
         return Enum_IO.ERROR;
-
 
     }
 
@@ -62,8 +64,16 @@ public class Reader {
             this.scanner = null;
         }
 
-        this.file = null;
-        return Enum_IO.CLOSED;
+        if( this.file == null ){
+            return Enum_IO.CLOSED;
+        }
+
+        if (IO_Manager.getInstance().removeOpenPath(this.file.getPath()) ){
+            this.file = null;
+            return Enum_IO.CLOSED;
+        }
+
+        return Enum_IO.ERROR;
 
     }
 }

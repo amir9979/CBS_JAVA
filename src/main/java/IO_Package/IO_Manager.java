@@ -1,11 +1,13 @@
 package IO_Package;
+
+import java.io.File;
 import java.util.HashSet;
 
 public class IO_Manager {
-    // imp - not ready to use
+    // testme
 
     private HashSet<String> openedPaths;
-
+    public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main";
 
     private static IO_Manager ourInstance = new IO_Manager();
 
@@ -14,15 +16,27 @@ public class IO_Manager {
     }
 
     private IO_Manager() {
-        // Todo - check if hash set does
-        //  'contains' properly on Strings
+        // Todo - check if HashSet does 'contains' properly on Strings
         this.openedPaths = new HashSet<String>();
+    }
+
+
+    public boolean addOpenPath(String toAdd){
+
+        return this.openedPaths.add(toAdd);
+    }
+
+    public boolean removeOpenPath(String toRemove){
+
+        if( ! this.openedPaths.contains(toRemove)){
+            return true;
+        }
+        return this.openedPaths.remove(toRemove);
     }
 
 
     public Reader getReader(String filePath){
 
-        // imp - If path is currently opened
         if ( isOpen(filePath)) {
             return null;
         }
@@ -31,7 +45,7 @@ public class IO_Manager {
         Reader reader = new Reader();
         Enum_IO enum_io = reader.openFile(filePath);
         if(enum_io.equals(Enum_IO.OPENED)){
-            openedPaths.add(filePath);
+            this.openedPaths.add(filePath);
             return reader;
         }
 
@@ -42,9 +56,7 @@ public class IO_Manager {
 
     public Writer getWriter(String folderPath, String fileName){
 
-
-        String[] joinPaths = {folderPath, fileName};
-        String filePath = IO_Manager.buildPath(joinPaths);
+        String filePath = IO_Manager.buildPath(new String[]{folderPath, fileName});
 
         if ( isOpen(filePath)) {
             return null;
@@ -54,7 +66,7 @@ public class IO_Manager {
         Enum_IO enum_io = writer.openFile(folderPath, fileName);
 
         if(enum_io.equals(Enum_IO.OPENED)){
-            openedPaths.add(filePath);
+            this.openedPaths.add(filePath);
             return writer;
         }
 
@@ -62,10 +74,28 @@ public class IO_Manager {
 
     }
 
-    public static boolean pathExists(String filePath){
-        // imp - Check if path exists (files and folders)
+    public static boolean pathExists(File file){
+        return file.exists();
+    }
 
-        return true;
+    public static boolean isDirectory(File directory){
+        return directory.isDirectory();
+    }
+
+    public Enum_IO deleteFile(File toDelete){
+
+
+        if ( pathExists(toDelete)) {
+            // fixme - toDelete file exists but won't delete ( sometimes does )
+            if (toDelete.delete()){
+                this.removeOpenPath(toDelete.getPath());
+                return Enum_IO.DELETED;
+            }
+        }else {
+            return Enum_IO.INVALID_PATH;
+        }
+
+        return Enum_IO.ERROR;
     }
 
     public boolean isOpen(String filePath){
@@ -74,9 +104,19 @@ public class IO_Manager {
 
     public static String buildPath(String[] input){
 
-        // imp - concat input like: input[0] + "\" + input[1]
+        if( input == null || input.length == 0){
+            return null;
+        }
 
-        return "";
+        // concat input in format: input[0] + "\" + input[1]
+        String result = input[0];
+        for (int i = 1; i < input.length ; i++) {
+            result += "\\" + input[i];
+        }
+
+        return result;
     }
+
+
 
 }
