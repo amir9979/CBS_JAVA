@@ -9,7 +9,6 @@ import java.io.File;
 
 public class IO_ManagerTest {
     // imp - write missing tests
-    // Blocking - deleteFile Method: toDelete file exists but won't delete ( sometimes does )
 
     IO_Manager io_manager = IO_Manager.getInstance();
 
@@ -21,7 +20,7 @@ public class IO_ManagerTest {
 
     static final String fileToReadName = "test_reader_file.txt";
     static final String fileToReadPath = IO_Manager.buildPath(new String[]{ test_resources_path, fileToReadName});
-    static final String[] linesToRead = {  "This file has 3 lines" ,
+    static final String[] linesToRead = {   "This file has 3 lines" ,
                                             "This is the second line",
                                             "This is the last line"};
 
@@ -40,17 +39,17 @@ public class IO_ManagerTest {
 
     @Before
     public void before(){
-        deleteFileToWrite();
+
     }
 
     @After
     public void after(){
-        deleteFileToWrite();
+
     }
 
     static void deleteFileToWrite(){
         // Check that file not exists
-        File file = new File(fileToWriteName);
+        File file = new File(fileToWritePath);
         if ( IO_Manager.pathExists(file) ){
             file.delete();
         }
@@ -78,6 +77,11 @@ public class IO_ManagerTest {
     @Test
     public void getWriter() {
 
+        File file = new File(test_resources_path,fileToWriteName);
+        if ( IO_Manager.pathExists(file) ){
+            file.delete();
+        }
+
         /***       Valid values   ***/
         Writer writer = io_manager.getWriter(test_resources_path,fileToWriteName);
         Assert.assertNotNull(writer);
@@ -86,6 +90,8 @@ public class IO_ManagerTest {
         /***       Invalid values   ***/
         writer = io_manager.getWriter(test_resources_path,fileToWriteName); // path still open
         Assert.assertNull(writer);
+
+        deleteFileToWrite();
 
     }
 

@@ -30,3 +30,10 @@ Testing:
     In every test:
         1. test invalid values:     /***      Invalid values  ***/
         2. test valid values:       /***       Valid values   ***/
+
+    Assert:
+        * Assert.assertTrue(condition)
+        * Assert.assertFalse(condition)
+        * Assert.assertNull(condition)
+        * Assert.assertNotNull(condition)
+        * Assert.assertEquals(Expected, Actual)
