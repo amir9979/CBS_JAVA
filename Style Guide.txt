@@ -1,15 +1,32 @@
 Commenting:
   General:
-    add standard Javadoc documentaion to classes and methods.
+    add standard Javadoc documentation to classes and methods.
   Tags:
-    todo - general todo tag.
-    imp - needs to be implemented.
-    BLOCKING - unimplemented code is blocking work elsewhere.
+    * Go to settings -> Editor -> _TODO
+    * '_' is used only here so tags wont pop up in the _TODO window
+    _todo - general to do tag.
+    _imp - needs to be implemented.
+    _BLOCKING - unimplemented code blocks work elsewhere.
+    _fixme - implemented code with bags that needs to be fixed
+    _testme - code ready to be tested
+    _done - code that works and passed it's tests
+    _missingdoc - not fully documented
     
 Naming:
   general:
-    The naming of classes, methods, fields, etc. will follow standard Java conventions.
+    * The naming of classes, methods, fields, etc. will follow standard Java conventions.
+    * Use this.something when possible
+    * Write if statements always with brackets like: if( something ){ }
   Interfaces:
     Interface names will be prefaced with an 'I'. e.g. I_Name.
   Abstract classes:
     Abstract class names will be prefaced with an 'A'. e.g. A_Name.
+
+
+Testing:
+    Before: add @Before to init the tested class
+            * the before() method runs before each test
+
+    In every test:
+        1. test invalid values:     /***      Invalid values  ***/
+        2. test valid values:       /***       Valid values   ***/

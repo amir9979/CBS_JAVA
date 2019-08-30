@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Writer{
-    // imp - not ready to use
+    // Testme - passed the tests
 
     private File file;
     private BufferedWriter buffer;
@@ -21,16 +21,15 @@ public class Writer{
             return Enum_IO.ALREADY_OPENED;
         }
 
-        // Imp - check if filePath is valid
-        String[] joinPaths = {folderPath, fileName};
-        String filePath = IO_Manager.buildPath(joinPaths);
 
-        if ( !IO_Manager.pathExists(folderPath) ||
-                IO_Manager.pathExists(filePath) ){
+        this.file = new File(folderPath, fileName);
+        File directory = new File(folderPath);
+
+        if ( IO_Manager.pathExists(this.file) ||
+                !IO_Manager.pathExists(directory) ){
             return Enum_IO.INVALID_PATH;
         }
 
-        this.file = new File(filePath);
 
         // Try to create Buffer
         try {
@@ -50,6 +49,7 @@ public class Writer{
 
             try{
                 this.buffer.write(textToWrite);
+                this.buffer.flush();
 
                 return Enum_IO.WROTE_SUCCESSFULLY;
 

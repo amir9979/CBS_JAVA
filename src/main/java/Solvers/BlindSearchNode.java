@@ -4,7 +4,7 @@ import Problems.I_ProblemState;
 
 public class BlindSearchNode extends A_SearchNode {
 
-	double	_g;
+	protected double	_g;
 
 	public BlindSearchNode( I_ProblemState currentProblemState ) {
 		// Fields in A_Search Node

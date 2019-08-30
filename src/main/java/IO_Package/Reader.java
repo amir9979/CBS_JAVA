@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Reader {
-    // imp - not ready to use
+    // Testme - passed the tests
 
     protected File file;
     protected Scanner scanner;
@@ -33,13 +33,12 @@ public class Reader {
             return Enum_IO.ALREADY_OPENED;
         }
 
+        this.file = new File(filePath);
 
-        // Imp - check if filePath exists
-        if ( !IO_Manager.pathExists(filePath) ){
+        if ( !IO_Manager.pathExists(this.file) ){
             return Enum_IO.INVALID_PATH;
         }
 
-        this.file = new File(filePath);
 
         // Try to create Scanner
         try {
@@ -48,9 +47,7 @@ public class Reader {
         } catch (FileNotFoundException exception){
             exception.printStackTrace();
         }
-
         return Enum_IO.ERROR;
-
 
     }
 

@@ -1,11 +1,14 @@
 package IO_Package;
+
+import java.io.File;
 import java.util.HashSet;
 
 public class IO_Manager {
+    // imp - tests
     // imp - not ready to use
 
     private HashSet<String> openedPaths;
-
+    public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main";
 
     private static IO_Manager ourInstance = new IO_Manager();
 
@@ -14,15 +17,13 @@ public class IO_Manager {
     }
 
     private IO_Manager() {
-        // Todo - check if hash set does
-        //  'contains' properly on Strings
+        // Todo - check if HashSet does 'contains' properly on Strings
         this.openedPaths = new HashSet<String>();
     }
 
 
     public Reader getReader(String filePath){
 
-        // imp - If path is currently opened
         if ( isOpen(filePath)) {
             return null;
         }
@@ -41,7 +42,6 @@ public class IO_Manager {
 
 
     public Writer getWriter(String folderPath, String fileName){
-
 
         String[] joinPaths = {folderPath, fileName};
         String filePath = IO_Manager.buildPath(joinPaths);
@@ -62,10 +62,26 @@ public class IO_Manager {
 
     }
 
-    public static boolean pathExists(String filePath){
-        // imp - Check if path exists (files and folders)
+    public static boolean pathExists(File file){
+        return file.exists();
+    }
 
-        return true;
+    public static boolean isDirectory(File directory){
+        return directory.isDirectory();
+    }
+
+    public static Enum_IO deleteFile(File toDelete){
+
+
+        if ( pathExists(toDelete)) {
+            if (toDelete.delete()){
+                return Enum_IO.DELETED;
+            }
+        }else {
+            return Enum_IO.INVALID_PATH;
+        }
+
+        return Enum_IO.ERROR;
     }
 
     public boolean isOpen(String filePath){
@@ -74,9 +90,19 @@ public class IO_Manager {
 
     public static String buildPath(String[] input){
 
-        // imp - concat input like: input[0] + "\" + input[1]
+        if( input == null || input.length == 0){
+            return null;
+        }
 
-        return "";
+        // concat input in format: input[0] + "\" + input[1]
+        String result = input[0];
+        for (int i = 1; i < input.length ; i++) {
+            result += "\\" + input[i];
+        }
+
+        return result;
     }
+
+
 
 }
