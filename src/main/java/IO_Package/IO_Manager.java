@@ -3,14 +3,14 @@ package IO_Package;
 import java.io.File;
 import java.util.HashSet;
 
-public class IO_Manager {
+public class IO_Manager { // Singleton class
     // testme
 
-    private HashSet<String> openedPaths;
-    public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main";
+    private HashSet<String> openedPaths; // Keeps track on opened files
+    public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main"; // absolute path to main
 
+    /* Singleton */
     private static IO_Manager ourInstance = new IO_Manager();
-
     public static IO_Manager getInstance() {
         return ourInstance;
     }
@@ -21,22 +21,26 @@ public class IO_Manager {
     }
 
 
-    public boolean addOpenPath(String toAdd){
-
-        return this.openedPaths.add(toAdd);
+    // Tries to add path to the openedPaths list
+    // Return true if added successfully , otherwise false
+    public boolean addOpenPath(String path){
+        return this.openedPaths.add(path);
     }
 
-    public boolean removeOpenPath(String toRemove){
-
-        if( ! this.openedPaths.contains(toRemove)){
+    // Return true if removed successfully , otherwise false
+    public boolean removeOpenPath(String path){
+        // if path isn't in the list, returns true
+        if( ! this.openedPaths.contains(path)){
             return true;
         }
-        return this.openedPaths.remove(toRemove);
+        return this.openedPaths.remove(path);
     }
 
 
+    // This method returns a Reader if path is available
     public Reader getReader(String filePath){
 
+        // Means it's in the openPath list
         if ( isOpen(filePath)) {
             return null;
         }
@@ -45,19 +49,20 @@ public class IO_Manager {
         Reader reader = new Reader();
         Enum_IO enum_io = reader.openFile(filePath);
         if(enum_io.equals(Enum_IO.OPENED)){
-            this.openedPaths.add(filePath);
             return reader;
         }
 
+        // If for any reason we got here - something went wrong
         return null;
-
     }
 
 
+    // This method returns a Writer if path is available
     public Writer getWriter(String folderPath, String fileName){
 
         String filePath = IO_Manager.buildPath(new String[]{folderPath, fileName});
 
+        // Means it's in the openPath list
         if ( isOpen(filePath)) {
             return null;
         }
@@ -66,12 +71,12 @@ public class IO_Manager {
         Enum_IO enum_io = writer.openFile(folderPath, fileName);
 
         if(enum_io.equals(Enum_IO.OPENED)){
-            this.openedPaths.add(filePath);
+            // Means it's in the openPath list
             return writer;
         }
 
+        // If for any reason we got here - something went wrong
         return null;
-
     }
 
     public static boolean pathExists(File file){
@@ -82,28 +87,35 @@ public class IO_Manager {
         return directory.isDirectory();
     }
 
+    // This method deletes a file
     public Enum_IO deleteFile(File toDelete){
-
 
         if ( pathExists(toDelete)) {
             // fixme - toDelete file exists but won't delete ( sometimes does )
             if (toDelete.delete()){
-                this.removeOpenPath(toDelete.getPath());
-                return Enum_IO.DELETED;
+                // returns true also when file not listed in openPath list
+                if( this.removeOpenPath(toDelete.getPath()) ){
+                    return Enum_IO.DELETED;
+                }
             }
         }else {
             return Enum_IO.INVALID_PATH;
         }
 
+        // If for any reason we got here - something went wrong
         return Enum_IO.ERROR;
     }
 
+
+    // checks if path is in openPath list
     public boolean isOpen(String filePath){
         return this.openedPaths.contains(filePath);
     }
 
+
     public static String buildPath(String[] input){
 
+        // basic check
         if( input == null || input.length == 0){
             return null;
         }
@@ -114,9 +126,8 @@ public class IO_Manager {
             result += "\\" + input[i];
         }
 
+        // returns the concat path
         return result;
     }
-
-
 
 }

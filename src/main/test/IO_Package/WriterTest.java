@@ -19,17 +19,21 @@ public class WriterTest {
 
     @Before
     public void before(){
-        this.writer = new Writer();
+
+        if (this.writer != null){
+            this.writer.closeFile();
+        }else {
+            this.writer = new Writer();
+        }
+
 
         // Check that file not exists
         IO_ManagerTest.deleteFileToWrite();
 
 
-
-
         /***       Test openFile with Valid values   ***/
         Enum_IO enum_io = writer.openFile(this.directoryPath, this.fileName);
-        Assert.assertEquals(Enum_IO.OPENED,enum_io);
+        Assert.assertEquals(Enum_IO.OPENED,enum_io); // Opened successfully
 
     }
 
@@ -45,13 +49,13 @@ public class WriterTest {
 
         /***      Invalid values  ***/
         Enum_IO enum_io = this.writer.openFile(this.directoryPath, this.fileName);
-        Assert.assertEquals(Enum_IO.ALREADY_OPENED,enum_io);
+        Assert.assertEquals(Enum_IO.CURRENT_FILE_STILL_OPEN,enum_io); // Trying to open an open file
 
         Writer badPathWriter = new Writer();
         String badFileDirectory = "fake folder";
         String badFileName = "not exists.txt";
         Enum_IO enum_io_notExists = badPathWriter.openFile(badFileDirectory, badFileName);
-        Assert.assertEquals(Enum_IO.INVALID_PATH, enum_io_notExists);
+        Assert.assertEquals(Enum_IO.INVALID_PATH, enum_io_notExists); // Trying to open an invalid path
 
     }
 
@@ -60,9 +64,8 @@ public class WriterTest {
 
         // Write line by line
         for (int i = 0; i < this.linesToWrite.length ; i++) {
-            Assert.assertEquals(Enum_IO.WROTE_SUCCESSFULLY,writer.writeText(linesToWrite[i]));
+            Assert.assertEquals(Enum_IO.WROTE_SUCCESSFULLY,writer.writeText(linesToWrite[i])); // Wrote successfully
         }
-
     }
 
     @Test
@@ -70,15 +73,15 @@ public class WriterTest {
 
         /***       Valid values   ***/
         Enum_IO enum_io = this.writer.closeFile();
-        Assert.assertEquals(Enum_IO.CLOSED, enum_io);
+        Assert.assertEquals(Enum_IO.CLOSED, enum_io); // Closed successfully
 
         enum_io = this.writer.closeFile();
-        Assert.assertEquals(Enum_IO.CLOSED, enum_io);
-
+        Assert.assertEquals(Enum_IO.CLOSED, enum_io); // Trying to close a closed file
 
 
     }
 
+    /* This method helps to remove the 'write_test.txt' */
     private boolean deletedFile(){
 
         //Close the file
@@ -92,6 +95,6 @@ public class WriterTest {
         enum_io = IO_Manager.getInstance().deleteFile(new File(filePath));
 
 
-        return enum_io.equals(Enum_IO.DELETED);
+        return enum_io.equals(Enum_IO.DELETED); // true if deleted successfully
     }
 }
