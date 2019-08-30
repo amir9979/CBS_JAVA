@@ -3,14 +3,14 @@ Commenting:
     add standard Javadoc documentation to classes and methods.
   Tags:
     * Go to settings -> Editor -> _TODO
-    * '_' is used only here so tags wont pop up in the _TODO window
+    * '_' is used only in this document, so that these tags wont pop up in the _TODO window
     _todo - general to do tag.
     _imp - needs to be implemented.
     _BLOCKING - unimplemented code blocks work elsewhere.
-    _fixme - implemented code with bags that needs to be fixed
-    _testme - code ready to be tested
-    _done - code that works and passed it's tests
-    _missingdoc - not fully documented
+    _fixme - implemented code with bugs that needs to be fixed.
+    _testme - code is ready to be tested.
+    _done - code that works and has passed its tests.
+    _missingdoc - not fully documented.
     
 Naming:
   general:
@@ -30,10 +30,3 @@ Testing:
     In every test:
         1. test invalid values:     /***      Invalid values  ***/
         2. test valid values:       /***       Valid values   ***/
-
-    Assert:
-        * Assert.assertTrue(condition)
-        * Assert.assertFalse(condition)
-        * Assert.assertNull(condition)
-        * Assert.assertNotNull(condition)
-        * Assert.assertEquals(Expected, Actual)
