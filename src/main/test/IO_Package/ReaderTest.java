@@ -1,5 +1,6 @@
 package IO_Package;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,11 +8,8 @@ import org.junit.Test;
 public class ReaderTest {
 
     private Reader reader;
-    private final String fileRelativePath = "resources/test reader file.txt";
-    private final String[] linesToRead = {  "This file has 3 linesToRead" ,
-                                            "This is the second line",
-                                            "This is the last line"};
-    private final String filePath = IO_Manager.buildPath(new String[]{ IO_Manager.workingDirectory, this.fileRelativePath});
+    private final String[] linesToRead = IO_ManagerTest.linesToRead;
+    private final String filePath = IO_ManagerTest.fileToReadPath;
 
 
     @Before
@@ -23,6 +21,12 @@ public class ReaderTest {
         Enum_IO enum_io = reader.openFile(this.filePath);
         Assert.assertEquals(Enum_IO.OPENED,enum_io);
 
+    }
+
+
+    @After
+    public void after(){
+        IO_Manager.getInstance().removeOpenPath(this.filePath);
     }
 
     @Test

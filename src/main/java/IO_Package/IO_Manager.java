@@ -4,8 +4,7 @@ import java.io.File;
 import java.util.HashSet;
 
 public class IO_Manager {
-    // imp - tests
-    // imp - not ready to use
+    // testme
 
     private HashSet<String> openedPaths;
     public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main";
@@ -22,6 +21,20 @@ public class IO_Manager {
     }
 
 
+    public boolean addOpenPath(String toAdd){
+
+        return this.openedPaths.add(toAdd);
+    }
+
+    public boolean removeOpenPath(String toRemove){
+
+        if( ! this.openedPaths.contains(toRemove)){
+            return true;
+        }
+        return this.openedPaths.remove(toRemove);
+    }
+
+
     public Reader getReader(String filePath){
 
         if ( isOpen(filePath)) {
@@ -32,7 +45,7 @@ public class IO_Manager {
         Reader reader = new Reader();
         Enum_IO enum_io = reader.openFile(filePath);
         if(enum_io.equals(Enum_IO.OPENED)){
-            openedPaths.add(filePath);
+            this.openedPaths.add(filePath);
             return reader;
         }
 
@@ -43,8 +56,7 @@ public class IO_Manager {
 
     public Writer getWriter(String folderPath, String fileName){
 
-        String[] joinPaths = {folderPath, fileName};
-        String filePath = IO_Manager.buildPath(joinPaths);
+        String filePath = IO_Manager.buildPath(new String[]{folderPath, fileName});
 
         if ( isOpen(filePath)) {
             return null;
@@ -54,7 +66,7 @@ public class IO_Manager {
         Enum_IO enum_io = writer.openFile(folderPath, fileName);
 
         if(enum_io.equals(Enum_IO.OPENED)){
-            openedPaths.add(filePath);
+            this.openedPaths.add(filePath);
             return writer;
         }
 
@@ -70,11 +82,13 @@ public class IO_Manager {
         return directory.isDirectory();
     }
 
-    public static Enum_IO deleteFile(File toDelete){
+    public Enum_IO deleteFile(File toDelete){
 
 
         if ( pathExists(toDelete)) {
+            // fixme - toDelete file exists but won't delete ( sometimes does )
             if (toDelete.delete()){
+                this.removeOpenPath(toDelete.getPath());
                 return Enum_IO.DELETED;
             }
         }else {

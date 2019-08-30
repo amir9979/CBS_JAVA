@@ -12,17 +12,20 @@ import static org.junit.Assert.*;
 public class WriterTest {
 
     private Writer writer;
-    private final String directoryRelativePath = "resources";
-    private final String[] linesToWrite = { "Try to write\n" ,
-                                            "Wrote the second line\n",
-                                            "Wrote the last line"};
+    private final String[] linesToWrite = IO_ManagerTest.linesToWrite;
 
-    private final String directoryPath = IO_Manager.buildPath(new String[]{ IO_Manager.workingDirectory, this.directoryRelativePath});
-    private final String fileName = "write test.txt";
+    private final String directoryPath = IO_ManagerTest.test_resources_path;
+    private final String fileName = IO_ManagerTest.fileToWriteName;
 
     @Before
     public void before(){
         this.writer = new Writer();
+
+        // Check that file not exists
+        IO_ManagerTest.deleteFileToWrite();
+
+
+
 
         /***       Test openFile with Valid values   ***/
         Enum_IO enum_io = writer.openFile(this.directoryPath, this.fileName);
@@ -79,13 +82,15 @@ public class WriterTest {
     private boolean deletedFile(){
 
         //Close the file
-        if(! this.writer.closeFile().equals(Enum_IO.CLOSED) ) {
+        Enum_IO enum_io = this.writer.closeFile();
+        if(! enum_io.equals(Enum_IO.CLOSED) ) {
             return false;
         }
 
         // Delete the file
         String filePath = IO_Manager.buildPath(new String[]{this.directoryPath, this.fileName});
-        Enum_IO enum_io = IO_Manager.deleteFile(new File(filePath));
+        enum_io = IO_Manager.getInstance().deleteFile(new File(filePath));
+
 
         return enum_io.equals(Enum_IO.DELETED);
     }

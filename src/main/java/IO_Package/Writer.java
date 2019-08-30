@@ -6,12 +6,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Writer{
-    // Testme - passed the tests
+    // Testme - ready to be tested
 
     private File file;
     private BufferedWriter buffer;
+    private IO_Manager io_manager;
+
 
     public Writer(){
+        this.io_manager = IO_Manager.getInstance();
     }
 
 
@@ -33,8 +36,9 @@ public class Writer{
 
         // Try to create Buffer
         try {
-            this.buffer = new BufferedWriter(new FileWriter(file));
+            this.buffer = new BufferedWriter(new FileWriter(this.file));
             return Enum_IO.OPENED;
+
         }catch (IOException exception){
             exception.printStackTrace();
         }
@@ -71,9 +75,11 @@ public class Writer{
 
             this.buffer.close();
             this.buffer = null;
-            this.file = null;
 
-            return Enum_IO.CLOSED;
+            if( this.io_manager.removeOpenPath(this.file.getPath()) ){
+                this.file = null;
+                return Enum_IO.CLOSED;
+            }
 
         }catch (IOException exception){
             exception.printStackTrace();
