@@ -3,9 +3,8 @@ package Statistics;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
- * This class collects is used to collect metrics about a run of an instance. It is coupled with the
+ * This class is used to collect metrics about a single run of a single instance. It is strongly coupled with the
  * {@link Statistics.S_Statistics} class.
  * Will only allow one occurrence of a field name. Meaning there can'y be a String field and an Integer field with the
  * same name.
@@ -14,9 +13,7 @@ public class InstanceReport {
     private Map<String, String> stringFields = new HashMap<String, String>();
     private Map<String, Integer> integerFields = new HashMap<String, Integer>();
     private Map<String, Float> floatFields = new HashMap<String, Float>();
-
-    InstanceReport() {
-    }
+    private boolean isCommited = false;
 
     /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
@@ -176,11 +173,29 @@ public class InstanceReport {
         return value != null ? value.toString() : null;
     }
 
-    // imp tosrting csv
-    // imp tosrting json
-    // imp simple tostring
-    // imp commit
+    @Override
+    public String toString() {
+        return "InstanceReport{" +
+                "stringFields=" + stringFields +
+                ", integerFields=" + integerFields +
+                ", floatFields=" + floatFields +
+                '}';
+    }
 
-
+    /**
+     * Commits the report, signaling to the {@link Statistics.S_Statistics} class that the report is final and that it
+     * can output the report to its output streams. An instance of this class can only be committed one. Repeated calls
+     * to this method will have no effect.
+     * @return true if this is the first call to this method on this instance, else false.
+     */
+    public boolean commit(){
+        if(isCommited){
+            return false;
+        }
+        else{
+            S_Statistics.commit(this);
+            return true;
+        }
+    }
 
 }
