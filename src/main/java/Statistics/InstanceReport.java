@@ -194,6 +194,7 @@ public class InstanceReport {
         }
         else{
             S_Statistics.commit(this);
+            isCommited = true;
             return true;
         }
     }
