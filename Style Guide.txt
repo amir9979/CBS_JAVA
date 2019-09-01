@@ -3,7 +3,7 @@ Commenting:
     add standard Javadoc documentation to classes and methods.
   Tags:
     * Go to settings -> Editor -> _TODO
-    * '_' is used only in this document, so that these tags wont pop up in the _TODO window
+    * '_' is used only in this document, so that these tags won't pop up in the _TODO window
     _todo - general to do tag.
     _imp - needs to be implemented.
     _BLOCKING - unimplemented code blocks work elsewhere.
@@ -11,6 +11,7 @@ Commenting:
     _testme - code is ready to be tested.
     _done - code that works and has passed its tests.
     _missingdoc - not fully documented.
+    _nicetohave - unimplemented improvements/expantions/features that are not "must have"s.
     
 Naming:
   general:
