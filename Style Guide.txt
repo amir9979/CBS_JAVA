@@ -12,7 +12,7 @@ Commenting:
     _done - code that works and has passed its tests.
     _missingdoc - not fully documented.
     _nicetohave - unimplemented improvements/expantions/features that are not "must have"s.
-    
+
 Naming:
   general:
     * The naming of classes, methods, fields, etc. will follow standard Java conventions.
