@@ -1,5 +1,7 @@
 package Instances.Agents;
 
+import IO_Package.IO_Manager;
+import Instances.Maps.Coordinate_2D;
 import Instances.Maps.I_Coordinate;
 
 public class Agent {
@@ -16,4 +18,6 @@ public class Agent {
         this.source = source;
         this.target = target;
     }
+
+
 }

@@ -63,7 +63,7 @@ public class InstanceManager {
     }
 
 
-    public class InstancePath{
+    public static class InstancePath{
 
         public final String path;
 

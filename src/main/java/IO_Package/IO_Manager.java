@@ -130,4 +130,25 @@ public class IO_Manager { // Singleton class
         return result;
     }
 
+
+
+
+    public static boolean isPositiveInt(String intAsString){
+
+        // imp - check if int
+        try {
+            int number=Integer.valueOf(intAsString);
+            if(number>0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (Exception e){
+            return false;
+
+        }
+    }
+
 }
