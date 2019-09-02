@@ -1,15 +1,16 @@
 package Instances;
 
-import Instances.Maps.Coordinate_2D;
-import Instances.Maps.I_Coordinate;
-
 public class Scenario {
+
     private String name;
-    // Fixme - Pair needs to be changed
-//    private Pair<I_Coordinate,I_Coordinate> startAndGoalPairs;
-//
-//    public Scenario(String name, Pair<I_Coordinate, I_Coordinate> startAndGoalPairs) {
-//        this.name = name;
-//        this.startAndGoalPairs = startAndGoalPairs;
-//    }
+
+    private Pair_Coordinates[] pair_coordinates;
+
+    public Scenario(String name, Pair_Coordinates[] pair_coordinates) {
+        this.name = name;
+        this.pair_coordinates = pair_coordinates;
+    }
+
+    public MAPF_Instance
+
 }
