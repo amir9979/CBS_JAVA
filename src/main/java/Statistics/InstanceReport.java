@@ -1,5 +1,6 @@
 package Statistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -188,7 +189,7 @@ public class InstanceReport {
      * to this method will have no effect.
      * @return true if this is the first call to this method on this instance, else false.
      */
-    public boolean commit(){
+    public boolean commit() throws IOException {
         if(isCommited){
             return false;
         }

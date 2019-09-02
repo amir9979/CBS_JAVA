@@ -1,11 +1,7 @@
 package Statistics;
 
 
-import Experiments.A_Experiment;
-import Instances.MAPF_Instance;
-import javafx.util.Pair;
-import jdk.internal.joptsimple.util.KeyValuePair;
-
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,17 +14,31 @@ import java.util.List;
  * a. adding {@link InstanceReport}s with {@link #newInstanceReport()}, and storing the results of experiments in them.
  * b. calling {@link #exportCSV(OutputStream, String[])} with a {@link java.io.FileOutputStream}, and an array of header fields.
  *
- * A more advanced usecase:
- * a. calling {@link #addOutputStream(OutputStream, InstanceReportToString, boolean)} with various {@link java.io.OutputStream}s.
+ * Example of a more advanced usecase:
+ * a. calling {@link #addOutputStream(OutputStream, InstanceReportToString, HeaderToString)} with various {@link java.io.OutputStream}s.
  * b. calling {@link #setHeader(String[])} to set a header (enables valid csv output).
- * c. adding {@link InstanceReport}s with {@link #newInstanceReport()}, and adding the results of experiments to them.
- * d. after each report is filled, calling {@link InstanceReport#commit()} to immediately output its contents to the
+ * c1. adding {@link InstanceReport}s with {@link #newInstanceReport()}, and adding the results of experiments to them.
+ * c2. after each report is filled, calling {@link InstanceReport#commit()} to immediately output its contents to the
  * output streams.
  */
 public class S_Statistics {
     ////      MEMBERS      ////
     private static String[] header = new String[0];
     private final static List<InstanceReport> reports = new ArrayList<InstanceReport>();
+    // the following three lists are managed together, so that any index refers to the same OutputStream in outputStreams
+    /**
+     * OutputStreams for {@link InstanceReport#commit() comitted} {@link InstanceReport}s to be output to.
+     */
+    private static List<OutputStream> outputStreams = new ArrayList<OutputStream>();
+    /**
+     * Functions to convert {@link InstanceReport}s to strings for output.
+     */
+    private static List<InstanceReportToString> instanceReportToStringsForOSs = new ArrayList<InstanceReportToString>();
+    /**
+     * Functions to convert the header to String to output at the start of an output stream. Can contain nulls, meaning
+     * a header is not needed for the OutputStream of the same index.
+     */
+    private static List<HeaderToString> headerToStringsForOSs = new ArrayList<HeaderToString>();
     ////      CONSTANTS AND INTERFACES      ////
     public static class StandardFields{
         public final static String expandedNodes = "Expanded Nodes";
@@ -37,15 +47,33 @@ public class S_Statistics {
         public final static String endTime = "End Time";
         public final static String elapsedTime = "Elapsed Time";
     }
+
+    /**
+     * Defines a function which converts an {@link InstanceReport} to a String.
+     * This class contains static methods which comply with this interface, and may be used when this interface is
+     * required.
+     * @see #instanceReportToStringCSV(InstanceReport)
+     */
     public interface InstanceReportToString{
         String instanceReportToString(InstanceReport instanceReport);
     }
 
+    /**
+     * Defines a function which converts a String array representing a header, to a String.
+     * {@link S_Statistics} contains static methods which comply with this interface, and may be used when this
+     * interface is required.
+     * @see #headerArrayToStringCSV(String[])
+     */
+    public interface HeaderToString{
+        String headerToString(String[] headerArray);
+    }
+
+
     ////      SETTERS AND GETTERS      ////
 
-    public static void setHeader(String[] newHeader){
+    public static void setHeader(String[] newHeader) throws IOException {
         header = newHeader;
-        //todo also output the new header to all relevant output streams.
+        outputHeaderToAllRelevantStreams();
     }
 
     private static String[] getHeader() {
@@ -69,32 +97,65 @@ public class S_Statistics {
     }
 
     public static void clearAll(){
-        clearHeader();;
+        clearHeader();
         clearReports();
+        clearOutputStreams();
     }
 
-    public static void addOutputStream(OutputStream outputStream, InstanceReportToString irTosTring, boolean needsHeader){
-        //imp
+    public static void addOutputStream(OutputStream outputStream, InstanceReportToString instanceReportToString,
+                                       HeaderToString headerToString) throws IOException {
+        outputStreams.add(outputStream);
+        instanceReportToStringsForOSs.add(instanceReportToString);
+        headerToStringsForOSs.add(headerToString); // null is interpreted as "no need for header"
+        //output the header to the new stream a header is needed and is set.
+        if(header.length > 0 && headerToString != null){
+            outputStream.write(headerToString.headerToString(header).getBytes());
+        }
+    }
+
+    public static void addOutputStream(OutputStream outputStream,
+                                       InstanceReportToString instanceReportToString) throws IOException {
+        addOutputStream(outputStream, instanceReportToString, null);
+    }
+
+    public static void removeOutputStream(OutputStream outputStream){
+        int streamIndex = outputStreams.indexOf(outputStream);
+        outputStreams.remove(streamIndex);
+        headerToStringsForOSs.remove(streamIndex);
+        instanceReportToStringsForOSs.remove(streamIndex);
+    }
+
+    public static void clearOutputStreams(){
+        outputStreams.clear();
+        headerToStringsForOSs.clear();
+        instanceReportToStringsForOSs.clear();
     }
 
     ////      OUTPUT      ////
 
-    //imp export
-    //imp outputing to given output streams. associate each output stream with f(InstanceReport):String . also require optional initializer and finalizer g(): String .
-    // imp groupBy, which gets a comparator to group by
-    // imp sort, which gets a comparator to sort by
+    // nicetohave groupBy, which gets a comparator to group by
+    // nicetohave sort, which gets a comparator to sort by
 
-    // imp tosrting csv
-    // imp tosrting json
+    ////    conversions to strings      ////
+
+    //      csv     //
+
+//    /**
+//     * Returns a string representation of the current {@link #header}, in a format compatible with CSV.
+//     * @return a string representation of the current {@link #header}, in a format compatible with CSV.
+//     */
+//    public static String currentHeaderToStringCSV(){
+//        return headerArrayToStringCSV(header);
+//    }
 
     /**
-     * Returns a string representation of the current {@link #header}, in a format compatible with CSV.
+     * Returns a string representation of the given header, in a format compatible with CSV.
      * @param delimiter the delimiter to use to delimit the fields.
-     * @return a string representation of the current {@link #header}, in a format compatible with CSV.
+     * @return a string representation of the given header, in a format compatible with CSV.
      */
-    private static String headerToStringCSV(char delimiter){
+    private static String headerToStringCSV(String[] headerArray, char delimiter){
         StringBuilder headerLine = new StringBuilder();
-        for(String field : header){
+        for(String field : headerArray){
             headerLine.append(field);
             headerLine.append(delimiter);
         }
@@ -103,11 +164,11 @@ public class S_Statistics {
     }
 
     /**
-     * Returns a string representation of the current {@link #header}, in a format compatible with CSV.
-     * @return a string representation of the current {@link #header}, in a format compatible with CSV.
+     * Returns a string representation of the given header, in a format compatible with CSV.
+     * @return a string representation of the given header, in a format compatible with CSV.
      */
-    private static String headerToStringCSV(){
-        return headerToStringCSV(',');
+    public static String headerArrayToStringCSV(String[] headerArray){
+        return headerToStringCSV(headerArray, ',');
     }
 
     /**
@@ -117,7 +178,7 @@ public class S_Statistics {
      * @param delimiter the delimiter to use to delimit the fields.
      * @return a string representation of the information in an instanceReport, in a format compatible with CSV.
      */
-    public static String instanceReportToStringCSV(InstanceReport instanceReport, char delimiter){
+    private static String instanceReportToStringCSV(InstanceReport instanceReport, char delimiter){
         StringBuilder reportLine = new StringBuilder();
 
         for(String field : header){
@@ -140,18 +201,89 @@ public class S_Statistics {
         return  instanceReportToStringCSV(instanceReport, ',');
     }
 
-    //imp
-    private static LinkedHashMap<String, String> instanceReportToSortedMap(InstanceReport instanceReport){
-        return null; //imp
+    //      human readable      //
+
+    public static String instanceReportToHumanReadableString(InstanceReport instanceReport){
+        return instanceReport.toString();
     }
 
-    //imp
-    static void commit(InstanceReport instanceReport){
+    // nicetohave tosrting json
 
+    /////       other conversions       ////
+
+
+//    private static LinkedHashMap<String, String> instanceReportToSortedMap(InstanceReport instanceReport){
+//        return null; //nicetohave
+//    }
+
+    ////      outputing to the streams      ////
+
+    private static void outputHeaderToStream(OutputStream outputStream, String[] headerArray,
+                                             HeaderToString headerToString) throws IOException {
+        outputStream.write(headerToString.headerToString(headerArray).getBytes());
     }
 
-    public static void exportCSV(OutputStream outputStream, String[] header){
-        //imp
+    private static void outputHeaderToAllRelevantStreams() throws IOException {
+        for (int i = 0; i < outputStreams.size(); i++) {
+            HeaderToString headerToString = headerToStringsForOSs.get(i);
+            if(headerToString != null){
+                outputHeaderToStream(outputStreams.get(i), S_Statistics.header, headerToString);
+            }
+        }
+    }
+
+    private static void outputInstanceReportToStream(OutputStream outputStream, InstanceReport instanceReport,
+                                                     InstanceReportToString instanceReportToString) throws IOException {
+        outputStream.write(instanceReportToString.instanceReportToString(instanceReport).getBytes());
+    }
+
+    private static void outputInstanceReportToAllStreams(InstanceReport instanceReport) throws IOException {
+        for (int i = 0; i < outputStreams.size(); i++) {
+            outputInstanceReportToStream(outputStreams.get(i), instanceReport, instanceReportToStringsForOSs.get(i));
+        }
+    }
+
+    private static void outputAllInstanceReportsToStream(OutputStream outputStream,
+                                                         InstanceReportToString instanceReportToString) throws IOException {
+        for (InstanceReport report :
+                S_Statistics.reports) {
+            outputInstanceReportToStream(outputStream, report, instanceReportToString);
+        }
+    }
+
+    ////        OUTPUT API      ////
+
+    /**
+     * Writes the committed {@link InstanceReport} to all the OutputStreams in {@link #outputStreams}
+     * @param instanceReport the committed {@link InstanceReport}
+     * @throws IOException If an I/O error occurs.
+     */
+    static void commit(InstanceReport instanceReport) throws IOException {
+        outputInstanceReportToAllStreams(instanceReport);
+    }
+
+    public static void exportToOutputStream(OutputStream out, InstanceReportToString irts, HeaderToString hts) throws IOException {
+        if(hts != null) {
+            outputHeaderToStream(out, S_Statistics.header, hts);
+            for (InstanceReport report :
+                    reports) {
+                outputInstanceReportToStream(out, report, irts);
+            }
+        }
+    }
+
+    public static void exportAll() throws IOException {
+        outputHeaderToAllRelevantStreams();
+        int i = 0;
+        for (OutputStream outputStream :
+                outputStreams) {
+            outputAllInstanceReportsToStream(outputStream, instanceReportToStringsForOSs.get(i));
+            i++;
+        }
+    }
+
+    public static void exportCSV(OutputStream outputStream, String[] headerArray) throws IOException {
+        outputHeaderToStream(outputStream, headerArray, S_Statistics::headerArrayToStringCSV);
     }
 
 }
