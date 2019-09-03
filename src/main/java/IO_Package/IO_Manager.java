@@ -8,6 +8,8 @@ public class IO_Manager { // Singleton class
 
     private HashSet<String> openedPaths; // Keeps track on opened files
     public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main"; // absolute path to main
+    public static final String pathSeparator = System.getProperty("file.separator");
+
 
     /* Singleton */
     private static IO_Manager ourInstance = new IO_Manager();

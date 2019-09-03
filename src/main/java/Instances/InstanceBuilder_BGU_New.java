@@ -22,26 +22,31 @@ public class InstanceBuilder_BGU_New implements I_InstanceBuilder {
 
     @Override
     public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath) {
-        MAPF_Instance mapf_instance;
-        String filePath = instancePath.path;
 
 
         Reader reader=new Reader();
-        Enum_IO enum_io =reader.openFile(filePath);
+        Enum_IO enum_io =reader.openFile(instancePath.path);
         if( !enum_io.equals(Enum_IO.OPENED) ){
             return null; // couldn't open the file
         }
 
-        String nextLine = reader.getNextLine();
+        String nextLine = reader.getNextLine(); // first line
         if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)){
             reader.closeFile();
             return null; // first line isn't an index indicator
         }
 
-        int instance_id = Integer.parseInt(nextLine); // get instance id
+        /*  =Init values=  */
+        MAPF_Instance mapf_instance = null;
         int[] dimensions = null;
         GraphMap graphMap = null;
         Agent[] agents = null;
+        int instance_id = Integer.parseInt(nextLine); // get instance id
+
+
+        /*  =Get data from reader=  */
+
+        nextLine = reader.getNextLine(); // Second line
 
         while ( nextLine != null ){
 
@@ -59,6 +64,8 @@ public class InstanceBuilder_BGU_New implements I_InstanceBuilder {
 
                     graphMap = new GraphMap(mapAsStrings);
 
+                    break;
+
                 case INDICATOR_AGENTS:
 
                     if ( dimensions == null ){
@@ -66,15 +73,23 @@ public class InstanceBuilder_BGU_New implements I_InstanceBuilder {
                         return null; // Missing dimensions
                     }
                     agents = buildAgents(reader, dimensions.length, SEPARATOR_AGENTS);
-            }
+
+                    break;
+
+
+            } // switch end
+
+            nextLine = reader.getNextLine();
         }
 
-        reader.closeFile();
+        reader.closeFile(); // No more data in the file
 
         if ( instanceName == null || graphMap == null || agents == null){
             return null; // Invalid parameters
         }
-        mapf_instance=new MAPF_Instance(instanceName, graphMap, agents);
+
+        instanceName = instanceName + "-" + instance_id; // Example: "Instance-16-0-7" + "-" + "0"
+        mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
         return mapf_instance;
 
     }
@@ -99,20 +114,20 @@ public class InstanceBuilder_BGU_New implements I_InstanceBuilder {
 
         if(dimensions == 2) {
             Coordinate_2D source = new Coordinate_2D(   Integer.valueOf(agentLine[3]),
-                    Integer.valueOf(agentLine[4]));
+                                                        Integer.valueOf(agentLine[4]));
             Coordinate_2D target = new Coordinate_2D(   Integer.valueOf(agentLine[1]),
-                    Integer.valueOf(agentLine[2]));
+                                                        Integer.valueOf(agentLine[2]));
             return new Agent(agentID, source, target);
         }
 
 
         if(dimensions == 3) {
             Coordinate_3D source = new Coordinate_3D(   Integer.valueOf(agentLine[4]),
-                    Integer.valueOf(agentLine[5]),
-                    Integer.valueOf(agentLine[6]));
+                                                        Integer.valueOf(agentLine[5]),
+                                                        Integer.valueOf(agentLine[6]));
             Coordinate_3D target = new Coordinate_3D(   Integer.valueOf(agentLine[1]),
-                    Integer.valueOf(agentLine[2]),
-                    Integer.valueOf(agentLine[3]));
+                                                        Integer.valueOf(agentLine[2]),
+                                                        Integer.valueOf(agentLine[3]));
             return new Agent(agentID, source, target);
         }
 
@@ -151,7 +166,7 @@ public class InstanceBuilder_BGU_New implements I_InstanceBuilder {
 
         int[] dimensions = null;
         if(dimensionsAsString.contains(separator)) {
-            String[] spllitedLine = dimensionsAsString.split(",");
+            String[] spllitedLine = dimensionsAsString.split(SEPARATOR_DIMENSIONS);
             dimensions = new int[spllitedLine.length];
 
             for (int i = 0; i < dimensions.length; i++) {

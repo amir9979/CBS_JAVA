@@ -8,10 +8,12 @@ import java.util.Stack;
 
 public class InstanceManager {
 
-    // Todo - no use for instanceFormat if we pass an InstanceBuilder
-
-    private IO_Manager io_manager;
+    // todo - if we aren't using them -> we can delete the commented lines
+    // private IO_Manager io_manager;
     // private final InstanceFormat instanceFormat;
+
+
+
     private final String sourceDirectory;
     private I_InstanceBuilder instanceBuilder;
 
@@ -23,12 +25,13 @@ public class InstanceManager {
                            I_InstanceBuilder instanceBuilder,
                            InstanceProperties properties) {
 
-        this.io_manager         = IO_Manager.getInstance();
         this.sourceDirectory    = sourceDirectory;
         this.instanceBuilder    = instanceBuilder;
         this.instancesPaths_stack = new Stack<InstancePath>();
         this.addInstancesPaths_toStack();
 
+        // todo - if we aren't using them -> we can delete
+        // this.io_manager         = IO_Manager.getInstance();
         // this.instancesPaths_stack     = this.addInstancesPaths_toStack(this.sourceDirectory, this.instanceFormat);
         // this.instanceFormat     = instanceFormat;
 
@@ -68,6 +71,7 @@ public class InstanceManager {
     }
 
 
+// todo - consider deleting this ( we have I_InstanceBuilder instead )
 
 //    public enum InstanceFormat{
 //        MOVING_AI,
@@ -98,6 +102,7 @@ public class InstanceManager {
 
 
     /***  =Scenario Class=  ***/
+    // todo - go over this class
 
     private class Scenario {
 
