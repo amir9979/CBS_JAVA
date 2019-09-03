@@ -17,6 +17,23 @@ public class InstanceReport {
     private boolean isCommited = false;
 
     /**
+     * Contains constants representing standard names for fields. It is optional to use these names, and any other field
+     * names would also be accepted by this class.
+     */
+    public static class StandardFields{
+        public final static String experimentName = "Experiment Name";
+        public final static String instanceName = "Instance Name";
+        public final static String instanceID = "Instance ID";
+        public final static String expandedNodes = "Expanded Nodes";
+        public final static String generatedNodes = "Generated Nodes";
+        public final static String startTime = "Start Time";
+        public final static String endTime = "End Time";
+        public final static String elapsedTime = "Elapsed Time";
+        public final static String solved = "Solved";
+        public final static String timeout = "Timeout";
+    }
+
+    /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
      * does nothing.
      * @param fieldName the name of the field. @NotNull

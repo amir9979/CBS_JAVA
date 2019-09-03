@@ -4,6 +4,7 @@ package Statistics;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -23,7 +24,13 @@ import java.util.List;
  */
 public class S_Statistics {
     ////      MEMBERS      ////
+    /**
+     * Optional. Defines a header. Useful for formats such as CSV.
+     */
     private static String[] header = new String[0];
+    /**
+     *
+     */
     private final static List<InstanceReport> reports = new ArrayList<InstanceReport>();
     // the following three lists are managed together, so that any index refers to the same OutputStream in outputStreams
     /**
@@ -39,15 +46,7 @@ public class S_Statistics {
      * a header is not needed for the OutputStream of the same index.
      */
     private static List<HeaderToString> headerToStringsForOSs = new ArrayList<HeaderToString>();
-    ////      CONSTANTS AND INTERFACES      ////
-    public static class StandardFields{
-        public final static String expandedNodes = "Expanded Nodes";
-        public final static String generatedNodes = "Generated Nodes";
-        public final static String startTime = "Start Time";
-        public final static String endTime = "End Time";
-        public final static String elapsedTime = "Elapsed Time";
-    }
-
+    ////      INTERFACES      ////
     /**
      * Defines a function which converts an {@link InstanceReport} to a String.
      * This class contains static methods which comply with this interface, and may be used when this interface is
@@ -71,45 +70,78 @@ public class S_Statistics {
 
     ////      SETTERS AND GETTERS      ////
 
+    /**
+     * Sets the {@link #header} and outputs the new header to all relevant streams.
+     * @param newHeader the new header @NotNull
+     * @throws IOException if an I/O error occurs when outputing the new header to one of the streams.
+     */
+    public static void setHeaderAndOutputNewHeader(String[] newHeader) throws IOException {
+        if(newHeader != null){
+            S_Statistics.header = newHeader;
+            if(newHeader.length > 0 ){outputHeaderToAllRelevantStreams();}
+        }
+    }
+
+    /**
+     * Sets the {@link #header}. Doesn't output the new header to any streams.
+     * @param newHeader the new header @NotNull
+     */
     public static void setHeader(String[] newHeader) throws IOException {
-        header = newHeader;
-        outputHeaderToAllRelevantStreams();
+        if(newHeader != null){S_Statistics.header = newHeader;}
     }
 
     private static String[] getHeader() {
-        return header;
+        return Arrays.copyOf(S_Statistics.header, S_Statistics.header.length);
     }
 
     public static void clearHeader() {header = new String[0];}
 
+    /**
+     * Creates a new, empty, {@link InstanceReport}, saves a reference to it, and returns it.
+     * @return a new instance of {@link InstanceReport}.
+     */
     public static InstanceReport newInstanceReport(){
         InstanceReport newReport = new InstanceReport();
-        reports.add(newReport);
+        S_Statistics.reports.add(newReport);
         return newReport;
     }
 
     public static boolean removeReport(InstanceReport report){
-        return reports.remove(report);
+        return S_Statistics.reports.remove(report);
     }
 
     public static void clearReports(){
-        reports.clear();
+        S_Statistics.reports.clear();
     }
 
+    /**
+     * Clears all class fields, essentially resetting the class.
+     */
     public static void clearAll(){
         clearHeader();
         clearReports();
         clearOutputStreams();
     }
 
+    /**
+     * Adds the given output stream to the list of OutputStreams. When {@link InstanceReport}s are committed, or when
+     * {@link #exportAll()} is called, {@link InstanceReport}s will be written to this given OutputStream.
+     * If headerToString isn't null, writes the current {@link #header} to the given {@link OutputStream}.
+     * @param outputStream an output stream.
+     * @param instanceReportToString function to convert {@link InstanceReport}s to Strings to write them to the given {@link OutputStream}.
+     * @param headerToString function to convert the header to String to write it to the given {@link OutputStream}. If null, header will not be written.
+     * @throws IOException if an I/O error occurs.
+     */
     public static void addOutputStream(OutputStream outputStream, InstanceReportToString instanceReportToString,
                                        HeaderToString headerToString) throws IOException {
-        outputStreams.add(outputStream);
-        instanceReportToStringsForOSs.add(instanceReportToString);
-        headerToStringsForOSs.add(headerToString); // null is interpreted as "no need for header"
-        //output the header to the new stream a header is needed and is set.
-        if(header.length > 0 && headerToString != null){
-            outputStream.write(headerToString.headerToString(header).getBytes());
+        if (outputStream != null && instanceReportToString != null) {
+            outputStreams.add(outputStream);
+            instanceReportToStringsForOSs.add(instanceReportToString);
+            headerToStringsForOSs.add(headerToString); // null is interpreted as "no need for header"
+            //output the header to the new stream if a header is needed and is set.
+            if(header.length > 0 && headerToString != null){
+                outputStream.write(headerToString.headerToString(header).getBytes());
+            }
         }
     }
 
@@ -203,18 +235,17 @@ public class S_Statistics {
 
     //      human readable      //
 
+    /**
+     * Returns a string representation of the information in an instanceReport, in a format that is suitable for easy
+     * reading. Useful for outputing to a console to monitor the experiment.
+     * @param instanceReport the InstanceReport to convert to a string. @NotNull.
+     * @return a string representation of the information in an instanceReport, in a format readable format.
+     */
     public static String instanceReportToHumanReadableString(InstanceReport instanceReport){
         return instanceReport.toString();
     }
 
     // nicetohave tosrting json
-
-    /////       other conversions       ////
-
-
-//    private static LinkedHashMap<String, String> instanceReportToSortedMap(InstanceReport instanceReport){
-//        return null; //nicetohave
-//    }
 
     ////      outputing to the streams      ////
 
@@ -262,16 +293,27 @@ public class S_Statistics {
         outputInstanceReportToAllStreams(instanceReport);
     }
 
-    public static void exportToOutputStream(OutputStream out, InstanceReportToString irts, HeaderToString hts) throws IOException {
-        if(hts != null) {
-            outputHeaderToStream(out, S_Statistics.header, hts);
+    /**
+     * Exports all the {@link InstanceReport}s to the given output stream.
+     * @param out the OutputStream to write to.
+     * @param instanceReportToString the function with which to convert {@link InstanceReport}s to Strings.
+     * @param headerToString the function with which to convert the {@link #header} to a String.
+     * @throws IOException if an I/O error occurs
+     */
+    public static void exportToOutputStream(OutputStream out, InstanceReportToString instanceReportToString, HeaderToString headerToString) throws IOException {
+        if(headerToString != null) {
+            outputHeaderToStream(out, S_Statistics.header, headerToString);
             for (InstanceReport report :
                     reports) {
-                outputInstanceReportToStream(out, report, irts);
+                outputInstanceReportToStream(out, report, instanceReportToString);
             }
         }
     }
 
+    /**
+     * Exports all the {@link InstanceReport}s to all the saved OutputStreams.
+     * @throws IOException if an I/O error occurs
+     */
     public static void exportAll() throws IOException {
         outputHeaderToAllRelevantStreams();
         int i = 0;
@@ -282,8 +324,16 @@ public class S_Statistics {
         }
     }
 
+    /**
+     * Exports all the {@link InstanceReport}s to the given OutputStream, in CSV format.
+     * @param outputStream the OutputStream to write to. Typically a {@link java.io.FileOutputStream}.
+     * @param headerArray the desired header for the CSV output. Only {@link InstanceReport} fields which are contained
+     *                    in this header will be written.
+     * @throws IOException if an I/O error occurs
+     */
     public static void exportCSV(OutputStream outputStream, String[] headerArray) throws IOException {
         outputHeaderToStream(outputStream, headerArray, S_Statistics::headerArrayToStringCSV);
+        outputAllInstanceReportsToStream(outputStream, S_Statistics::instanceReportToStringCSV);
     }
 
 }
