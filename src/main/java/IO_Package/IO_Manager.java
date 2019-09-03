@@ -91,7 +91,6 @@ public class IO_Manager { // Singleton class
     public Enum_IO deleteFile(File toDelete){
 
         if ( pathExists(toDelete)) {
-            // fixme - toDelete file exists but won't delete ( sometimes does )
             if (toDelete.delete()){
                 // returns true also when file not listed in openPath list
                 if( this.removeOpenPath(toDelete.getPath()) ){
@@ -132,13 +131,35 @@ public class IO_Manager { // Singleton class
 
 
 
+    public static String[] getFilesFromDirectory(String directoryPath){
+        /*  Return null in case of an error */
+
+        if ( isDirectory( new File(directoryPath))){
+            File directory = new File(directoryPath);
+            File[] listOfFiles = directory.listFiles();
+
+            String[] pathList = new String[listOfFiles.length];
+
+            for (int i = 0; i < listOfFiles.length ; i++) {
+
+                pathList[i] = listOfFiles[i].getPath();
+            }
+
+            return pathList;
+
+        }
+
+        return null;
+    }
+
+
+
 
     public static boolean isPositiveInt(String intAsString){
 
-        // imp - check if int
         try {
-            int number=Integer.valueOf(intAsString);
-            if(number>0) {
+            int number = Integer.parseInt(intAsString);
+            if(number >= 0) {
                 return true;
             }
             else {

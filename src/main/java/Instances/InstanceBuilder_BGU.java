@@ -9,21 +9,25 @@ import Instances.Maps.Coordinate_3D;
 import Instances.Maps.GraphMap;
 
 
+
 public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
     @Override
-    public MAPF_Instance getInstance(InstanceManager.InstancePath instancePath) {
+    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath) {
 
         MAPF_Instance mapf_instance;
         String fullName=instancePath.path;
         String nameOfInstance;
-        if(fullName.contains("/")) {
-            String[] fullNameSplited = fullName.split("/");  // todo check if the / is valid
+        // todo - check separator
+        String separator = "\\\\"; // all this is a single backslash '\'
+        if(fullName.contains(separator)) {
+
+            String[] fullNameSplited = fullName.split(separator);
             nameOfInstance = fullNameSplited[fullNameSplited.length - 1];
         }
         else {
-            return null;   //if the path is invalid
+            return null;   // if the path is invalid
         }
 
         Reader reader=new Reader();
@@ -40,6 +44,12 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         Agent [] agents=new Agent[0]; //just until it will initial accordingly
         int dimensions=0;
 
+
+        /* Example: First 3 lines in bgu instance ( before map )
+         0
+        Grid:
+        16,16
+        */
         while (index<4){
             line=reader.getNextLine();
             if(line==null) {
@@ -125,6 +135,22 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         else {
             return null; //todo add more possible dimensions
         }
+    }
+
+    @Override
+    public InstanceManager.InstancePath[] getInstancesPaths(String directoryPath){
+
+        String[] paths = IO_Manager.getFilesFromDirectory(directoryPath);
+
+        InstanceManager.InstancePath[] instancePaths = new InstanceManager.InstancePath[paths.length];
+
+
+        for (int i = 0; i < paths.length ; i++) {
+            instancePaths[i] = new InstanceManager.InstancePath(paths[i]);
+        }
+
+
+        return instancePaths;
     }
 
 

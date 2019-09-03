@@ -31,8 +31,8 @@ public class InstanceBuilder_BGUTest {
     @Test
     public void getInstance() {
 
-
-        MAPF_Instance mapf_instance = instanceBuilderBgu.getInstance(this.instancePath);
+        String instanceName = ""; // todo - replace
+        MAPF_Instance mapf_instance = instanceBuilderBgu.getInstance(instanceName, this.instancePath);
 
         Agent[] agents = mapf_instance.getAgents();
 

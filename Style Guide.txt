@@ -12,6 +12,20 @@ Commenting:
     _done - code that works and has passed its tests.
     _missingdoc - not fully documented.
     _nicetohave - unimplemented improvements/expantions/features that are not "must have"s.
+  Headlines (section markers):
+    Can be used to mark code sections, to increase the readability of large classes.
+    Format: /*SPACESPACE=HEADLINE=SPACESPACE*/
+      SPACE is replaced by a ' ' (space character)
+      HEADLINE is replaced by whatever text you would like to describe the following section with.
+    Hierarchy:
+      If you need hierarchical headlines, add more 'SPACESPACE=' at the beginning to make sub headlines.
+      Shorter headlines will be used to mark bigger sections, with longer headlines marking subsections.
+    Example:
+      /*  =Class Fields=  */
+      /*  =  =Private Fields=  */
+      code...code...code...
+      /*  =  =Public Fields=  */
+      code...code...code...
 
 Naming:
   general:
