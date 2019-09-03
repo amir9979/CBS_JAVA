@@ -11,6 +11,7 @@ import java.util.Map;
  * same name.
  */
 public class InstanceReport {
+    // testme
     private Map<String, String> stringFields = new HashMap<String, String>();
     private Map<String, Integer> integerFields = new HashMap<String, Integer>();
     private Map<String, Float> floatFields = new HashMap<String, Float>();
