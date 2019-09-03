@@ -1,28 +1,46 @@
 package IO_Package;
+
+import java.io.File;
 import java.util.HashSet;
 
-public class IO_Manager {
-    // imp - not ready to use
+public class IO_Manager { // Singleton class
+    // testme
 
-    private HashSet<String> openedPaths;
+    private HashSet<String> openedPaths; // Keeps track on opened files
+    public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main"; // absolute path to main
 
-
+    /* Singleton */
     private static IO_Manager ourInstance = new IO_Manager();
-
     public static IO_Manager getInstance() {
         return ourInstance;
     }
 
     private IO_Manager() {
-        // Todo - check if hash set does
-        //  'contains' properly on Strings
+        // Todo - check if HashSet does 'contains' properly on Strings
         this.openedPaths = new HashSet<String>();
     }
 
 
+    // Tries to add path to the openedPaths list
+    // Return true if added successfully , otherwise false
+    public boolean addOpenPath(String path){
+        return this.openedPaths.add(path);
+    }
+
+    // Return true if removed successfully , otherwise false
+    public boolean removeOpenPath(String path){
+        // if path isn't in the list, returns true
+        if( ! this.openedPaths.contains(path)){
+            return true;
+        }
+        return this.openedPaths.remove(path);
+    }
+
+
+    // This method returns a Reader if path is available
     public Reader getReader(String filePath){
 
-        // imp - If path is currently opened
+        // Means it's in the openPath list
         if ( isOpen(filePath)) {
             return null;
         }
@@ -31,21 +49,20 @@ public class IO_Manager {
         Reader reader = new Reader();
         Enum_IO enum_io = reader.openFile(filePath);
         if(enum_io.equals(Enum_IO.OPENED)){
-            openedPaths.add(filePath);
             return reader;
         }
 
+        // If for any reason we got here - something went wrong
         return null;
-
     }
 
 
+    // This method returns a Writer if path is available
     public Writer getWriter(String folderPath, String fileName){
 
+        String filePath = IO_Manager.buildPath(new String[]{folderPath, fileName});
 
-        String[] joinPaths = {folderPath, fileName};
-        String filePath = IO_Manager.buildPath(joinPaths);
-
+        // Means it's in the openPath list
         if ( isOpen(filePath)) {
             return null;
         }
@@ -54,29 +71,63 @@ public class IO_Manager {
         Enum_IO enum_io = writer.openFile(folderPath, fileName);
 
         if(enum_io.equals(Enum_IO.OPENED)){
-            openedPaths.add(filePath);
+            // Means it's in the openPath list
             return writer;
         }
 
+        // If for any reason we got here - something went wrong
         return null;
-
     }
 
-    public static boolean pathExists(String filePath){
-        // imp - Check if path exists (files and folders)
-
-        return true;
+    public static boolean pathExists(File file){
+        return file.exists();
     }
 
+    public static boolean isDirectory(File directory){
+        return directory.isDirectory();
+    }
+
+    // This method deletes a file
+    public Enum_IO deleteFile(File toDelete){
+
+        if ( pathExists(toDelete)) {
+            // fixme - toDelete file exists but won't delete ( sometimes does )
+            if (toDelete.delete()){
+                // returns true also when file not listed in openPath list
+                if( this.removeOpenPath(toDelete.getPath()) ){
+                    return Enum_IO.DELETED;
+                }
+            }
+        }else {
+            return Enum_IO.INVALID_PATH;
+        }
+
+        // If for any reason we got here - something went wrong
+        return Enum_IO.ERROR;
+    }
+
+
+    // checks if path is in openPath list
     public boolean isOpen(String filePath){
         return this.openedPaths.contains(filePath);
     }
 
+
     public static String buildPath(String[] input){
 
-        // imp - concat input like: input[0] + "\" + input[1]
+        // basic check
+        if( input == null || input.length == 0){
+            return null;
+        }
 
-        return "";
+        // concat input in format: input[0] + "\" + input[1]
+        String result = input[0];
+        for (int i = 1; i < input.length ; i++) {
+            result += "\\" + input[i];
+        }
+
+        // returns the concat path
+        return result;
     }
 
 }
