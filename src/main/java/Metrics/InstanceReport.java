@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * This class is used to collect metrics about a single run of a single instance. It is strongly coupled with the
- * {@link Metrics.S_Statistics} class.
+ * {@link S_Metrics} class.
  * Will only allow one occurrence of a field name. Meaning there can'y be a String field and an Integer field with the
  * same name.
  */
@@ -201,7 +201,7 @@ public class InstanceReport {
     }
 
     /**
-     * Commits the report, signaling to the {@link Metrics.S_Statistics} class that the report is final and that it
+     * Commits the report, signaling to the {@link S_Metrics} class that the report is final and that it
      * can output the report to its output streams. An instance of this class can only be committed one. Repeated calls
      * to this method will have no effect.
      * @return true if this is the first call to this method on this instance, else false.
@@ -211,7 +211,7 @@ public class InstanceReport {
             return false;
         }
         else{
-            S_Statistics.commit(this);
+            S_Metrics.commit(this);
             isCommited = true;
             return true;
         }
