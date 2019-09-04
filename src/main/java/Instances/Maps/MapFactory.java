@@ -56,13 +56,11 @@ public class MapFactory {
     }
 
     /* nicetohave
-    public static GraphMap newSimple8Connected2D_GraphMap(Enum_MapCellType[][] map_2D){
+    public static GraphMap newSimple8Connected2D_GraphMap(Enum_MapCellType[][] rectangle_2D_Map){
         return null;
     }
-    */
 
-    /* nicetohave
-    public static GraphMap newSimple6Connected3D_GraphMap(Enum_MapCellType[][] map_2D){
+    public static GraphMap newSimple6Connected3D_GraphMap(Enum_MapCellType[][][] rectangularBox_3D_Map){
         return null;
     }
     */

@@ -11,7 +11,6 @@ public class GraphMap implements I_Map {
         this.map = map;
     }
 
-    //imp
     @Override
     public I_MapCell getMapCell(I_Coordinate coordinate) {
         return map.get(coordinate);
@@ -22,4 +21,5 @@ public class GraphMap implements I_Map {
         return this.map.containsKey(coordinate);
     }
 
+    //imp tostring
 }
