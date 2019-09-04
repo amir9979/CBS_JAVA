@@ -8,6 +8,7 @@ public class Coordinate_2D implements I_Coordinate {
     private int y_value;
 
 
+
     public Coordinate_2D(int x_value, int y_value) {
         this.x_value = x_value;
         this.y_value = y_value;

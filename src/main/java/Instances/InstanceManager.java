@@ -4,91 +4,105 @@ import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
 import Instances.Maps.I_Map;
 
-import java.util.ArrayList;
 import java.util.Stack;
 
 public class InstanceManager {
 
-    private IO_Manager io_manager;
-    private final InstanceFormat instanceFormat;
+    // todo - if we aren't using them -> we can delete the commented lines
+    // private IO_Manager io_manager;
+    // private final InstanceFormat instanceFormat;
+
+
+
     private final String sourceDirectory;
+    private I_InstanceBuilder instanceBuilder;
 
-    private Stack<InstancePath> instancesPaths;
+    private Stack<InstancePath> instancesPaths_stack;
 
 
-    public InstanceManager(InstanceFormat instanceFormat, String sourceDirectory, InstanceProperties properties) {
-        this.io_manager = IO_Manager.getInstance();
-        this.instanceFormat = instanceFormat;
-        this.sourceDirectory = sourceDirectory;
+    public InstanceManager( /* InstanceFormat instanceFormat, */
+                           String sourceDirectory,
+                           I_InstanceBuilder instanceBuilder,
+                           InstanceProperties properties) {
 
-        this.instancesPaths = this.getInstancesPaths(this.sourceDirectory, this.instanceFormat);
+        this.sourceDirectory    = sourceDirectory;
+        this.instanceBuilder    = instanceBuilder;
+        this.instancesPaths_stack = new Stack<InstancePath>();
+        this.addInstancesPaths_toStack();
 
+        // todo - if we aren't using them -> we can delete
+        // this.io_manager         = IO_Manager.getInstance();
+        // this.instancesPaths_stack     = this.addInstancesPaths_toStack(this.sourceDirectory, this.instanceFormat);
+        // this.instanceFormat     = instanceFormat;
 
     }
 
 
 
     public MAPF_Instance getNextInstance(){
+        /* Returns null in case of an error */
+
         MAPF_Instance nextInstance = null;
         while(nextInstance == null){
-            InstancePath nextPath = instancesPaths.pop();
-            if(nextPath == null){break;}
-
-            switch (this.instanceFormat){
-                case MOVING_AI:
-                    //imp nextPath= f(InstancePath):MAPF_Instance in this format
-                    break;
-                case SEARCH_AT_BGU:
-                    // imp nextPath= f(InstancePath):MAPF_Instance in this format
-                    break;
+            InstancePath nextPath = instancesPaths_stack.pop();
+            if(nextPath == null){
+                break;
             }
+
+            String instanceName = ""; // imp - get instance name
+
+            nextInstance = this.instanceBuilder.getInstance(instanceName, nextPath);
+
         }
+
         return nextInstance;
+    }
+
+
+    private void addInstancesPaths_toStack(){
+
+        String directoryPath = this.sourceDirectory; // todo - might be a different path ?
+        InstancePath[] instancePaths = this.instanceBuilder.getInstancesPaths(directoryPath);
+
+        for (int i = 0; i < instancePaths.length ; i++) {
+            this.instancesPaths_stack.push(instancePaths[i]);
+        }
 
     }
 
 
-    private Stack<InstancePath> getInstancesPaths(String sourceDirectory,
-                                                      InstanceFormat instanceFormat){
+// todo - consider deleting this ( we have I_InstanceBuilder instead )
 
-        // Todo - filter by properties?
-        return null; // imp
-    }
-
-
-
-    public enum InstanceFormat{
-        MOVING_AI,
-        SEARCH_AT_BGU
-    }
+//    public enum InstanceFormat{
+//        MOVING_AI,
+//        SEARCH_AT_BGU
+//    }
 
 
-    public class InstancePath{
+
+    /***  =Instance path wrapper=  ***/
+
+    public static class InstancePath{
 
         public final String path;
-
-        public InstancePath(String path){
-            this.path = path;
-        }
-
-
+        public InstancePath(String path){ this.path = path; }
     }
 
     private class Moving_AI_Path extends InstancePath{
 
         public final String scenarioPath;
-
         public Moving_AI_Path(String mapPath, String scenarioPath) {
             super(mapPath);
             this.scenarioPath = scenarioPath;
         }
 
-
-
     }
 
 
 
+
+    /***  =Scenario Class=  ***/
+    // todo - go over this class
 
     private class Scenario {
 
@@ -97,8 +111,8 @@ public class InstanceManager {
         private Agent[] agents;
 
         public Scenario(String name, I_Map map, Agent[] agents) {
-            this.name = name;
-            this.map = map;
+            this.name   = name;
+            this.map    = map;
             this.agents = agents;
         }
 
