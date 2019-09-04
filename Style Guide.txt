@@ -52,7 +52,18 @@ Testing:
         * Assert.assertNull(condition)
         * Assert.assertNotNull(condition)
         * Assert.assertEquals(Expected, Actual)
+
+
+
 Arrays:
-  In arrays that represent maps, dimensions will be ordered as follows: 
+  In arrays that represent maps, dimensions will be ordered as follows:
     arr[x][y][z]...
     So that arr.length is equal to the x length (the width) of the represented map.
+
+    Naming:
+    1. arr.length -> xAxis_length
+    2. arr[0].length -> yAxis_length
+    3. int i -> yIndex , int j -> xIndex
+    for loop example:
+                for (int yIndex = 0; yIndex < yAxis_length; yIndex++)
+                    for (int xIndex = 0; xIndex < xAxis_length; xIndex++)

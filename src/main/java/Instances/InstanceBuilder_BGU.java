@@ -1,161 +1,294 @@
-//package Instances;
-//
-//import IO_Package.Enum_IO;
-//import IO_Package.IO_Manager;
-//import IO_Package.Reader;
-//import Instances.Agents.Agent;
-//import Instances.Maps.Coordinate_2D;
-//import Instances.Maps.Coordinate_3D;
-//import Instances.Maps.GraphMap;
-//
-//
-//
-//public class InstanceBuilder_BGU implements I_InstanceBuilder {
-//
-//
-//    @Override
-//    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath) {
-//
-//        MAPF_Instance mapf_instance;
-//        String fullName=instancePath.path;
-//        String nameOfInstance;
-//        // todo - check separator
-//        String separator = IO_Manager.pathSeparator; // this is a single backslash '\'
-//        if(fullName.contains(separator)) {
-//
-//            String[] fullNameSplitted = fullName.split(separator);
-//            nameOfInstance = fullNameSplitted[fullNameSplitted.length - 1];
-//        }
-//        else {
-//            return null;   // if the path is invalid
-//        }
-//
-//        Reader reader=new Reader();
-//        Enum_IO enum_io =reader.openFile(fullName);
-//        if( !enum_io.equals(Enum_IO.OPENED) ){
-//            return null; // couldn't open the file
-//        }
-//
-//        int index=1;
-//        String line="";
-//        GraphMap graphMap;
-//        String numOfRows="0"; //just until it will initial accordingly
-//        String[] mapByStrings=new String[0]; //just until it will initial accordingly
-//        Agent [] agents=new Agent[0]; //just until it will initial accordingly
-//        int dimensions=0;
-//
-//
-//        /* Example: First 3 lines in bgu instance ( before map )
-//         0
-//        Grid:
-//        16,16
-//        */
-//        while (index<4){
-//            line=reader.getNextLine();
-//            if(line==null) {
-//                reader.closeFile();
-//                return null;
-//            }
-//            if(index==3) {
-//                if(line.contains(",")) {
-//                    String[] splitedLine=line.split(",");
-//                    dimensions=splitedLine.length;
-//                    numOfRows = splitedLine[0];
-//                    if(IO_Manager.isPositiveInt(numOfRows)){
-//                        mapByStrings = new String[Integer.valueOf(numOfRows)];
-//                    }
-//                }
-//            }
-//            index++;
-//        }
-//        int row=0;
-//        while (row<Integer.valueOf(numOfRows)){
-//            line=reader.getNextLine();
-//            if(line==null) {
-//                reader.closeFile();
-//                return null;
-//            }
-//            mapByStrings[row]=line;
-//            row++;
-//        }
-//        graphMap = new GraphMap(mapByStrings);
-//
-//        line=reader.getNextLine();
-//        if(line!=null && line.equals("Agents:")){
-//            line=reader.getNextLine();
-//            if(line!=null && IO_Manager.isPositiveInt(line)){
-//                int numOfAgents=Integer.valueOf(line);
-//                int indexOfAgent=0;
-//                agents=new Agent[numOfAgents];
-//                while (indexOfAgent<numOfAgents){
-//                    line=reader.getNextLine();
-//                    if(line!=null && line.contains(",")){
-//                        agents[indexOfAgent]=buildAgent(dimensions,line);
-//                    }
-//                    else {
-//                        reader.closeFile();
-//                        return null; //expected the the line will contains comma
-//                    }
-//                    indexOfAgent++;
-//                }
-//                mapf_instance=new MAPF_Instance(nameOfInstance,graphMap,agents);
-//                return mapf_instance;
-//            }
-//        }
-//        else {
-//            reader.closeFile();
-//            return null; //expected that the line will be agents"
-//        }
-//
-//        return null;
-//    }
-//
-//    private Agent buildAgent(int dimensions, String line){
-//        String[] coordinates=line.split(",");
-//        if(dimensions==2) {
-//            if (coordinates.length == 5 && IO_Manager.isPositiveInt(coordinates[0]) && IO_Manager.isPositiveInt(coordinates[1]) && IO_Manager.isPositiveInt(coordinates[2]) && IO_Manager.isPositiveInt(coordinates[3]) && IO_Manager.isPositiveInt(coordinates[4])) {
-//                Coordinate_2D source = new Coordinate_2D(Integer.valueOf(coordinates[3]), Integer.valueOf(coordinates[4]));
-//                Coordinate_2D target = new Coordinate_2D(Integer.valueOf(coordinates[1]), Integer.valueOf(coordinates[2]));
-//                return new Agent(Integer.valueOf(coordinates[0]),source,target);
-//            }
-//            else {
-//                return null; //invalid parameters of the line
-//            }
-//        }
-//        if(dimensions==3) {
-//            if (coordinates.length == 7 && IO_Manager.isPositiveInt(coordinates[0]) && IO_Manager.isPositiveInt(coordinates[1]) && IO_Manager.isPositiveInt(coordinates[2]) && IO_Manager.isPositiveInt(coordinates[3]) && IO_Manager.isPositiveInt(coordinates[4]) && IO_Manager.isPositiveInt(coordinates[5])&& IO_Manager.isPositiveInt(coordinates[6])) {
-//                Coordinate_3D source = new Coordinate_3D(Integer.valueOf(coordinates[4]), Integer.valueOf(coordinates[5]), Integer.valueOf(coordinates[6]));
-//                Coordinate_3D target = new Coordinate_3D(Integer.valueOf(coordinates[1]), Integer.valueOf(coordinates[2]), Integer.valueOf(coordinates[3]));
-//                return new Agent(Integer.valueOf(coordinates[0]),source,target);
-//            }
-//            else {
-//                return null; //invalid parameters of the line
-//            }
-//        }
-//        else {
-//            return null; //todo add more possible dimensions
-//        }
-//    }
-//
-//    @Override
-//    public InstanceManager.InstancePath[] getInstancesPaths(String directoryPath){
-//
-//        String[] paths = IO_Manager.getFilesFromDirectory(directoryPath);
-//
-//        InstanceManager.InstancePath[] instancePaths = new InstanceManager.InstancePath[paths.length];
-//
-//
-//        for (int i = 0; i < paths.length ; i++) {
-//            instancePaths[i] = new InstanceManager.InstancePath(paths[i]);
-//        }
-//
-//
-//        return instancePaths;
-//    }
-//
-//
-//
-//
-//
-//
-//}
+package Instances;
+
+import IO_Package.Enum_IO;
+import IO_Package.IO_Manager;
+import IO_Package.Reader;
+import Instances.Agents.Agent;
+import Instances.Maps.*;
+
+import java.util.HashMap;
+
+public class InstanceBuilder_BGU implements I_InstanceBuilder {
+
+
+    private final String INDICATOR_AGENTS = "Agents:";
+    private final String SEPARATOR_AGENTS = ",";
+    private final String INDICATOR_MAP = "Grid:";
+    private final String SEPARATOR_DIMENSIONS = ",";
+
+
+    /*      =Cell Types=   */
+    private final char EMPTY = '.';
+    private final char WALL = '@';
+
+    private HashMap<Character,Enum_MapCellType> cellTypeHashMap;
+
+
+
+    public InstanceBuilder_BGU(){
+        this.initCellTypeHashMap();
+    }
+
+
+
+
+    @Override
+    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath) {
+
+
+        Reader reader=new Reader();
+        Enum_IO enum_io =reader.openFile(instancePath.path);
+        if( !enum_io.equals(Enum_IO.OPENED) ){
+            return null; // couldn't open the file
+        }
+
+        String nextLine = reader.getNextLine(); // first line
+        if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)){
+            reader.closeFile();
+            return null; // first line isn't an index indicator
+        }
+
+        /*  =Init values=  */
+        MAPF_Instance mapf_instance = null;
+        int numOfDimensions = -1;
+        GraphMap graphMap = null;
+        Agent[] agents = null;
+        int instance_id = Integer.parseInt(nextLine); // get instance id
+
+
+        /*  =Get data from reader=  */
+
+        nextLine = reader.getNextLine(); // Second line
+
+        while ( nextLine != null ){
+
+            switch (nextLine){
+
+                case INDICATOR_MAP:
+                    String dimensionsAsString = reader.getNextLine();
+                    int[] dimensions = getDimensions(dimensionsAsString);
+                    if (dimensions == null){
+                        reader.closeFile();
+                        return null; // unexpected dimensions line
+                    }
+                    numOfDimensions = dimensions.length;
+                    String[] mapAsStrings = this.buildMapAsStringArray(reader, dimensions);
+                    // build map
+                    graphMap = buildGraphMap(mapAsStrings, numOfDimensions);
+                    break;
+
+                case INDICATOR_AGENTS:
+
+                    if ( numOfDimensions < 1 ){
+                        reader.closeFile();
+                        return null; // Missing dimensions
+                    }
+                    agents = buildAgents(reader, numOfDimensions);
+
+                    break;
+
+
+            } // switch end
+
+            nextLine = reader.getNextLine();
+        }
+
+        reader.closeFile(); // No more data in the file
+
+        if ( instanceName == null || graphMap == null || agents == null){
+            return null; // Invalid parameters
+        }
+
+        instanceName = instanceName + "-" + instance_id; // Example: "Instance-16-0-7" + "-" + "0"
+        mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
+        return mapf_instance;
+
+    }
+
+
+
+
+    /***  =Build Agents=  ***/
+
+    private Agent buildSingleAgent(int dimensions, String line){
+
+        String[] agentLine = line.split(this.SEPARATOR_AGENTS);
+
+        if( agentLine == null || agentLine.length < 1){
+            return null; // invalid agent line
+        }
+
+        for (int i = 0; i < agentLine.length; i++) {
+            if( ! IO_Manager.isPositiveInt(agentLine[i])){
+                return null; // dimensions should be a positive int
+            }
+        }
+
+        int agentID = Integer.parseInt(agentLine[0]);
+
+        if(dimensions == 2) {
+            /*      source values    */
+            int source_xValue = Integer.valueOf(agentLine[3]);
+            int source_yValue = Integer.valueOf(agentLine[4]);
+            Coordinate_2D source = new Coordinate_2D(source_xValue, source_yValue);
+            /*      Target values    */
+            int target_xValue = Integer.valueOf(agentLine[1]);
+            int target_yValue = Integer.valueOf(agentLine[2]);
+            Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
+
+            return new Agent(agentID, source, target);
+        }
+
+
+        if(dimensions == 3) {
+            /*      source values    */
+            int source_xValue = Integer.valueOf(agentLine[4]);
+            int source_yValue = Integer.valueOf(agentLine[5]);
+            int source_zValue = Integer.valueOf(agentLine[6]);
+            Coordinate_3D source = new Coordinate_3D(source_xValue, source_yValue, source_zValue);
+            /*      Target values    */
+            int target_xValue = Integer.valueOf(agentLine[1]);
+            int target_yValue = Integer.valueOf(agentLine[2]);
+            int target_zValue = Integer.valueOf(agentLine[2]);
+            Coordinate_3D target = new Coordinate_3D(target_xValue, target_yValue, target_zValue);
+
+            return new Agent(agentID, source, target);
+        }
+
+        return null; // Bad dimensions input
+    }
+
+
+    private Agent[] buildAgents(Reader reader,int dimensions) {
+
+        String nextLine = reader.getNextLine(); // expected num of agents
+        if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)) {
+            return null; // num of agents should be a positive int
+        }
+
+        int numOfAgents = Integer.parseInt(nextLine);
+        Agent[] agents = new Agent[numOfAgents];
+
+        for (int i = 0; i < agents.length; i++) {
+            nextLine = reader.getNextLine();
+
+            Agent agentToAdd = buildSingleAgent(dimensions, nextLine);
+            if ( agentToAdd == null ){
+                return null; // Bad agent line
+            }
+            agents[i] = agentToAdd;
+        }
+
+        return agents;
+    }
+
+
+
+    /***  =Build Map and Dimensions=  ***/
+
+    private int[] getDimensions(String dimensionsAsString) {
+
+        int[] dimensions = null;
+        if(dimensionsAsString.contains(SEPARATOR_DIMENSIONS)) {
+            String[] splittedLine = dimensionsAsString.split(SEPARATOR_DIMENSIONS);
+            dimensions = new int[splittedLine.length];
+
+            for (int i = 0; i < dimensions.length; i++) {
+                if ( IO_Manager.isPositiveInt( splittedLine[i] )){
+                    dimensions[i] = Integer.parseInt(splittedLine[i]);
+                }else{
+                    return null; // dimensions should be positive integers
+                }
+            }
+
+        }else {
+            return null; // Missing expected separator
+        }
+
+        return dimensions; // Example: {16,16}
+    }
+
+
+
+
+    private String[] buildMapAsStringArray(Reader reader, int[] dimensions){
+
+        int yAxis_length = dimensions[0];
+        String[] mapAsStringArray = new String[yAxis_length];
+        for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+
+            String nextLine = reader.getNextLine();
+            if ( nextLine != null ){
+                mapAsStringArray[yIndex] = nextLine;
+            }else {
+                return null; // unexpected num of lines
+            }
+        }
+        return mapAsStringArray;
+    }
+
+
+    private GraphMap buildGraphMap(String[] mapAsStrings, int numOfDimensions) {
+
+        switch ( numOfDimensions ){
+            case 2:
+                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsStrings);
+                return MapFactory.newSimple4Connected2D_GraphMap(mapAsCellType_2D);
+
+            case 3:
+                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsStrings);
+                return null; // niceToHave - change to newSimple 4Connected 3D_GraphMap if exists in MapFactory
+        }
+
+
+        return null; // If something went wrong ( should return in switch-case )
+    }
+
+
+    private Enum_MapCellType[][] build_2D_cellTypeMap(String[] mapAsStrings) {
+        // imp - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
+
+        int yAxis_length = mapAsStrings.length;
+        int xAxis_length = mapAsStrings[0].length();
+
+
+        Enum_MapCellType[][] cellTypeMap = new Enum_MapCellType[xAxis_length][yAxis_length];
+
+        for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+
+            for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
+
+                Enum_MapCellType cellType = null; // imp - convert using this.cellTypeHashMap
+                cellTypeMap[xIndex][yIndex] = cellType;
+            }
+
+        }
+
+        return cellTypeMap;
+    }
+
+    private Enum_MapCellType[][][] build_3D_cellTypeMap(String[] mapAsStrings) {
+
+        // niceToHave - no need to implement for now
+        return null;
+    }
+
+
+
+
+    private void initCellTypeHashMap() {
+
+        this.cellTypeHashMap = new HashMap<>();
+        this.cellTypeHashMap.put(this.EMPTY,Enum_MapCellType.EMPTY);
+        this.cellTypeHashMap.put(this.WALL,Enum_MapCellType.WALL);
+
+    }
+
+
+
+
+    @Override
+    public InstanceManager.InstancePath[] getInstancesPaths(String directoryPath) {
+        return new InstanceManager.InstancePath[0];
+    }
+}

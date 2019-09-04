@@ -7,11 +7,11 @@ public class GraphMap implements I_Map {
 
     private HashMap<I_Coordinate, GraphMapCell> map;
 
+    // Use the MapFactory
     GraphMap(HashMap<I_Coordinate, GraphMapCell> map) {
         this.map = map;
     }
 
-    //imp
     @Override
     public I_MapCell getMapCell(I_Coordinate coordinate) {
         return map.get(coordinate);
