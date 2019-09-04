@@ -5,26 +5,16 @@ import java.util.Map;
 
 public class GraphMap implements I_Map {
 
+    private HashMap<I_Coordinate, GraphMapCell> map;
 
-    public GraphMap(String[] mapAsStrings){
-        // blocking
-    }
-
-
-    private HashMap<I_Coordinate, I_MapCell> map;
-
-    public GraphMap(HashMap<I_Coordinate, I_MapCell> map) {
+    GraphMap(HashMap<I_Coordinate, GraphMapCell> map) {
         this.map = map;
     }
 
+    //imp
     @Override
-    public I_MapCell getMapCell(I_Coordinate i_coordinate) {
-        return null;
-    }
-
-    @Override
-    public I_MapCell[] getNeighbors(I_MapCell mapCell) {
-        return new I_MapCell[0];
+    public I_MapCell getMapCell(I_Coordinate coordinate) {
+        return map.get(coordinate);
     }
 
     @Override
