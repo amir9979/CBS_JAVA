@@ -20,7 +20,7 @@ public class IO_ManagerTest {
 
     static final String fileToReadName = "test_reader_file.txt";
     static final String fileToReadPath = IO_Manager.buildPath(new String[]{ test_resources_path, fileToReadName});
-    static final String[] linesToRead = {  "This file has 3 lines" ,
+    static final String[] linesToRead = {   "This file has 3 lines" ,
                                             "This is the second line",
                                             "This is the last line"};
 

@@ -59,7 +59,6 @@ public class ReaderTest {
         Enum_IO enum_io_notExists = badPathReader.openFile(badFilePath);
         Assert.assertEquals(Enum_IO.INVALID_PATH, enum_io_notExists); // Trying to open an invalid path
 
-
     }
 
 

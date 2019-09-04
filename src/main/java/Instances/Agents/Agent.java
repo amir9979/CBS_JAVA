@@ -1,8 +1,8 @@
 package Instances.Agents;
 
-import IO_Package.IO_Manager;
-import Instances.Maps.Coordinate_2D;
 import Instances.Maps.I_Coordinate;
+
+import java.util.Objects;
 
 public class Agent {
 
@@ -20,4 +20,18 @@ public class Agent {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Agent)) return false;
+        Agent agent = (Agent) o;
+        return iD == agent.iD &&
+                Objects.equals(source, agent.source) &&
+                Objects.equals(target, agent.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(iD, source, target);
+    }
 }
