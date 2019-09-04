@@ -107,21 +107,20 @@ public class S_Metrics {
         return newReport;
     }
 
+    /**
+     * Returns the most recently created {@link InstanceReport}.
+     * @return the most recently created {@link InstanceReport}.
+     */
+    public static InstanceReport getMostRecentInstanceReport(){
+        return S_Metrics.reports.get(S_Metrics.reports.size()-1);
+    }
+
     public static boolean removeReport(InstanceReport report){
         return S_Metrics.reports.remove(report);
     }
 
     public static void clearReports(){
         S_Metrics.reports.clear();
-    }
-
-    /**
-     * Clears all class fields, essentially resetting the class.
-     */
-    public static void clearAll(){
-        clearHeader();
-        clearReports();
-        clearOutputStreams();
     }
 
     /**
@@ -164,6 +163,14 @@ public class S_Metrics {
         instanceReportToStringsForOSs.clear();
     }
 
+    /**
+     * Clears all class fields, essentially resetting the class.
+     */
+    public static void clearAll(){
+        clearHeader();
+        clearReports();
+        clearOutputStreams();
+    }
     ////      OUTPUT      ////
 
     // nicetohave groupBy, which gets a comparator to group by
