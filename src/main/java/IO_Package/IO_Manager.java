@@ -8,6 +8,8 @@ public class IO_Manager { // Singleton class
 
     private HashSet<String> openedPaths; // Keeps track on opened files
     public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main"; // absolute path to main
+    public static final String pathSeparator = System.getProperty("file.separator");
+
 
     /* Singleton */
     private static IO_Manager ourInstance = new IO_Manager();
@@ -128,6 +130,49 @@ public class IO_Manager { // Singleton class
 
         // returns the concat path
         return result;
+    }
+
+
+
+    public static String[] getFilesFromDirectory(String directoryPath){
+        /*  Return null in case of an error */
+
+        if ( isDirectory( new File(directoryPath))){
+            File directory = new File(directoryPath);
+            File[] listOfFiles = directory.listFiles();
+
+            String[] pathList = new String[listOfFiles.length];
+
+            for (int i = 0; i < listOfFiles.length ; i++) {
+
+                pathList[i] = listOfFiles[i].getPath();
+            }
+
+            return pathList;
+
+        }
+
+        return null;
+    }
+
+
+
+
+    public static boolean isPositiveInt(String intAsString){
+
+        try {
+            int number = Integer.parseInt(intAsString);
+            if(number >= 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (Exception e){
+            return false;
+
+        }
     }
 
 }

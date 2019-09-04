@@ -6,6 +6,11 @@ import java.util.Map;
 public class GraphMap implements I_Map {
 
 
+    public GraphMap(String[] mapAsStrings){
+        // blocking
+    }
+
+
     private HashMap<I_Coordinate, I_MapCell> map;
 
     public GraphMap(HashMap<I_Coordinate, I_MapCell> map) {
