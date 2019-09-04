@@ -14,37 +14,39 @@ public class MapFactory {
      * any other cell, so they will not be generated.
      * @param rectangle_2D_Map A rectangle grid representing a map, containing only {@link Enum_MapCellType#EMPTY} and
      *                      {@link Enum_MapCellType#WALL}. The length of its first dimension should correspond to the
-     *                         original map's x dimension.
+     *                         number of rows, i.e. the original map's y dimension.
      * @return a new 4-connected {@link GraphMap}.
      */
     public static GraphMap newSimple4Connected2D_GraphMap(Enum_MapCellType[][] rectangle_2D_Map){
-        int xLength = rectangle_2D_Map.length;
-        int yLength = rectangle_2D_Map[0].length;
-        GraphMapCell[][] cells = new GraphMapCell[xLength][yLength]; //rectangle map
+        int numRows = rectangle_2D_Map.length;
+        int numColumns = rectangle_2D_Map[0].length;
+        GraphMapCell[][] cells = new GraphMapCell[numRows][numColumns]; //rectangle map
         //generate all cells
-        for (int x = 0; x < xLength; x++) {
-            for (int y = 0; y < yLength; y++) {
-                if(rectangle_2D_Map[x][y] == Enum_MapCellType.EMPTY){
-                    cells[x][y] = new GraphMapCell(rectangle_2D_Map[x][y], new Coordinate_2D(x, y));
+        for (int row = 0; row < numRows; row++) {
+            for (int column = 0; column < numColumns; column++) {
+                if(rectangle_2D_Map[row][column] == Enum_MapCellType.EMPTY){
+                    cells[row][column] = new GraphMapCell(rectangle_2D_Map[row][column],
+                            /* note how row <=> coordinate.y */
+                            new Coordinate_2D(column, row));
                 }
             }
         }
         HashMap<I_Coordinate, GraphMapCell> allCells = new HashMap<>(); //to be used for GraphMap constructor
         //connect cells to their neighbors (4-connected)
         ArrayList<GraphMapCell> neighbors = new ArrayList<>(4);
-        for (int x = 0; x < xLength; x++) {
-            for (int y = 0; y < yLength; y++) {
-                GraphMapCell currentCell = cells[x][y];
-                if(cells[x][y] != null){
+        for (int row = 0; row < numRows; row++) {
+            for (int column = 0; column < numColumns; column++) {
+                GraphMapCell currentCell = cells[row][column];
+                if(cells[row][column] != null){
                     neighbors.clear();
-                    //look for WEST neighbor
-                    if(x-1 >= 0 && cells[x-1][y] != null){neighbors.add(cells[x-1][y]);}
-                    //look for EAST neighbor
-                    if(x+1 < xLength && cells[x+1][y] != null){neighbors.add(cells[x+1][y]);}
                     //look for NORTH neighbor
-                    if(y-1 >= 0 && cells[x][y-1] != null){neighbors.add(cells[x][y-1]);}
+                    if(row-1 >= 0 && cells[row-1][column] != null){neighbors.add(cells[row-1][column]);}
                     //look for SOUTH neighbor
-                    if(y+1 < xLength && cells[x][y+1] != null){neighbors.add(cells[x][y+1]);}
+                    if(row+1 < numRows && cells[row+1][column] != null){neighbors.add(cells[row+1][column]);}
+                    //look for WEST neighbor
+                    if(column-1 >= 0 && cells[row][column-1] != null){neighbors.add(cells[row][column-1]);}
+                    //look for EAST neighbor
+                    if(column+1 < numRows && cells[row][column+1] != null){neighbors.add(cells[row][column+1]);}
                     // set cell neighbors
                     currentCell.setNeighbors(neighbors.toArray(new GraphMapCell[0]));
                     // add to allCells
@@ -56,11 +58,13 @@ public class MapFactory {
     }
 
     /* nicetohave
-    public static GraphMap newSimple8Connected2D_GraphMap(Enum_MapCellType[][] rectangle_2D_Map){
+    public static GraphMap newSimple8Connected2D_GraphMap(Enum_MapCellType[][] map_2D){
         return null;
     }
+    */
 
-    public static GraphMap newSimple6Connected3D_GraphMap(Enum_MapCellType[][][] rectangularBox_3D_Map){
+    /* nicetohave
+    public static GraphMap newSimple6Connected3D_GraphMap(Enum_MapCellType[][] map_2D){
         return null;
     }
     */

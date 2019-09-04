@@ -52,3 +52,7 @@ Testing:
         * Assert.assertNull(condition)
         * Assert.assertNotNull(condition)
         * Assert.assertEquals(Expected, Actual)
+Arrays:
+  In arrays that represent maps, dimensions will be ordered as follows: 
+    arr[x][y][z]...
+    So that arr.length is equal to the x length (the width) of the represented map.

@@ -21,9 +21,9 @@ public class InstanceManager {
 
 
     public InstanceManager( /* InstanceFormat instanceFormat, */
-            String sourceDirectory,
-            I_InstanceBuilder instanceBuilder,
-            InstanceProperties properties) {
+                           String sourceDirectory,
+                           I_InstanceBuilder instanceBuilder,
+                           InstanceProperties properties) {
 
         this.sourceDirectory    = sourceDirectory;
         this.instanceBuilder    = instanceBuilder;
