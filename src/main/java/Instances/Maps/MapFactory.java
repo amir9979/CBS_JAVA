@@ -18,33 +18,33 @@ public class MapFactory {
      * @return a new 4-connected {@link GraphMap}.
      */
     public static GraphMap newSimple4Connected2D_GraphMap(Enum_MapCellType[][] rectangle_2D_Map){
-        int xLength = rectangle_2D_Map.length;
-        int yLength = rectangle_2D_Map[0].length;
-        GraphMapCell[][] cells = new GraphMapCell[xLength][yLength]; //rectangle map
+        int xAxis_length = rectangle_2D_Map.length;
+        int yAxis_length = rectangle_2D_Map[0].length;
+        GraphMapCell[][] cells = new GraphMapCell[xAxis_length][yAxis_length]; //rectangle map
         //generate all cells
-        for (int x = 0; x < xLength; x++) {
-            for (int y = 0; y < yLength; y++) {
-                if(rectangle_2D_Map[x][y] == Enum_MapCellType.EMPTY){
-                    cells[x][y] = new GraphMapCell(rectangle_2D_Map[x][y], new Coordinate_2D(x, y));
+        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
+            for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+                if(rectangle_2D_Map[xIndex][yIndex] == Enum_MapCellType.EMPTY){
+                    cells[xIndex][yIndex] = new GraphMapCell(rectangle_2D_Map[xIndex][yIndex], new Coordinate_2D(xIndex, yIndex));
                 }
             }
         }
         HashMap<I_Coordinate, GraphMapCell> allCells = new HashMap<>(); //to be used for GraphMap constructor
         //connect cells to their neighbors (4-connected)
         ArrayList<GraphMapCell> neighbors = new ArrayList<>(4);
-        for (int x = 0; x < xLength; x++) {
-            for (int y = 0; y < yLength; y++) {
-                GraphMapCell currentCell = cells[x][y];
-                if(cells[x][y] != null){
+        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
+            for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+                GraphMapCell currentCell = cells[xIndex][yIndex];
+                if(cells[xIndex][yIndex] != null){
                     neighbors.clear();
                     //look for WEST neighbor
-                    if(x-1 >= 0 && cells[x-1][y] != null){neighbors.add(cells[x-1][y]);}
+                    if(xIndex-1 >= 0 && cells[xIndex-1][yIndex] != null){neighbors.add(cells[xIndex-1][yIndex]);}
                     //look for EAST neighbor
-                    if(x+1 < xLength && cells[x+1][y] != null){neighbors.add(cells[x+1][y]);}
+                    if(xIndex+1 < xAxis_length && cells[xIndex+1][yIndex] != null){neighbors.add(cells[xIndex+1][yIndex]);}
                     //look for NORTH neighbor
-                    if(y-1 >= 0 && cells[x][y-1] != null){neighbors.add(cells[x][y-1]);}
+                    if(yIndex-1 >= 0 && cells[xIndex][yIndex-1] != null){neighbors.add(cells[xIndex][yIndex-1]);}
                     //look for SOUTH neighbor
-                    if(y+1 < xLength && cells[x][y+1] != null){neighbors.add(cells[x][y+1]);}
+                    if(yIndex+1 < xAxis_length && cells[xIndex][yIndex+1] != null){neighbors.add(cells[xIndex][yIndex+1]);}
                     // set cell neighbors
                     currentCell.setNeighbors(neighbors.toArray(new GraphMapCell[0]));
                     // add to allCells
