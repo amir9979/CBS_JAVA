@@ -3,8 +3,11 @@ package Metrics;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -262,11 +265,15 @@ public class S_Metrics {
         outputStream.write(headerToString.headerToString(headerArray).getBytes());
     }
 
-    private static void outputHeaderToAllRelevantStreams() throws IOException {
+    private static void outputHeaderToAllRelevantStreams() {
         for (int i = 0; i < outputStreams.size(); i++) {
             HeaderToString headerToString = headerToStringsForOSs.get(i);
             if(headerToString != null){
-                outputHeaderToStream(outputStreams.get(i), S_Metrics.header, headerToString);
+                try {
+                    outputHeaderToStream(outputStreams.get(i), S_Metrics.header, headerToString);
+                } catch (IOException e) {
+                    handleIO_Exception(e, outputStreams.get(i), headerToStringsForOSs.get(i).headerToString(S_Metrics.header));
+                }
             }
         }
     }
@@ -276,9 +283,29 @@ public class S_Metrics {
         outputStream.write(instanceReportToString.instanceReportToString(instanceReport).getBytes());
     }
 
-    private static void outputInstanceReportToAllStreams(InstanceReport instanceReport) throws IOException {
+    private static void outputInstanceReportToAllStreams(InstanceReport instanceReport) {
         for (int i = 0; i < outputStreams.size(); i++) {
-            outputInstanceReportToStream(outputStreams.get(i), instanceReport, instanceReportToStringsForOSs.get(i));
+            try {
+                outputInstanceReportToStream(outputStreams.get(i), instanceReport, instanceReportToStringsForOSs.get(i));
+            } catch (IOException e) {
+                handleIO_Exception(e, outputStreams.get(i), instanceReportToStringsForOSs.get(i).instanceReportToString(instanceReport));
+            }
+        }
+    }
+
+    private static void outputAllInstanceReportToAllStreams() {
+        for (int i = 0; i < outputStreams.size(); i++) {
+            OutputStream outputStream = outputStreams.get(i);
+            InstanceReportToString iToString = instanceReportToStringsForOSs.get(i);
+            InstanceReport currentInstanceReport = null;
+            try {
+                for (int j = 0; j < S_Metrics.reports.size(); j++) {
+                    currentInstanceReport = S_Metrics.reports.get(j);
+                    outputInstanceReportToStream(outputStream, currentInstanceReport, iToString);
+                }
+            } catch (IOException e) {
+                handleIO_Exception(e, outputStream, iToString.instanceReportToString(currentInstanceReport));
+            }
         }
     }
 
@@ -288,6 +315,17 @@ public class S_Metrics {
                 S_Metrics.reports) {
             outputInstanceReportToStream(outputStream, report, instanceReportToString);
         }
+    }
+
+    private static void handleIO_Exception(IOException e, OutputStream outputStream, String data){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+
+        System.out.println("I/O error at time: " + dateFormat.format(date));
+        System.out.println("          when writing instance: " + data);
+        System.out.println("          to OutputStream: " + outputStream.toString());
+        System.out.println("          printing stack trace:");
+        e.printStackTrace();
     }
 
     ////        OUTPUT API      ////
@@ -320,16 +358,12 @@ public class S_Metrics {
 
     /**
      * Exports all the {@link InstanceReport}s to all the saved OutputStreams.
-     * @throws IOException if an I/O error occurs
+     * If an {@link IOException} occurs with one of the streams, error information will be printed, and the method will
+     * move on to the other streams.
      */
-    public static void exportAll() throws IOException {
+    public static void exportAll() {
         outputHeaderToAllRelevantStreams();
-        int i = 0;
-        for (OutputStream outputStream :
-                outputStreams) {
-            outputAllInstanceReportsToStream(outputStream, instanceReportToStringsForOSs.get(i));
-            i++;
-        }
+        outputAllInstanceReportToAllStreams();
     }
 
     /**
