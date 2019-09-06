@@ -19,7 +19,7 @@ public class MAPF_Instance {
 
     public Agent[] getAgents() {
 
-        // fixme - deep copy
+        // fixme - deep copy. Or change array to Collections.unmodifiableList ?
         return agents;
     }
 

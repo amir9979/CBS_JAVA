@@ -2,13 +2,20 @@ package Instances.Maps;
 
 import java.util.Arrays;
 
+/**
+ * A single cell in a {@link GraphMap}. Represents a unique location in the graph.
+ * Immutable beyond first initialization (First with a constructor, and then with {@link #setNeighbors(GraphMapCell[])}.
+ */
 public class GraphMapCell implements I_MapCell{
 
+    /**
+     * The type of the cell. The type could determine whether or not an agent can traverse or occupy a cell.
+     */
     public final Enum_MapCellType cellType;
     private GraphMapCell[] neighbors;
     public final I_Coordinate coordinate;
 
-    public GraphMapCell(Enum_MapCellType cellType, I_Coordinate coordinate) {
+    GraphMapCell(Enum_MapCellType cellType, I_Coordinate coordinate) {
         this.cellType = cellType;
         this.coordinate = coordinate;
         this.neighbors = null;
@@ -44,6 +51,7 @@ public class GraphMapCell implements I_MapCell{
     /**
      * Returns an array (copy) that contains references to this cell's neighbors.
      * The amount of neighbors varies by map and connectivity.
+     * Runs in O({@link #neighbors}.length).
      * @return an array (copy) that contains references to this cell's neighbors.
      */
     @Override

@@ -2,6 +2,9 @@ package Instances.Maps;
 
 import java.util.Objects;
 
+/**
+ * A data type which represents a coordinate in two-dimensional space.
+ */
 public class Coordinate_2D implements I_Coordinate {
 
     private int x_value;
