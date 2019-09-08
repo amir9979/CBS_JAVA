@@ -14,8 +14,7 @@ public class InstanceManager {
     private Stack<InstancePath> instancesPaths_stack;
 
 
-    public InstanceManager( /* InstanceFormat instanceFormat, */
-                           String sourceDirectory,
+    public InstanceManager(String sourceDirectory,
                            I_InstanceBuilder instanceBuilder,
                            InstanceProperties properties) {
 

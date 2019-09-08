@@ -93,7 +93,7 @@ public class IO_Manager { // Singleton class
     public Enum_IO deleteFile(File toDelete){
 
         if ( pathExists(toDelete)) {
-            if (toDelete.delete()){
+           if (toDelete.delete()){
                 // returns true also when file not listed in openPath list
                 if( this.removeOpenPath(toDelete.getPath()) ){
                     return Enum_IO.DELETED;
