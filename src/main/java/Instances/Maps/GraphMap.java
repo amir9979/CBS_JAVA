@@ -38,4 +38,8 @@ public class GraphMap implements I_Map {
         return this.allGraphCells.containsKey(coordinate);
     }
 
+    public int getNumMapCells(){
+        return allGraphCells.size();
+    }
+
 }
