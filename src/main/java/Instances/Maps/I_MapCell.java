@@ -1,5 +1,7 @@
 package Instances.Maps;
 
+import java.util.List;
+
 public interface I_MapCell {
 
     /**
@@ -13,7 +15,7 @@ public interface I_MapCell {
      * The amount of neighbors varies by map and connectivity.
      * @return an array that contains references to this cell's neighbors. Should not include this.
      */
-    I_MapCell[] getNeighbors(); //todo replace with List to support immutable list based implementations
+    List<I_MapCell> getNeighbors();
 
     /**
      * returns the cell's coordinate.
