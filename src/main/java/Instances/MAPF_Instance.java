@@ -23,8 +23,8 @@ public class MAPF_Instance {
      */
     public final I_Map map;
     /**
-     * An immutable list of agents. Since the {@link Agent}s themselves are also immutable, the contents of this list
-     * cannot be changed in any way.
+     * An unmodifiable list of agents. Since the {@link Agent}s should themselves be immutable, the contents of this
+     * list cannot be changed in any way.
      */
     public final List<Agent> agents;
 
@@ -32,13 +32,13 @@ public class MAPF_Instance {
     MAPF_Instance(String name, I_Map map, Agent[] agents) {
         this.name = name;
         this.map = map;
-        this.agents = List.of(agents); //immutable list
+        this.agents = List.of(agents); //unmodifiable list
     }
 
     MAPF_Instance(String name, I_Map map, List<Agent> agents) {
         this.name = name;
         this.map = map;
-        this.agents = List.of(agents.toArray(new Agent[0])); //immutable list
+        this.agents = List.copyOf(agents); //unmodifiable list
     }
 
 }
