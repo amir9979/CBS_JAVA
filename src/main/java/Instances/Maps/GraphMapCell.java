@@ -63,8 +63,6 @@ public class GraphMapCell implements I_MapCell{
 
     /**
      * Returns true iff other is contained in {@link #neighbors}. In particular, returns false if other==this.
-     * Equality is checked through reference equality, because the implementation of {@link GraphMap} and this class
-     * does not allow duplicate instances of the same {@link GraphMapCell}.
      * @param other another {@link I_MapCell}.
      * @return true iff other is contained in {@link #neighbors}.
      */
@@ -73,7 +71,7 @@ public class GraphMapCell implements I_MapCell{
         boolean result = false;
         for (GraphMapCell neighbor :
                 neighbors) {
-            result = result || (neighbor == other);
+            result = result || (neighbor.equals(other));
         }
         return result;
     }
