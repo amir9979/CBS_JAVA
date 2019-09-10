@@ -5,6 +5,8 @@ import java.util.Arrays;
 /**
  * A single cell in a {@link GraphMap}. Represents a unique location in the graph.
  * Immutable beyond first initialization (First with a constructor, and then with {@link #setNeighbors(GraphMapCell[])}.
+ * Equals and HashCode are not overridden, because the implementation of {@link GraphMap} and this class does not allow
+ * duplicate instances of the same {@link GraphMapCell}.
  */
 public class GraphMapCell implements I_MapCell{
 
@@ -58,4 +60,22 @@ public class GraphMapCell implements I_MapCell{
     public I_MapCell[] getNeighbors() {
         return Arrays.copyOf(neighbors, neighbors.length);
     }
+
+    /**
+     * Returns true iff other is contained in {@link #neighbors}. In particular, returns false if other==this.
+     * Equality is checked through reference equality, because the implementation of {@link GraphMap} and this class
+     * does not allow duplicate instances of the same {@link GraphMapCell}.
+     * @param other another {@link I_MapCell}.
+     * @return true iff other is contained in {@link #neighbors}.
+     */
+    @Override
+    public boolean isNeighbor(I_MapCell other) {
+        boolean result = false;
+        for (GraphMapCell neighbor :
+                neighbors) {
+            result = result || (neighbor == other);
+        }
+        return result;
+    }
+
 }
