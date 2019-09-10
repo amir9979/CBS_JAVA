@@ -3,6 +3,10 @@ package Instances.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Responsible for the creation of instances of all classes that implement {@link I_Map}.
+ * Factory design pattern.
+ */
 public class MapFactory {
 
     /**
