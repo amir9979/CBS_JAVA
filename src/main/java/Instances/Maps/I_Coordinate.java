@@ -1,7 +1,7 @@
 package Instances.Maps;
 
 /**
- * An I_Coordinate represents a unique location in Euclidean space.
+ * Represents a unique location in Euclidean space.
  */
 public interface I_Coordinate {
     // todo generalize to include non-euclidean space? replace methods with one abstract h() function?

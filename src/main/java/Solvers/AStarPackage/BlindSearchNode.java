@@ -1,6 +1,6 @@
-package Solvers;
+package Solvers.AStarPackage;
 
-import Problems.I_ProblemState;
+import Solvers.AStarPackage.Problems.I_ProblemState;
 
 public class BlindSearchNode extends A_SearchNode {
 
