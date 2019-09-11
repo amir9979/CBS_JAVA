@@ -6,9 +6,9 @@ import java.util.Objects;
 
 public class Agent {
 
-    private final int iD;
-    private final I_Coordinate source;
-    private final I_Coordinate target;
+    public final int iD;
+    public final I_Coordinate source;
+    public final I_Coordinate target;
 
 
 
