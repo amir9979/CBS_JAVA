@@ -1,4 +1,4 @@
-package Problems;
+package Solvers.AStarPackage.Problems;
 
 import java.util.List;
 
