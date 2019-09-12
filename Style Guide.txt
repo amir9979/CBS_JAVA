@@ -63,7 +63,7 @@ Arrays:
     Naming:
     1. arr.length -> xAxis_length
     2. arr[0].length -> yAxis_length
-    3. int i -> yIndex , int j -> xIndex
-    for loop example:
-                for (int yIndex = 0; yIndex < yAxis_length; yIndex++)
-                    for (int xIndex = 0; xIndex < xAxis_length; xIndex++)
+    3. int i -> xIndex , int j -> yIndex
+    Example of a stadard for i for j iteration:
+      for (int xIndex = 0; xIndex < xAxis_length; xIndex++)
+          for (int yIndex = 0; yIndex < yAxis_length; yIndex++)
