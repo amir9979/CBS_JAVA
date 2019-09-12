@@ -37,8 +37,8 @@ public class InstanceReport {
     /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
      * does nothing.
-     * @param fieldName the name of the field. @NotNull
-     * @param fieldValue the value to associate with the field. @NotNull
+     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. @NotNull
+     * @param fieldValue the value to associate with the field. If intended for CSV output, can't contain ','. @NotNull
      * @return the old value of the field, or null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type.
      */
     public String putStingValue(String fieldName, String fieldValue){
@@ -57,7 +57,7 @@ public class InstanceReport {
     /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
      * does nothing.
-     * @param fieldName the name of the field. @NotNull
+     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. @NotNull
      * @param fieldValue the value to associate with the field. @NotNull
      * @return the old value of the field, or null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type.
      */
@@ -78,7 +78,7 @@ public class InstanceReport {
     /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
      * does nothing.
-     * @param fieldName the name of the field. @NotNull
+     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. @NotNull
      * @param fieldValue the value to associate with the field. @NotNull
      * @return the old value of the field, or null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type.
      */
@@ -172,7 +172,7 @@ public class InstanceReport {
             return true;
         }
         else{
-            return hasField(fieldName);
+            return !hasField(fieldName);
         }
     }
 
@@ -205,6 +205,8 @@ public class InstanceReport {
      * Commits the report, signaling to the {@link S_Metrics} class that the report is final and that it
      * can output the report to its output streams. An instance of this class can only be committed one. Repeated calls
      * to this method will have no effect.
+     * Note that to use CSV output format (the default), you will have to provide {@link S_Metrics} with a header before
+     * calling this method, else there will be no output.
      * @return true if this is the first call to this method on this instance, else false.
      */
     public boolean commit() throws IOException {

@@ -25,7 +25,6 @@ import java.util.List;
  * output streams.
  */
 public class S_Metrics {
-    // testme
     ////      MEMBERS      ////
     /**
      * Optional. Defines a header. Useful for formats such as CSV.
@@ -171,7 +170,7 @@ public class S_Metrics {
      * @throws IOException if an I/O error occurs.
      */
     public static void addOutputStream(OutputStream outputStream) throws IOException {
-        addOutputStream(outputStream, S_Metrics::instanceReportToStringCSV, null);
+        addOutputStream(outputStream, S_Metrics::instanceReportToStringCSV, S_Metrics::headerArrayToStringCSV);
     }
 
     public static void removeOutputStream(OutputStream outputStream){
@@ -242,10 +241,10 @@ public class S_Metrics {
      * @param delimiter the delimiter to use to delimit the fields.
      * @return a string representation of the information in an instanceReport, in a format compatible with CSV.
      */
-    private static String instanceReportToStringCSV(InstanceReport instanceReport, char delimiter){
+    private static String instanceReportToStringCSV(InstanceReport instanceReport, char delimiter, String[] headerArray){
         StringBuilder reportLine = new StringBuilder();
 
-        for(String field : header){
+        for(String field : headerArray){
             if(instanceReport.hasField(field)){
                 reportLine.append(instanceReport.getValue(field));
             }
@@ -262,7 +261,7 @@ public class S_Metrics {
      * @return a string representation of the information in an instanceReport, in a format compatible with CSV.
      */
     public static String instanceReportToStringCSV(InstanceReport instanceReport){
-        return  instanceReportToStringCSV(instanceReport, ',');
+        return  instanceReportToStringCSV(instanceReport, ',', S_Metrics.header);
     }
 
     //      human readable      //
@@ -274,7 +273,7 @@ public class S_Metrics {
      * @return a string representation of the information in an instanceReport, in a format readable format.
      */
     public static String instanceReportToHumanReadableString(InstanceReport instanceReport){
-        return instanceReport.toString();
+        return instanceReport.toString() + '\n';
     }
 
     // nicetohave tosrting json
@@ -343,10 +342,21 @@ public class S_Metrics {
         Date date = new Date();
 
         System.out.println("I/O error at time: " + dateFormat.format(date));
-        System.out.println("          when writing instance: " + data);
+        System.out.println("          when writing: " + data);
         System.out.println("          to OutputStream: " + outputStream.toString());
         System.out.println("          printing stack trace:");
         e.printStackTrace();
+    }
+
+    private static void flushAllOutputStreams() {
+        for (OutputStream os :
+                outputStreams) {
+            try {
+                os.flush();
+            } catch (IOException e) {
+                handleIO_Exception(e, os, "All data that had not yet been flushed.");
+            }
+        }
     }
 
     ////        OUTPUT API      ////
@@ -358,6 +368,7 @@ public class S_Metrics {
      */
     static void commit(InstanceReport instanceReport) throws IOException {
         outputInstanceReportToAllStreams(instanceReport);
+        flushAllOutputStreams();
     }
 
     /**
@@ -375,6 +386,7 @@ public class S_Metrics {
                 outputInstanceReportToStream(out, report, instanceReportToString);
             }
         }
+        out.flush();
     }
 
     /**
@@ -385,6 +397,7 @@ public class S_Metrics {
      */
     public static void exportToOutputStream(OutputStream out) throws IOException {
         exportToOutputStream(out, S_Metrics::instanceReportToStringCSV, S_Metrics::headerArrayToStringCSV);
+        out.flush();
     }
 
     /**
@@ -393,8 +406,8 @@ public class S_Metrics {
      * move on to the other streams.
      */
     public static void exportAll() {
-        outputHeaderToAllRelevantStreams();
         outputAllInstanceReportToAllStreams();
+        flushAllOutputStreams();
     }
 
     /**
@@ -406,7 +419,9 @@ public class S_Metrics {
      */
     public static void exportCSV(OutputStream outputStream, String[] headerArray) throws IOException {
         outputHeaderToStream(outputStream, headerArray, S_Metrics::headerArrayToStringCSV);
-        outputAllInstanceReportsToStream(outputStream, S_Metrics::instanceReportToStringCSV);
+        outputAllInstanceReportsToStream(outputStream,
+                instanceReport -> S_Metrics.instanceReportToStringCSV(instanceReport, ',', headerArray));
+        outputStream.flush();
     }
 
 }
