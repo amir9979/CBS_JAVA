@@ -54,7 +54,8 @@ public class S_Metrics {
      * Defines a function which converts an {@link InstanceReport} to a String.
      * This class contains static methods which comply with this interface, and may be used when this interface is
      * required.
-     * @see #instanceReportToStringCSV(InstanceReport)
+     * @see #instanceReportToStringCSV(InstanceReport).
+     * @see #instanceReportToHumanReadableString(InstanceReport).
      */
     public interface InstanceReportToString{
         String instanceReportToString(InstanceReport instanceReport);
@@ -64,7 +65,7 @@ public class S_Metrics {
      * Defines a function which converts a String array representing a header, to a String.
      * {@link S_Metrics} contains static methods which comply with this interface, and may be used when this
      * interface is required.
-     * @see #headerArrayToStringCSV(String[])
+     * @see #headerArrayToStringCSV(String[]).
      */
     public interface HeaderToString{
         String headerToString(String[] headerArray);
@@ -148,9 +149,29 @@ public class S_Metrics {
         }
     }
 
+    /**
+     * Adds the given output stream to the list of OutputStreams. When {@link InstanceReport}s are committed, or when
+     * {@link #exportAll()} is called, {@link InstanceReport}s will be written to this given OutputStream.
+     * Doesn't write a header to the stream.
+     * @param outputStream an output stream.
+     * @param instanceReportToString function to convert {@link InstanceReport}s to Strings to write them to the given {@link OutputStream}.
+     * @throws IOException if an I/O error occurs.
+     */
     public static void addOutputStream(OutputStream outputStream,
                                        InstanceReportToString instanceReportToString) throws IOException {
         addOutputStream(outputStream, instanceReportToString, null);
+    }
+
+    /**
+     * Adds the given output stream to the list of OutputStreams. When {@link InstanceReport}s are committed, or when
+     * {@link #exportAll()} is called, {@link InstanceReport}s will be written to this given OutputStream.
+     * Uses the default {@link InstanceReportToString}.
+     * Doesn't write a header to the stream.
+     * @param outputStream an output stream.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static void addOutputStream(OutputStream outputStream) throws IOException {
+        addOutputStream(outputStream, S_Metrics::instanceReportToStringCSV, null);
     }
 
     public static void removeOutputStream(OutputStream outputStream){
@@ -354,6 +375,16 @@ public class S_Metrics {
                 outputInstanceReportToStream(out, report, instanceReportToString);
             }
         }
+    }
+
+    /**
+     * Exports all the {@link InstanceReport}s to the given output stream. Uses default {@link InstanceReportToString}
+     * and {@link HeaderToString} methods.
+     * @param out the OutputStream to write to.
+     * @throws IOException if an I/O error occurs
+     */
+    public static void exportToOutputStream(OutputStream out) throws IOException {
+        exportToOutputStream(out, S_Metrics::instanceReportToStringCSV, S_Metrics::headerArrayToStringCSV);
     }
 
     /**
