@@ -1,7 +1,10 @@
 package Instances.Maps;
 
+/**
+ * Represents a unique location in Euclidean space.
+ */
 public interface I_Coordinate {
-
+    // todo generalize to include non-euclidean space? replace methods with one abstract h() function?
     /**
      * Returns the euclidean distance to another {@link I_Coordinate coordinate}. Should return 0 iff this.equals(other)
      * return true.  If other is null, or is not of the same runtime type as this, returns -1.

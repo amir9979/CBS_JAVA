@@ -1,8 +1,6 @@
 package Solvers.AStarPackage;
 
-import Problems.I_ProblemState;
-import Solvers.A_SearchNode;
-import Solvers.A_SearchSolver;
+import Solvers.AStarPackage.Problems.I_ProblemState;
 
 public class A_StarSearch extends A_SearchSolver {
 	// Define lists here ...
