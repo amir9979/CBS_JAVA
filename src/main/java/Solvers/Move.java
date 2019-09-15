@@ -7,6 +7,9 @@ import Instances.Maps.I_MapCell;
  * A single move for a single agent. Immutable.
  */
 public class Move {
+    /**
+     * The {@link Agent} making the move.
+     */
     final Agent agent;
     /**
      * The time at the end of the move.

@@ -5,9 +5,7 @@ import Instances.Maps.I_MapCell;
 
 /**
  * A constraint on a move from a specific location, to another location, at a specific time.
- * This class is useful for preventing a swapping conflict (AKA edge conflict). Note that to prevent a swapping conflict,
- * one must also create a {@link LocationConstraint} that prevents the agent from staying where it currently is (making
- * a "wait" move).
+ * This class is useful for preventing a swapping conflict (AKA edge conflict).
  *
  * It is important to note that while this class extends {@link LocationConstraint}, it is in fact less restrictive.
  * Meaning:
