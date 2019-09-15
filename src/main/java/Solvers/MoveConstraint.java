@@ -18,13 +18,13 @@ public class MoveConstraint extends LocationConstraint{
      */
     private final I_MapCell prevLocation;
 
-    public MoveConstraint(Agent agent, int time, I_MapCell location, I_MapCell prevLocation) {
+    public MoveConstraint(Agent agent, int time, I_MapCell prevLocation, I_MapCell location) {
         super(agent, time, location);
         if(prevLocation == null) throw new IllegalArgumentException();
         this.prevLocation = prevLocation;
     }
 
-    public MoveConstraint(int time, I_MapCell location, I_MapCell prevLocation) {
+    public MoveConstraint(int time, I_MapCell prevLocation, I_MapCell location) {
         this(null, time, location, prevLocation);
     }
 
