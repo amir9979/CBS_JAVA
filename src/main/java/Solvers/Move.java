@@ -17,21 +17,21 @@ public class Move {
      */
     final int timeNow;
     /**
-     * The {@link #agent}'s location at the end of the move
-     */
-    final I_MapCell currLocation;
-    /**
      * The agent's location before the move. Can equal {@link #currLocation}.
      */
     final I_MapCell prevLocation;
+    /**
+     * The {@link #agent}'s location at the end of the move
+     */
+    final I_MapCell currLocation;
 
-    public Move(Agent agent, int timeNow, I_MapCell currLocation, I_MapCell prevLocation) {
-        if(agent == null || timeNow<0 || currLocation == null || prevLocation == null){
+    public Move(Agent agent, int timeNow, I_MapCell prevLocation, I_MapCell currLocation) {
+        if(agent == null || timeNow<1 || prevLocation == null || currLocation == null){
             throw new IllegalArgumentException();
         }
         this.agent = agent;
         this.timeNow = timeNow;
-        this.currLocation = currLocation;
         this.prevLocation = prevLocation;
+        this.currLocation = currLocation;
     }
 }

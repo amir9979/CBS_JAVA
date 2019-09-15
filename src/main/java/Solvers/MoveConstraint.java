@@ -10,8 +10,7 @@ import Instances.Maps.I_MapCell;
  * It is important to note that while this class extends {@link LocationConstraint}, it is in fact less restrictive.
  * Meaning:
  * a. It accepts all {@link Move moves} accepted by the {@link LocationConstraint} it extends.
- * b. The set of {@link Move moves} rejected by an instance of this class is equal to, or a subset of, the the set of
- * {@link Move moves} rejected by the {@link LocationConstraint} it extends.
+ * b. It may also accept other {@link Move moves}, that are rejected by the {@link LocationConstraint} it extends.
  */
 public class MoveConstraint extends LocationConstraint{
     /**
@@ -31,11 +30,12 @@ public class MoveConstraint extends LocationConstraint{
 
     @Override
     public boolean accepts(Move move) {
-        return super.accepts(move);
+        return super.accepts(move) ||
+                !move.prevLocation.equals(this.prevLocation) /*the previous location is different*/;
     }
 
     @Override
     public boolean rejects(Move move) {
-        return super.rejects(move) && move.prevLocation.equals(this.prevLocation);
+        return !this.accepts(move);
     }
 }

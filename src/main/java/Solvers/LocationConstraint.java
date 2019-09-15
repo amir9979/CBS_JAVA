@@ -42,18 +42,22 @@ public class LocationConstraint {
     }
 
     /**
-     * Returns true iff the given {@link Move} conflicts with this constraint.
+     * Returns true iff the given {@link Move} conflicts with this constraint. Checking if a move if accepted is faster,
+     * than checking if it is rejected, since a single difference is enough to resolve the check. Therefore, this method
+     * is implemented in full, whereas {@link #rejects(Move)} uses this method for its implementation.
      * @param move a move that might conflict with this constraint
      * @return true iff the given {@link Move} conflicts with this constraint.
      */
     public boolean accepts(Move move){
         if(move == null) throw new IllegalArgumentException();
         return this.location != move.currLocation || this.time != move.timeNow ||
-                (this.agent != null && !this.agent.equals(move.agent));
+                /*the constraint is limited to a specific agent, and that agent is different*/
+                (this.agent != null && !this.agent.equals(move.agent) );
     }
 
     /**
-     * Returns false iff the given {@link Move} conflicts with this constraint.
+     * Returns false iff the given {@link Move} conflicts with this constraint. This returns the opposite of
+     * {@link #accepts(Move)}, and is only present for convenience.
      * @param move a move that might conflict with this constraint
      * @return false iff the given {@link Move} conflicts with this constraint.
      */
