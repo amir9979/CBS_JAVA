@@ -7,7 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="CBS_JAVA" />
+        <module name="CBS" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="CBS" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

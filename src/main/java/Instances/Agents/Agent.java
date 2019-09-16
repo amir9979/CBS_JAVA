@@ -10,8 +10,6 @@ public class Agent {
     private final I_Coordinate source;
     private final I_Coordinate target;
 
-    //einat commit
-
 
     public Agent(int iD, I_Coordinate source, I_Coordinate target) {
         this.iD = iD;
