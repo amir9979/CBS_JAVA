@@ -2,6 +2,8 @@ package Instances.Agents;
 
 import Instances.Maps.I_Coordinate;
 
+import java.util.Objects;
+
 public class Agent {
 
     public final int iD;
@@ -9,11 +11,14 @@ public class Agent {
     public final I_Coordinate target;
 
 
+
+
     public Agent(int iD, I_Coordinate source, I_Coordinate target) {
         this.iD = iD;
         this.source = source;
         this.target = target;
     }
+
 
     @Override
     public boolean equals(Object o) {

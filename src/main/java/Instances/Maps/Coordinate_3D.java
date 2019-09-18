@@ -71,7 +71,7 @@ public class Coordinate_3D implements I_Coordinate {
         return 0;
     }
 
-    public float manhattanDistance(I_Coordinate other) {
+    public int manhattanDistance(I_Coordinate other) {
         return 0;
     }
 }
