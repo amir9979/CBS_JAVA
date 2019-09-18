@@ -18,11 +18,11 @@ class MoveConstraintTest {
             {w, w, w, w, w, w},
             {w, w, w, w, w, w},
     };
+    private I_Map map1 = MapFactory.newSimple4Connected2D_GraphMap(map_2D_circle);
 
     @Test
     void accepts() {
         // doesnt check things that are checked in LocationConstraintTest
-        I_Map map1 = MapFactory.newSimple4Connected2D_GraphMap(map_2D_circle);
         I_Coordinate coor13 = new Coordinate_2D(1,3);
         I_Coordinate coor14 = new Coordinate_2D(1,4);
         I_Coordinate coor24 = new Coordinate_2D(2,4);
@@ -54,7 +54,8 @@ class MoveConstraintTest {
 
     }
 
-    @Test
-    void rejects() {
-    }
+    // redundant, as it simply negates accepts()
+//    @Test
+//    void rejects() {
+//    }
 }
