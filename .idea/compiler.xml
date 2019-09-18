@@ -10,8 +10,6 @@
         <module name="CBS" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="CBS" target="8" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="11" />
   </component>
 </project>

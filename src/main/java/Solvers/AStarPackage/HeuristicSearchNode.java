@@ -1,9 +1,7 @@
 package Solvers.AStarPackage;
 
-import Problems.I_Heuristic;
-import Problems.I_ProblemState;
-import Solvers.A_SearchNode;
-import Solvers.BlindSearchNode;
+import Solvers.AStarPackage.Problems.I_Heuristic;
+import Solvers.AStarPackage.Problems.I_ProblemState;
 
 public class HeuristicSearchNode extends BlindSearchNode
 {

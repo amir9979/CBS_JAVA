@@ -1,7 +1,7 @@
-package Solvers;
+package Solvers.AStarPackage;
 
-import Problems.I_ProblemMove;
-import Problems.I_ProblemState;
+import Solvers.AStarPackage.Problems.I_ProblemMove;
+import Solvers.AStarPackage.Problems.I_ProblemState;
 
 import java.util.ArrayList;
 import java.util.List;

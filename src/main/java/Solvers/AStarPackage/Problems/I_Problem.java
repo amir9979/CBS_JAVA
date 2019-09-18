@@ -1,4 +1,4 @@
-package Problems;
+package Solvers.AStarPackage.Problems;
 
 public interface I_Problem{
 	I_ProblemState 	getProblemState();
