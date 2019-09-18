@@ -7,8 +7,8 @@ import java.util.Objects;
  */
 public class Coordinate_2D implements I_Coordinate {
 
-    private final int x_value;
-    private final int y_value;
+    public final int x_value;
+    public final int y_value;
 
 
     public Coordinate_2D(int x_value, int y_value) {

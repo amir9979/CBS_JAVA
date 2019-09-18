@@ -1,6 +1,5 @@
 package Instances;
 
-import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
 import Instances.Maps.I_Map;
 
@@ -13,6 +12,13 @@ public class InstanceManager {
 
     private Stack<InstancePath> instancesPaths_stack;
 
+    public I_InstanceBuilder getInstanceBuilder() {
+        return instanceBuilder;
+    }
+
+    public Stack<InstancePath> getInstancesPaths_stack() {
+        return instancesPaths_stack;
+    }
 
     public InstanceManager(String sourceDirectory,
                            I_InstanceBuilder instanceBuilder,
@@ -25,8 +31,6 @@ public class InstanceManager {
 
     }
 
-
-
     public MAPF_Instance getNextInstance(){
         /* Returns null in case of an error */
 
@@ -37,7 +41,8 @@ public class InstanceManager {
                 break;
             }
 
-            String instanceName = ""; // imp - get instance name
+            String[] splitedPath=nextPath.path.split("/"); //Todo check if the "/" is correct
+            String instanceName = splitedPath[splitedPath.length-1];
 
             nextInstance = this.instanceBuilder.getInstance(instanceName, nextPath);
 
@@ -57,8 +62,6 @@ public class InstanceManager {
         }
 
     }
-
-
 
     /***  =Instance path wrapper=  ***/
 
