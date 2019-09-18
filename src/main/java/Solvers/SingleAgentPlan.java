@@ -18,7 +18,7 @@ public class SingleAgentPlan {
      *             and the contained {@link Move}'s {@link Move#timeNow} must form an ascending series with d=1.
      * @param agent the plan's agent.
      */
-    public SingleAgentPlan(List<Move> moves, Agent agent) {
+    public SingleAgentPlan(Agent agent, List<Move> moves) {
         if(moves == null || agent == null) throw new IllegalArgumentException();
         if(!isValidMoveSequenceForAgent(moves, agent)) throw new IllegalArgumentException();
         this.agent = agent;
@@ -26,10 +26,16 @@ public class SingleAgentPlan {
     }
 
     public SingleAgentPlan(Agent agent) {
-        this(new ArrayList<>(), agent);
+        this(agent, new ArrayList<>());
     }
 
-    private boolean isValidMoveSequenceForAgent(List<Move> moves, Agent agent) {
+    private static boolean isValidNextMoveForAgent(List<Move> currentMoves, Move newMove, Agent agent){
+        return agent.equals(newMove.agent) &&
+                ( currentMoves.size() == 0 ||
+                        newMove.timeNow - currentMoves.get(currentMoves.size()-1).timeNow == 1 );
+    }
+
+    private static boolean isValidMoveSequenceForAgent(List<Move> moves, Agent agent) {
         if(moves.isEmpty()){return true;}
         else if(!moves.get(0).prevLocation.getCoordinate().equals(agent.source)){
             // the plan starts at a different coordinate than the agent.
@@ -40,8 +46,8 @@ public class SingleAgentPlan {
             Move prevMove = moves.get(0);
             for (Move move:
                     moves) {
-                result &= (move==prevMove) //for first iteration
-                        || (move.timeNow-prevMove.timeNow == 1); //ascending series with d=1
+                result &= (move==prevMove //for first iteration
+                        || (move.timeNow-prevMove.timeNow == 1)); //ascending series with d=1
                 prevMove = move;
 
                 result &= move.agent.equals(agent); //all same agent
@@ -57,8 +63,7 @@ public class SingleAgentPlan {
      *               the current latest move.
      */
     void addMove(Move newMove){
-        if(this.moves.size() == 0 ||
-                (newMove.timeNow - this.moves.get(0).timeNow == 1 && agent.equals(newMove.agent)) ){
+        if(isValidNextMoveForAgent(this.moves, newMove, this.agent)){
             this.moves.add(newMove);
         }
         else {throw new IllegalArgumentException();}
@@ -69,9 +74,9 @@ public class SingleAgentPlan {
      * {@link #setMoves(List)}.
      * @param newMoves a sequence of moves to append to the current plan.
      */
-    void addMoves(Move newMoves){
+    void addMoves(List<Move> newMoves){
         List<Move> tmpMoves = new ArrayList<>(this.moves);
-        tmpMoves.add(newMoves);
+        tmpMoves.addAll(newMoves);
         if(isValidMoveSequenceForAgent(tmpMoves, agent)){
             this.moves = tmpMoves;
         }
@@ -84,8 +89,9 @@ public class SingleAgentPlan {
 
     /**
      * Replaces the current plan with a copy of the given sequence of moves.
-     * @param newMoves a sequence of moves for the agent. Can be empty. All {@link Move}s must be moves for the same {@link Agent},
-     *      and the contained {@link Move}'s {@link Move#timeNow} must form an ascending series with d=1.
+     * Can be empty. All {@link Move}s must be moves for the same {@link Agent}, and the contained {@link Move}'s
+     * {@link Move#timeNow} must form an ascending series with d=1. Must start at {@link #agent}s source.
+     * @param newMoves a sequence of moves for the agent.
      */
     void setMoves(List<Move> newMoves){
         if(newMoves == null) throw new IllegalArgumentException();
@@ -105,14 +111,24 @@ public class SingleAgentPlan {
      */
     public List<Move> getMoves(){return new ArrayList<>(this.moves);}
 
+    /**
+     * @return the start time of the plan, which is 1 less than the time of the first move. returns -1 if plan is empty.
+     */
     public int getStartTime(){
-        return moves.isEmpty() ? 0 : moves.get(0).timeNow-1;
+        return moves.isEmpty() ? -1 : moves.get(0).timeNow-1;
         // since the first move represents one timestep after the start, the start time is timeNow of the first move -1
     }
 
+    /**
+     * @return the start time of the plan, which is the time of the last move. returns -1 if plan is empty.
+     */
     public int getEndTime(){
-        return moves.isEmpty() ? 0 : moves.get(moves.size()-1).timeNow;
+        return moves.isEmpty() ? -1 : moves.get(moves.size()-1).timeNow;
     }
 
-    public int getElapsedTime(){return this.getEndTime()-this.getStartTime();}
+    /**
+     * Returns the total time of the plan, which is the difference between end and start times.
+     * @return the total time of the plan, which is the difference between end and start times. Return -1 if plan is empty.
+     */
+    public int getTotalTime(){return moves.isEmpty() ? -1 : this.getEndTime()-this.getStartTime();}
 }

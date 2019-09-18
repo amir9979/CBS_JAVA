@@ -18,5 +18,5 @@ public class Solution {
         this.agentPlans = Map.copyOf(agentPlans);
     }
 
-    //imp validations?
+    //nicetohave validations?
 }
