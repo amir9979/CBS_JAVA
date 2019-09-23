@@ -1,6 +1,8 @@
 package Solvers.PrioritisedPlanning;
 
 import Instances.Agents.Agent;
+import Metrics.InstanceReport;
+import Solvers.I_Solver;
 import Solvers.LocationConstraint;
 import Solvers.MoveConstraint;
 import Solvers.RunParameters;
@@ -22,17 +24,28 @@ public class RunParameters_PP extends RunParameters {
      */
     public final Agent[] preferredPriorityOrder;
 
-    public RunParameters_PP(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, Agent[] preferredPriorityOrder) {
-        super(timeout, moveConstraints, locationConstraints);
+    public RunParameters_PP(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport, Agent[] preferredPriorityOrder) {
+        super(timeout, moveConstraints, locationConstraints, instanceReport);
         this.preferredPriorityOrder = preferredPriorityOrder;
     }
 
-    public RunParameters_PP(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, Agent[] preferredPriorityOrder) {
-        super(moveConstraints, locationConstraints);
+    public RunParameters_PP(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport, Agent[] preferredPriorityOrder) {
+        super(moveConstraints, locationConstraints, instanceReport);
+        this.preferredPriorityOrder = preferredPriorityOrder;
+    }
+
+    public RunParameters_PP(InstanceReport instanceReport, Agent[] preferredPriorityOrder) {
+        super(instanceReport);
         this.preferredPriorityOrder = preferredPriorityOrder;
     }
 
     public RunParameters_PP(Agent[] preferredPriorityOrder) {
+        super();
         this.preferredPriorityOrder = preferredPriorityOrder;
+    }
+
+    public RunParameters_PP() {
+        super();
+        this.preferredPriorityOrder = new Agent[0];
     }
 }

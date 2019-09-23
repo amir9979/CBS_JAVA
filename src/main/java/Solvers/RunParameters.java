@@ -1,5 +1,7 @@
 package Solvers;
 
+import Metrics.InstanceReport;
+
 import java.util.List;
 
 /**
@@ -15,6 +17,7 @@ public class RunParameters {
     /*  =Fields=  */
     /**
      * The maximum time (milliseconds) allotted to the search. If the search exceeds this time, it is aborted.
+     * Can also be 0, or negative.
      */
     public final long timeout;
 
@@ -23,6 +26,7 @@ public class RunParameters {
      * These constraints limit the {@link Move moves} that {@link Instances.Agents.Agent agents} can make. A
      * {@link I_Solver solver} that uses this field should start its solution process with these constraints, but may
      * later add or remove constraints, depending on the algorithm being used.
+     * Can be null.
      */
     public final List<MoveConstraint> moveConstraints;
 
@@ -32,23 +36,36 @@ public class RunParameters {
      * {@link Instances.Agents.Agent agents} may occupy. A {@link I_Solver solver} that uses this field should start its
      * solution process with these constraints, but may later add or remove constraints, depending on the algorithm
      * being used.
+     * Can be null.
      */
     public final List<LocationConstraint> locationConstraints;
 
+    /**
+     * An {@link InstanceReport} where to {@link I_Solver} will write metrics generated from the run.
+     * Can be null.
+     */
+    public final InstanceReport instanceReport;
+
     /*  =Constructors=  */
 
-    public RunParameters(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints) {
+    public RunParameters(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport) {
         this.timeout = timeout;
         this.moveConstraints = moveConstraints == null ? null : List.copyOf(moveConstraints);
         this.locationConstraints = locationConstraints == null ? null : List.copyOf(locationConstraints);
+        this.instanceReport = instanceReport;
     }
 
-    public RunParameters(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints) {
-        this(defaultTimeout, moveConstraints, locationConstraints);
+    public RunParameters(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport) {
+        this(defaultTimeout, moveConstraints, locationConstraints, instanceReport);
     }
+
+    public RunParameters(InstanceReport instanceReport) {
+        this(null, null, instanceReport);
+    }
+
 
     public RunParameters() {
-        this(null, null);
+        this(null, null, null);
     }
 
 }

@@ -18,5 +18,11 @@ public class Solution {
         this.agentPlans = Map.copyOf(agentPlans);
     }
 
+    @Override
+    public String toString() {
+        //imp JSON string or something
+        return agentPlans.toString();
+    }
+
     //nicetohave validations?
 }

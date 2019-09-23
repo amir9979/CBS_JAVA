@@ -30,15 +30,25 @@ public class MAPF_Instance {
 
 
     MAPF_Instance(String name, I_Map map, Agent[] agents) {
+        if(name == null || map == null || agents == null){throw new IllegalArgumentException();}
         this.name = name;
         this.map = map;
         this.agents = List.of(agents); //unmodifiable list
     }
 
     MAPF_Instance(String name, I_Map map, List<Agent> agents) {
-        this.name = name;
-        this.map = map;
-        this.agents = List.copyOf(agents); //unmodifiable list
+        this(name, map, agents.toArray(Agent[]::new));
+    }
+
+    /**
+     * Creates a new {@link MAPF_Instance} from this {@link MAPF_Instance}, which only contains one of the {@link #agents}.
+     * @param agent the agent to create a sub-instance for.
+     * @return a new {@link MAPF_Instance} created from this {@link MAPF_Instance}, which only contains one of the {@link #agents}.
+     * @throws IllegalArgumentException if the agent is not contained in {@link #agents}.
+     */
+    public MAPF_Instance getSubproblemFor(Agent agent){
+        if(agent == null || !this.agents.contains(agent)){throw new IllegalArgumentException("Agent not present in instance.");}
+        return new MAPF_Instance(name+"-agent" + agent.iD, map, new Agent[]{agent});
     }
 
 }

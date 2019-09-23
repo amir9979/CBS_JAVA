@@ -1,8 +1,7 @@
 package Metrics;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is used to collect metrics about a single run of a single instance. It is strongly coupled with the
@@ -159,6 +158,16 @@ public class InstanceReport {
     public boolean hasField(String fieldName){
         return stringFields.containsKey(fieldName) || integerFields.containsKey(fieldName)
                 || floatFields.containsKey(fieldName);
+    }
+
+    /**
+     * @return a {@link Set} of the field names for which values are currently held.
+     */
+    public Set<String> getAllFields() {
+        HashSet<String> allFields = new HashSet<String>(stringFields.keySet());
+        allFields.addAll(integerFields.keySet());
+        allFields.addAll(floatFields.keySet());
+        return allFields;
     }
 
     /**

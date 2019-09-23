@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class SingleAgentPlan {
     private List<Move> moves;
-    private final Agent agent;
+    public final Agent agent;
 
     /**
      * @param moves a sequence of moves for the agent. Can be empty. All {@link Move}s must be moves for the same {@link Agent},
