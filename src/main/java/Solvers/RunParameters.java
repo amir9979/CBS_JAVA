@@ -1,5 +1,7 @@
 package Solvers;
 
+import Metrics.InstanceReport;
+
 import java.util.List;
 
 /**
@@ -35,20 +37,31 @@ public class RunParameters {
      */
     public final List<LocationConstraint> locationConstraints;
 
+    /**
+     * An {@link InstanceReport} where to {@link I_Solver} will write metrics generated from the run.
+     */
+    public final InstanceReport instanceReport;
+
     /*  =Constructors=  */
 
-    public RunParameters(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints) {
+    public RunParameters(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport) {
         this.timeout = timeout;
         this.moveConstraints = moveConstraints == null ? null : List.copyOf(moveConstraints);
         this.locationConstraints = locationConstraints == null ? null : List.copyOf(locationConstraints);
+        this.instanceReport = instanceReport;
     }
 
-    public RunParameters(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints) {
-        this(defaultTimeout, moveConstraints, locationConstraints);
+    public RunParameters(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport) {
+        this(defaultTimeout, moveConstraints, locationConstraints, instanceReport);
     }
+
+    public RunParameters(InstanceReport instanceReport) {
+        this(null, null, instanceReport);
+    }
+
 
     public RunParameters() {
-        this(null, null);
+        this(null, null, null);
     }
 
 }
