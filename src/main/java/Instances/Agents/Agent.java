@@ -34,4 +34,11 @@ public class Agent {
     public int hashCode() {
         return Objects.hash(iD, source, target);
     }
+
+    @Override
+    public String toString() {
+        return "Agent{" +
+                "iD=" + iD +
+                '}';
+    }
 }

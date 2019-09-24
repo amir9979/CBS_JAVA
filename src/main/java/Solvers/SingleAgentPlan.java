@@ -5,8 +5,6 @@ import Instances.Agents.Agent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Consumer;
 
 /**
  * A plan for a single agent, which is a sequence of {@link Move}s.
@@ -36,8 +34,6 @@ public class SingleAgentPlan implements Iterable<Move> {
     public SingleAgentPlan(SingleAgentPlan planToCopy){
         this(planToCopy.agent, planToCopy.moves);
     }
-
-
 
     public SingleAgentPlan(Agent agent) {
         this(agent, new ArrayList<>());
@@ -172,12 +168,10 @@ public class SingleAgentPlan implements Iterable<Move> {
     }
 
     @Override
-    public void forEach(Consumer action) {
-        this.moves.forEach(action);
-    }
-
-    @Override
-    public Spliterator spliterator() {
-        return this.moves.spliterator();
+    public String toString() {
+        return "SingleAgentPlan{" +
+                "agent=" + agent +
+                ", moves=" + moves +
+                '}';
     }
 }

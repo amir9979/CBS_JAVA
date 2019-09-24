@@ -34,4 +34,14 @@ public class Move {
         this.prevLocation = prevLocation;
         this.currLocation = currLocation;
     }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+//                "agent=" + agent +
+                ", timeNow=" + timeNow +
+                ", prevLocation=" + prevLocation +
+                ", currLocation=" + currLocation +
+                '}';
+    }
 }
