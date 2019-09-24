@@ -3,13 +3,16 @@ package Solvers;
 import Instances.Agents.Agent;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 /**
  * A plan for a single agent, which is a sequence of {@link Move}s.
  * An instance of this class is unmodifiable outside of this class's package.
  */
-public class SingleAgentPlan {
+public class SingleAgentPlan implements Iterable<Move> {
     private List<Move> moves;
     public final Agent agent;
 
@@ -22,8 +25,19 @@ public class SingleAgentPlan {
         if(moves == null || agent == null) throw new IllegalArgumentException();
         if(!isValidMoveSequenceForAgent(moves, agent)) throw new IllegalArgumentException();
         this.agent = agent;
-        this.moves = moves;
+        this.moves = new ArrayList<>(moves);
     }
+
+    /**
+     * Copy Constructor.
+     * @param planToCopy  a {@link SingleAgentPlan}. @NotNull
+     * @throws NullPointerException if #planToCopy is null.
+     */
+    public SingleAgentPlan(SingleAgentPlan planToCopy){
+        this(planToCopy.agent, planToCopy.moves);
+    }
+
+
 
     public SingleAgentPlan(Agent agent) {
         this(agent, new ArrayList<>());
@@ -103,13 +117,26 @@ public class SingleAgentPlan {
         }
     }
 
+//    /**
+//     * Returns a list of the moves in the plan. The returned list is a copy, and changes made in it will not effect the
+//     * plan.
+//     * @return a list of the moves in the plan. The returned list is a copy, and changes made in it will not effect the
+//     *      plan.
+//     */
+//    public List<Move> getMoves(){return new ArrayList<>(this.moves);}
+
     /**
-     * Returns a list of the moves in the plan. The returned list is a copy, and changes made in it will not effect the
-     * plan.
-     * @return a list of the moves in the plan. The returned list is a copy, and changes made in it will not effect the
-     *      plan.
+     * return the move in the plan where {@link Move#timeNow} equals the given time.
+     * @param time the time of the move in the plan.
+     * @return the move in the plan where {@link Move#timeNow} equals the given time.
      */
-    public List<Move> getMoves(){return new ArrayList<>(this.moves);}
+    public Move moveAt(int time){
+        int startTime = getStartTime();
+        if(time < startTime || time > getEndTime()){ return null;}
+        else{
+            return moves.get(time - startTime); // return the move at the specified time
+        }
+    }
 
     /**
      * @return the start time of the plan, which is 1 less than the time of the first move. returns -1 if plan is empty.
@@ -131,4 +158,26 @@ public class SingleAgentPlan {
      * @return the total time of the plan, which is the difference between end and start times. Return -1 if plan is empty.
      */
     public int getTotalTime(){return moves.isEmpty() ? -1 : this.getEndTime()-this.getStartTime();}
+
+    public boolean conflictsWith(SingleAgentPlan other){
+        //imp
+        return true;
+    }
+
+    /*  = Iterable Interface =  */
+
+    @Override
+    public Iterator<Move> iterator() {
+        return this.moves.iterator();
+    }
+
+    @Override
+    public void forEach(Consumer action) {
+        this.moves.forEach(action);
+    }
+
+    @Override
+    public Spliterator spliterator() {
+        return this.moves.spliterator();
+    }
 }
