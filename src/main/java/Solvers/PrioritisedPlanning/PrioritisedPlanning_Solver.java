@@ -5,6 +5,7 @@ import Instances.MAPF_Instance;
 import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
+import Solvers.ConstraintsAndConflicts.Constraint;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,8 +26,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     /*  =  = Fields related to the run =  */
 
     private long maximumRuntime;
-    private List<MoveConstraint> moveConstraints;
-    private List<LocationConstraint> locationConstraints;
+    private List<Constraint> constraints;
     private InstanceReport instanceReport;
 
     private long startTime;
@@ -43,6 +43,12 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = Constructors =  */
 
+    /**
+     * Constructor.
+     * @param lowLevelSolver A {@link I_Solver solver}, to be used for solving sub-problems where only one agent is to
+     *                      be planned for, and the existing {@link Solvers.SingleAgentPlan plans} for other
+     *                      {@link Agent}s are to be avoided.
+     */
     public PrioritisedPlanning_Solver(I_Solver lowLevelSolver) {
         if(lowLevelSolver == null){throw new IllegalArgumentException();}
         this.lowLevelSolver = lowLevelSolver;
@@ -76,10 +82,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.instance = instance;
 
         this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
-        this.moveConstraints = runParameters.moveConstraints == null ? new ArrayList<>()
-                : new ArrayList<>(runParameters.moveConstraints);
-        this.locationConstraints = runParameters.locationConstraints == null ? new ArrayList<>()
-                : new ArrayList<>(runParameters.locationConstraints);
+        this.constraints = runParameters.constraints == null ? new ArrayList<>()
+                : new ArrayList<>(runParameters.constraints);
         this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
                 : runParameters.instanceReport;
 
@@ -123,11 +127,10 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             InstanceReport subproblemReport = S_Metrics.newInstanceReport();
             subproblemReport.putStingValue("Parent Instance", this.instance.name);
             subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
-            RunParameters subproblemParameters = new RunParameters(new ArrayList<>(this.moveConstraints),
-                    new ArrayList<>(this.locationConstraints), subproblemReport);
+            RunParameters subproblemParameters = new RunParameters(new ArrayList<>(this.constraints), subproblemReport);
 
             //solve sub-problem
-            SingleAgentPlan planForAgent = lowLevelSolver.solve(subproblem, subproblemParameters).agentPlans.get(currentAgent);
+            SingleAgentPlan planForAgent = lowLevelSolver.solve(subproblem, subproblemParameters).getPlanFor(currentAgent);
             try {
                 subproblemReport.commit();
             } catch (IOException e) {
@@ -136,28 +139,28 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             //save
             agentPlans.put(currentAgent, planForAgent);
             //add constraints to prevent the next agents from conflicting with the new plan
-            moveConstraints.addAll(moveConstraintsForPlan(planForAgent));
-            locationConstraints.addAll(locationConstraintsForPlan(planForAgent));
+            constraints.addAll(swappingConstraintsForPlan(planForAgent));
+            constraints.addAll(vertexConstraintsForPlan(planForAgent));
         }
 
         endTime = System.currentTimeMillis();
         return new Solution(agentPlans);
     }
 
-    private List<LocationConstraint> locationConstraintsForPlan(SingleAgentPlan planForAgent) {
-        List<LocationConstraint> constraints = new LinkedList<>();
+    private List<Constraint> vertexConstraintsForPlan(SingleAgentPlan planForAgent) {
+        List<Constraint> constraints = new LinkedList<>();
         for (Move move :
-                planForAgent.getMoves()) {
-            constraints.add(new LocationConstraint(null, move.timeNow, move.currLocation));
+                planForAgent) {
+            constraints.add(new Constraint(null, move.timeNow, move.currLocation));
         }
         return constraints;
     }
 
-    private List<MoveConstraint> moveConstraintsForPlan(SingleAgentPlan planForAgent) {
-        List<MoveConstraint> constraints = new LinkedList<>();
+    private List<Constraint> swappingConstraintsForPlan(SingleAgentPlan planForAgent) {
+        List<Constraint> constraints = new LinkedList<>();
         for (Move move :
-                planForAgent.getMoves()) {
-            constraints.add(new MoveConstraint(null, move.timeNow,
+                planForAgent) {
+            constraints.add(new Constraint(null, move.timeNow,
                     /*the constraint is in opposite direction of the move*/ move.currLocation, move.prevLocation));
         }
         return constraints;
@@ -178,8 +181,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * of the {@link Solution} that is output by {@link #solve(MAPF_Instance, RunParameters)}, or written to an {@link Metrics.InstanceReport}.
      */
     private void releaseMemory() {
-        this.locationConstraints = null;
-        this.moveConstraints = null;
+        this.constraints = null;
         this.agents = null;
         this.instance = null;
         this.instanceReport = null;

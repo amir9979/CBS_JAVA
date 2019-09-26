@@ -1,8 +1,11 @@
 package Solvers;
 
 import Instances.Agents.Agent;
+import Solvers.ConstraintsAndConflicts.SwappingConflict;
+import Solvers.ConstraintsAndConflicts.VertexConflict;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A collection of {@link SingleAgentPlan}s, representing a solution to a Path Finding problem.
@@ -31,6 +34,41 @@ public class Solution implements Iterable<SingleAgentPlan>{
         return agentPlans.get(agent);
     }
 
+    /**
+     * Looks for vertex conflicts ({@link VertexConflict}) or swapping conflicts ({@link SwappingConflict}). Runtime is
+     * O( (n-1)*mTotal ) , where n = the number of {@link SingleAgentPlan plans}/{@link Agent agents} in this solution,
+     * and mTotal = the total number of moves in all plans together.
+     * @return true if the solution is valid (contains no vertex or swapping conflicts).
+     */
+    public boolean isValidSolution(){
+        // todo improve by using a Set of Moves.
+//        Set<Move> previousMoves = new HashSet<>();
+//        for (SingleAgentPlan plan :
+//                agentPlans.values()) {
+//            for (Move move :
+//                    plan) {
+//                Move reverseMove = new Move(move.agent, move.timeNow, move.currLocation, move.prevLocation);
+//                if()
+//            }
+//        }
+        for (SingleAgentPlan plan :
+                agentPlans.values()) {
+            for (SingleAgentPlan otherPlan :
+                    agentPlans.values()) {
+                if(! (plan == otherPlan) ){ //don't compare with self
+                    if(plan.conflictsWith(otherPlan)) {return false;}
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return agentPlans.values().toString();
+        //nicetohave JSON string or something
+    }
+
     /*  = Iterator Interface =  */
 
     @Override
@@ -39,9 +77,13 @@ public class Solution implements Iterable<SingleAgentPlan>{
     }
 
     @Override
-    public String toString() {
-        return agentPlans.values().toString();
-        //nicetohave JSON string or something
+    public void forEach(Consumer<? super SingleAgentPlan> action) {
+        agentPlans.values().forEach(action);
+    }
+
+    @Override
+    public Spliterator<SingleAgentPlan> spliterator() {
+        return agentPlans.values().spliterator();
     }
 
     //nicetohave validations?

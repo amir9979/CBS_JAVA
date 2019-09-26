@@ -9,6 +9,10 @@ import Instances.Maps.I_MapCell;
 public class Move {
     /**
      * The {@link Agent} making the move.
+     * Ignored in {@link #equals(Object)} and {@link #hashCode()}. This allows this class to be used as-is in
+     * {@link java.util.Set}s for efficiently finding conflicts between different {@link Agent}'s {@link Move}s. It also
+     * makes more sense when comparing two {@link Move}s made by different {@link Agent}s, as one would want to ask the
+     * question "are these two agents making the same move?" when calling {@link #equals(Object)}.
      */
     public final Agent agent;
     /**
@@ -43,5 +47,32 @@ public class Move {
                 ", prevLocation=" + prevLocation +
                 ", currLocation=" + currLocation +
                 '}';
+    }
+
+    /**
+     * Ignores the {@link #agent} field.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Move move = (Move) o;
+
+        if (timeNow != move.timeNow) return false;
+        if (!prevLocation.equals(move.prevLocation)) return false;
+        return currLocation.equals(move.currLocation);
+
+    }
+
+    /**
+     * Ignores the {@link #agent} field.
+     */
+    @Override
+    public int hashCode() {
+        int result = timeNow;
+        result = 31 * result + prevLocation.hashCode();
+        result = 31 * result + currLocation.hashCode();
+        return result;
     }
 }

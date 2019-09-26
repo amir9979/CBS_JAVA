@@ -1,10 +1,14 @@
 package Solvers;
 
 import Instances.Agents.Agent;
+import Solvers.ConstraintsAndConflicts.SwappingConflict;
+import Solvers.ConstraintsAndConflicts.VertexConflict;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 /**
  * A plan for a single agent, which is a sequence of {@link Move}s.
@@ -122,9 +126,11 @@ public class SingleAgentPlan implements Iterable<Move> {
 //    public List<Move> getMoves(){return new ArrayList<>(this.moves);}
 
     /**
-     * return the move in the plan where {@link Move#timeNow} equals the given time.
+     * Return the move in the plan where {@link Move#timeNow} equals the given time.
+     * O(1).
      * @param time the time of the move in the plan.
-     * @return the move in the plan where {@link Move#timeNow} equals the given time.
+     * @return the move in the plan where {@link Move#timeNow} equals the given time, or null if there is no move for
+     * that time.
      */
     public Move moveAt(int time){
         int startTime = getStartTime();
@@ -155,10 +161,36 @@ public class SingleAgentPlan implements Iterable<Move> {
      */
     public int getTotalTime(){return moves.isEmpty() ? -1 : this.getEndTime()-this.getStartTime();}
 
+    /**
+     * Compares with another {@link SingleAgentPlan}, looking for vertex conflicts ({@link VertexConflict}) or
+     * swapping conflicts ({@link SwappingConflict}). Runtime is O(the number of moves in this plan).
+     * @param other
+     * @return true if a conflict exists between the plans.
+     */
     public boolean conflictsWith(SingleAgentPlan other){
-        //imp
-        return true;
+        // todo improve by finding lower and upper bound for time, and checking only in that range
+        // todo use the static functions in the Conflict classes instead
+        for (Move localMove :
+                this.moves) {
+            Move otherMoveAtTime = other.moveAt(localMove.timeNow);
+            if(otherMoveAtTime != null){
+                boolean vertexConflict = otherMoveAtTime.currLocation.equals(localMove.currLocation);
+                boolean swappingConflict = otherMoveAtTime.prevLocation.equals(localMove.currLocation)
+                        && localMove.prevLocation.equals(otherMoveAtTime.currLocation);
+                if(vertexConflict || swappingConflict){return true;}
+            }
+        }
+        return false;
     }
+
+    @Override
+    public String toString() {
+        return "SingleAgentPlan{" +
+                "agent=" + agent +
+                ", moves=" + moves +
+                '}';
+    }
+
 
     /*  = Iterable Interface =  */
 
@@ -168,10 +200,12 @@ public class SingleAgentPlan implements Iterable<Move> {
     }
 
     @Override
-    public String toString() {
-        return "SingleAgentPlan{" +
-                "agent=" + agent +
-                ", moves=" + moves +
-                '}';
+    public void forEach(Consumer<? super Move> action) {
+        this.moves.forEach(action);
+    }
+
+    @Override
+    public Spliterator<Move> spliterator() {
+        return this.moves.spliterator();
     }
 }
