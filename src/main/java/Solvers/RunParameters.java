@@ -2,7 +2,9 @@ package Solvers;
 
 import Metrics.InstanceReport;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class RunParameters {
 
     public RunParameters(long timeout, List<Constraint> constraints, InstanceReport instanceReport) {
         this.timeout = timeout;
-        this.constraints = constraints == null ? null : List.copyOf(constraints);
+        this.constraints = constraints;
         this.instanceReport = instanceReport;
     }
 

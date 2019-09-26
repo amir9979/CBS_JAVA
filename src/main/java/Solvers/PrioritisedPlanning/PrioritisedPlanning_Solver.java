@@ -6,6 +6,7 @@ import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,7 +27,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     /*  =  = Fields related to the run =  */
 
     private long maximumRuntime;
-    private List<Constraint> constraints;
+    private ConstraintSet constraints;
     private InstanceReport instanceReport;
 
     private long startTime;
@@ -82,8 +83,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.instance = instance;
 
         this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
-        this.constraints = runParameters.constraints == null ? new ArrayList<>()
-                : new ArrayList<>(runParameters.constraints);
+        this.constraints = runParameters.constraints == null ? new ConstraintSet()
+                : new ConstraintSet(runParameters.constraints);
         this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
                 : runParameters.instanceReport;
 
@@ -95,7 +96,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         }
     }
 
-    private void reorderAgentsByPriority(Agent[] requestedOrder) {
+    protected void reorderAgentsByPriority(Agent[] requestedOrder) {
         HashSet<Agent> tmpAgents = new HashSet<>(this.agents);
         this.agents.clear();
 
@@ -111,7 +112,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = algorithm =  */
 
-    private Solution solvePrioritisedPlanning() {
+    protected Solution solvePrioritisedPlanning() {
         Map<Agent, SingleAgentPlan> agentPlans = new HashMap<>(this.agents.size());
 
         //solve for each agent while avoiding the plans of previous agents.
@@ -127,7 +128,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             InstanceReport subproblemReport = S_Metrics.newInstanceReport();
             subproblemReport.putStingValue("Parent Instance", this.instance.name);
             subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
-            RunParameters subproblemParameters = new RunParameters(new ArrayList<>(this.constraints), subproblemReport);
+            RunParameters subproblemParameters = new RunParameters(this.constraints.getOriginalConstraints(), subproblemReport);
 
             //solve sub-problem
             SingleAgentPlan planForAgent = lowLevelSolver.solve(subproblem, subproblemParameters).getPlanFor(currentAgent);
@@ -147,7 +148,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         return new Solution(agentPlans);
     }
 
-    private List<Constraint> vertexConstraintsForPlan(SingleAgentPlan planForAgent) {
+    protected List<Constraint> vertexConstraintsForPlan(SingleAgentPlan planForAgent) {
         List<Constraint> constraints = new LinkedList<>();
         for (Move move :
                 planForAgent) {
@@ -156,7 +157,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         return constraints;
     }
 
-    private List<Constraint> swappingConstraintsForPlan(SingleAgentPlan planForAgent) {
+    protected List<Constraint> swappingConstraintsForPlan(SingleAgentPlan planForAgent) {
         List<Constraint> constraints = new LinkedList<>();
         for (Move move :
                 planForAgent) {
@@ -168,11 +169,11 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = wind down =  */
 
-    private void writeMetricsToReport(Solution solution) {
-        instanceReport.putIntegerValue("Timeout", abortedForTimeout ? 1 : 0);
-        instanceReport.putStingValue("start Time", new Date(endTime).toString());
-        instanceReport.putIntegerValue("Time Elapsed (ms)", (int)(endTime-startTime));
-        instanceReport.putStingValue("Solution", solution.toString());
+    protected void writeMetricsToReport(Solution solution) {
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, abortedForTimeout ? 1 : 0);
+        instanceReport.putStingValue(InstanceReport.StandardFields.startTime, new Date(endTime).toString());
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
+        instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
     }
 
     /**
@@ -180,7 +181,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * All fields should be cleared by this method. Any data that might be relevant later should be passed as part
      * of the {@link Solution} that is output by {@link #solve(MAPF_Instance, RunParameters)}, or written to an {@link Metrics.InstanceReport}.
      */
-    private void releaseMemory() {
+    protected void releaseMemory() {
         this.constraints = null;
         this.agents = null;
         this.instance = null;

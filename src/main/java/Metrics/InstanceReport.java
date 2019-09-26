@@ -28,8 +28,9 @@ public class InstanceReport {
         public final static String generatedNodes = "Generated Nodes";
         public final static String startTime = "Start Time";
         public final static String endTime = "End Time";
-        public final static String elapsedTime = "Elapsed Time";
+        public final static String elapsedTimeMS = "Elapsed Time (ms)";
         public final static String solved = "Solved";
+        public final static String solution = "Solution";
         public final static String timeout = "Timeout";
     }
 

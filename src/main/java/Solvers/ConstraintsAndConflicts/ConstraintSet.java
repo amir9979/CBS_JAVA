@@ -22,6 +22,20 @@ public class ConstraintSet {
      * As a side effect, it essentially eliminates all swapping constraints that are made redundant by some vertex constraint.
      */
     private Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
+    private List<Constraint> originalConstraints = new LinkedList<>();
+
+    public ConstraintSet() {
+    }
+
+    public ConstraintSet(ConstraintSet toCopy){
+        if(toCopy == null) {throw new IllegalArgumentException();}
+        this.addAll(toCopy.originalConstraints);
+    }
+
+    public ConstraintSet(Collection<? extends Constraint> seedConstraints) {
+        if(seedConstraints == null) {throw new IllegalArgumentException();}
+        this.addAll(seedConstraints);
+    }
 
     /*  = Set Interface =  */
 
@@ -47,7 +61,9 @@ public class ConstraintSet {
             changed = true;
         }
         changed |= this.constraints.get(dummy).add(constraint.agent);
-        return changed || this.constraints.get(dummy).add(constraint.prevLocation);
+        changed |= this.constraints.get(dummy).add(constraint.prevLocation);
+        if(changed){this.originalConstraints.add(constraint);}
+        return  changed;
     }
 
     /**
@@ -124,6 +140,10 @@ public class ConstraintSet {
         return result;
     }
 
+    public List<Constraint> getOriginalConstraints() {
+        return new ArrayList<>(originalConstraints);
+    }
+
     /**
      * replaces the constraint with a simple wrapper that is quick to find in a set.
      */
@@ -158,6 +178,13 @@ public class ConstraintSet {
 
         public ConstraintWrapper(Constraint constraint) {
             this(constraint.agent, constraint.location, constraint.time, constraint.prevLocation);
+        }
+
+        public ConstraintWrapper(ConstraintWrapper toCopy){
+            this.agents = new HashSet<>(toCopy.agents);
+            this.prevLocations = new HashSet<>(toCopy.prevLocations);
+            this.location = toCopy.location;
+            this.time = toCopy.time;
         }
 
         @Override
