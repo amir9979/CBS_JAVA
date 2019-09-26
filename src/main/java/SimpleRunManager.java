@@ -3,10 +3,7 @@ import IO_Package.IO_Manager;
 import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
-import Solvers.AStar_Solver;
-import Solvers.I_Solver;
-
-import java.util.ArrayList;
+import Solvers.AStar.AStar_Solver;
 
 public class SimpleRunManager extends A_RunManager {
 

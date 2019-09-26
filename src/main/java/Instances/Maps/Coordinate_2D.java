@@ -30,7 +30,6 @@ public class Coordinate_2D implements I_Coordinate {
         return Objects.hash(this.x_value, this.y_value);
     }
 
-
     @Override
     public String toString() {
         return "Coordinate_2D{" +

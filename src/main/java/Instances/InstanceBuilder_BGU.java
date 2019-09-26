@@ -11,6 +11,9 @@ import java.util.HashMap;
 public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
+    // Blocking - check properties ( continue if properties = null )
+
+
     private final String INDICATOR_AGENTS = "Agents:";
     private final String SEPARATOR_AGENTS = ",";
     private final String INDICATOR_MAP = "Grid:";
@@ -21,17 +24,19 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     private final char EMPTY = '.';
     private final char WALL = '@';
 
-    private HashMap<Character,Enum_MapCellType> cellTypeHashMap;
+    private HashMap<Character,Enum_MapCellType> cellTypeHashMap = new HashMap<Character, Enum_MapCellType>(){{
+        put(EMPTY,Enum_MapCellType.EMPTY);
+        put(WALL,Enum_MapCellType.WALL);
+    }};
 
-    public InstanceBuilder_BGU(){
-        this.initCellTypeHashMap();
-    }
 
-    public static MAPF_Instance getInstance(String instanceName, String instancePath) { //return to InstanceManager.InstancePath instancePath
+
+
+    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
 
 
         Reader reader=new Reader();
-        Enum_IO enum_io =reader.openFile(instancePath); //return to instancePath.path
+        Enum_IO enum_io =reader.openFile(instancePath.path);
         if( !enum_io.equals(Enum_IO.OPENED) ){
             return null; // couldn't open the file
         }
@@ -47,7 +52,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         int numOfDimensions = -1;
         GraphMap graphMap = null;
         Agent[] agents = null;
-        int instance_id = Integer.parseInt(nextLine); // get instance id
+        int instance_id = Integer.parseInt(nextLine); // get instance id,
 
 
         /*  =Get data from reader=  */
@@ -58,7 +63,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
             switch (nextLine){
 
-                case "Grid:":
+                case INDICATOR_MAP:
                     String dimensionsAsString = reader.getNextLine();
                     int[] dimensions = getDimensions(dimensionsAsString);
                     if (dimensions == null){
@@ -66,12 +71,12 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
                         return null; // unexpected dimensions line
                     }
                     numOfDimensions = dimensions.length;
-                    String[] mapAsStrings = buildMapAsStringArray(reader, dimensions);
+                    String[] mapAsStrings = this.buildMapAsStringArray(reader, dimensions);
                     // build map
                     graphMap = buildGraphMap(mapAsStrings, numOfDimensions);
                     break;
 
-                case "Agents:":
+                case INDICATOR_AGENTS:
 
                     if ( numOfDimensions < 1 ){
                         reader.closeFile();
@@ -100,11 +105,13 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     }
 
 
+
+
     /***  =Build Agents=  ***/
 
-    public static Agent buildSingleAgent(int dimensions, String line){
+    private Agent buildSingleAgent(int dimensions, String line){
 
-        String[] agentLine = line.split(","); ///remembet t return to this. seperator agent
+        String[] agentLine = line.split(this.SEPARATOR_AGENTS);
 
         if( agentLine == null || agentLine.length < 1){
             return null; // invalid agent line
@@ -141,7 +148,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             /*      Target values    */
             int target_xValue = Integer.valueOf(agentLine[1]);
             int target_yValue = Integer.valueOf(agentLine[2]);
-            int target_zValue = Integer.valueOf(agentLine[2]);
+            int target_zValue = Integer.valueOf(agentLine[3]);
             Coordinate_3D target = new Coordinate_3D(target_xValue, target_yValue, target_zValue);
 
             return new Agent(agentID, source, target);
@@ -150,7 +157,8 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         return null; // Bad dimensions input
     }
 
-    public static Agent[] buildAgents(Reader reader, int dimensions) {
+
+    private Agent[] buildAgents(Reader reader,int dimensions) {
 
         String nextLine = reader.getNextLine(); // expected num of agents
         if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)) {
@@ -174,13 +182,14 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     }
 
 
+
     /***  =Build Map and Dimensions=  ***/
 
-    public static int[] getDimensions(String dimensionsAsString) {
+    private int[] getDimensions(String dimensionsAsString) {
 
         int[] dimensions = null;
-        if(dimensionsAsString.contains(",")) {
-            String[] splittedLine = dimensionsAsString.split(",");
+        if(dimensionsAsString.contains(SEPARATOR_DIMENSIONS)) {
+            String[] splittedLine = dimensionsAsString.split(SEPARATOR_DIMENSIONS);
             dimensions = new int[splittedLine.length];
 
             for (int i = 0; i < dimensions.length; i++) {
@@ -198,7 +207,10 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         return dimensions; // Example: {16,16}
     }
 
-    public static String[] buildMapAsStringArray(Reader reader, int[] dimensions){
+
+
+
+    private String[] buildMapAsStringArray(Reader reader, int[] dimensions){
 
         int xAxis_length = dimensions[0];
         String[] mapAsStringArray = new String[xAxis_length];
@@ -207,7 +219,6 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             String nextLine = reader.getNextLine();
             if ( nextLine != null ){
                 mapAsStringArray[xIndex] = nextLine;
-//                System.out.println(mapAsStringArray[xIndex]);
             }else {
                 return null; // unexpected num of lines
             }
@@ -215,7 +226,8 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         return mapAsStringArray;
     }
 
-    public static GraphMap buildGraphMap(String[] mapAsStrings, int numOfDimensions) {
+
+    private GraphMap buildGraphMap(String[] mapAsStrings, int numOfDimensions) {
 
         switch ( numOfDimensions ){
             case 2:
@@ -231,7 +243,9 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         return null; // If something went wrong ( should return in switch-case )
     }
 
-    public static Enum_MapCellType[][] build_2D_cellTypeMap(String[] mapAsStrings) {
+
+    private Enum_MapCellType[][] build_2D_cellTypeMap(String[] mapAsStrings) {
+        // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
 
         int xAxis_length = mapAsStrings.length;
         int yAxis_length = mapAsStrings[0].length();
@@ -242,76 +256,32 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
 
             for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
-                if((mapAsStrings[xIndex].charAt(yIndex))=='.'){
-                    Enum_MapCellType cellType = Enum_MapCellType.EMPTY;
-                    cellTypeMap[xIndex][yIndex] = cellType;
-                }
-                else {
-                    Enum_MapCellType cellType = Enum_MapCellType.WALL;
-                    cellTypeMap[xIndex][yIndex] = cellType;
-                }
-            }
 
+                // done - convert using this.cellTypeHashMap
+                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsStrings[xIndex].charAt(yIndex));
+                cellTypeMap[xIndex][yIndex] = cellType;
+            }
         }
+
         return cellTypeMap;
     }
 
-    private static Enum_MapCellType[][][] build_3D_cellTypeMap(String[] mapAsStrings) {
-
+    private Enum_MapCellType[][][] build_3D_cellTypeMap(String[] mapAsStrings) {
         // niceToHave - no need to implement for now
         return null;
     }
 
-    private void initCellTypeHashMap() {
 
-        this.cellTypeHashMap = new HashMap<>();
-        this.cellTypeHashMap.put(this.EMPTY,Enum_MapCellType.EMPTY);
-        this.cellTypeHashMap.put(this.WALL,Enum_MapCellType.WALL);
 
-    }
 
-    @Override
-    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath) {
-        return null;
-    }
 
     @Override
     public InstanceManager.InstancePath[] getInstancesPaths(String directoryPath) {
-        return new InstanceManager.InstancePath[0];
+        // done - get list of paths from directoryPath
+        InstanceManager.InstancePath[] pathArray = IO_Manager.getFilesFromDirectory(directoryPath);
+
+        return pathArray;
     }
 
-    public static void main(String[] args) {
-
-
-        int[]boardSize=new int[2];
-        InstanceProperties instanceProperties=new InstanceProperties(boardSize,0,7,1);
-        I_InstanceBuilder i_instanceBuilder=new InstanceBuilder_BGU();
-        getInstance("Instance-16-0-7-0", "Instance-16-0-7-0");
-
-        //buildSingleAgent
-//        String line="0,5,2,9,7\n";
-//        int dimentions=2;
-//        Coordinate_2D end=new Coordinate_2D(5,2);
-//        Coordinate_2D start=new Coordinate_2D(9,7);
-//        buildSingleAgent(dimentions,line);
-
-
-//        buildMapAsStringArray
-//        Reader reader=new Reader();
-//        reader.openFile("Instance-16-0-7-0");
-//
-//        reader.getNextLine();
-//        reader.getNextLine();
-//        reader.getNextLine();
-//
-//        int [] dimentions= new int[2];
-//        dimentions[0]=16;
-//        dimentions[1]=16;
-//        buildMapAsStringArray(reader,dimentions);
-
-
-
-
-    }
 
 }

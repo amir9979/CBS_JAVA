@@ -9,8 +9,9 @@ public class InstanceManager {
 
     private final String sourceDirectory;
     private I_InstanceBuilder instanceBuilder;
+    private InstanceProperties instanceProperties;
 
-    private Stack<InstancePath> instancesPaths_stack;
+    private Stack<InstancePath> instancesPaths_stack = new Stack<InstancePath>();
 
     public I_InstanceBuilder getInstanceBuilder() {
         return instanceBuilder;
@@ -26,7 +27,8 @@ public class InstanceManager {
 
         this.sourceDirectory    = sourceDirectory;
         this.instanceBuilder    = instanceBuilder;
-        this.instancesPaths_stack = new Stack<InstancePath>();
+        this.instanceProperties = properties;
+
         this.addInstancesPaths_toStack();
 
     }
@@ -36,15 +38,23 @@ public class InstanceManager {
 
         MAPF_Instance nextInstance = null;
         while(nextInstance == null){
+
+            if(this.instancesPaths_stack.empty()){
+                return null;
+            }
             InstancePath nextPath = instancesPaths_stack.pop();
-            if(nextPath == null){
+
+            if(nextPath == null) {
                 break;
             }
 
-            String[] splitedPath=nextPath.path.split("/"); //Todo check if the "/" is correct
+
+            String regexSeparator = "\\\\";
+            String[] splitedPath = nextPath.path.split(regexSeparator); // Done - check if the "/" is correct
             String instanceName = splitedPath[splitedPath.length-1];
 
-            nextInstance = this.instanceBuilder.getInstance(instanceName, nextPath);
+            nextInstance = this.instanceBuilder.getInstance(instanceName, nextPath,this.instanceProperties);
+
 
         }
 

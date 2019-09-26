@@ -22,8 +22,8 @@ public class IO_ManagerTest {
     static final String fileToReadName = "IO_Package\\test_reader_file.txt";
     static final String fileToReadPath = IO_Manager.buildPath(new String[]{testResources_path, fileToReadName});
     static final String[] linesToRead = {   "This file has 3 lines" ,
-            "This is the second line",
-            "This is the last line"};
+                                            "This is the second line",
+                                            "This is the last line"};
 
 
     /***    WriterTest   ***/
@@ -31,8 +31,8 @@ public class IO_ManagerTest {
     static final String fileToWritePath = IO_Manager.buildPath(new String[]{testResources_path, fileToWriteName});
 
     static final String[] linesToWrite = {  "Try to write\n" ,
-            "Wrote the second line\n",
-            "Wrote the last line"};
+                                            "Wrote the second line\n",
+                                            "Wrote the last line"};
 
 
 
