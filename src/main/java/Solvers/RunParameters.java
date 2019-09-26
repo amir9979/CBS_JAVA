@@ -1,6 +1,7 @@
 package Solvers;
 
 import Metrics.InstanceReport;
+import Solvers.ConstraintsAndConflicts.Constraint;
 
 import java.util.List;
 
@@ -12,56 +13,47 @@ import java.util.List;
  */
 public class RunParameters {
     /*  =Constants=  */
-    private static final  long defaultTimeout = 1000*60*5 /*5 minutes*/;
+    private static final long defaultTimeout = 1000*60*5 /*5 minutes*/;
 
     /*  =Fields=  */
     /**
      * The maximum time (milliseconds) allotted to the search. If the search exceeds this time, it is aborted.
+     * Can also be 0, or negative.
      */
     public final long timeout;
 
     /**
-     * An unmodifiable list of {@link MoveConstraint move constraints} for the {@link I_Solver sovler} to use.
-     * These constraints limit the {@link Move moves} that {@link Instances.Agents.Agent agents} can make. A
-     * {@link I_Solver solver} that uses this field should start its solution process with these constraints, but may
-     * later add or remove constraints, depending on the algorithm being used.
+     * An unmodifiable list of {@link Constraint location constraints} for the {@link I_Solver sovler} to use.
+     * A {@link I_Solver solver} that uses this field should start its solution process with these constraints, but may
+     * later add or remove constraints, depending on the algorithm being used. @Nullable
      */
-    public final List<MoveConstraint> moveConstraints;
-
-    /**
-     * An unmodifiable list of {@link LocationConstraint location constraints} for the {@link I_Solver sovler} to use.
-     * These constraints limit the {@link Instances.Maps.I_MapCell locations(map cells)} that
-     * {@link Instances.Agents.Agent agents} may occupy. A {@link I_Solver solver} that uses this field should start its
-     * solution process with these constraints, but may later add or remove constraints, depending on the algorithm
-     * being used.
-     */
-    public final List<LocationConstraint> locationConstraints;
+    public final List<Constraint> constraints;
 
     /**
      * An {@link InstanceReport} where to {@link I_Solver} will write metrics generated from the run.
+     * Can be null.
      */
     public final InstanceReport instanceReport;
 
     /*  =Constructors=  */
 
-    public RunParameters(long timeout, List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport) {
+    public RunParameters(long timeout, List<Constraint> constraints, InstanceReport instanceReport) {
         this.timeout = timeout;
-        this.moveConstraints = moveConstraints == null ? null : List.copyOf(moveConstraints);
-        this.locationConstraints = locationConstraints == null ? null : List.copyOf(locationConstraints);
+        this.constraints = constraints == null ? null : List.copyOf(constraints);
         this.instanceReport = instanceReport;
     }
 
-    public RunParameters(List<MoveConstraint> moveConstraints, List<LocationConstraint> locationConstraints, InstanceReport instanceReport) {
-        this(defaultTimeout, moveConstraints, locationConstraints, instanceReport);
+    public RunParameters(List<Constraint> constraints, InstanceReport instanceReport) {
+        this(defaultTimeout, constraints, instanceReport);
     }
 
     public RunParameters(InstanceReport instanceReport) {
-        this(null, null, instanceReport);
+        this(null, instanceReport);
     }
 
 
     public RunParameters() {
-        this(null, null, null);
+        this(null, null);
     }
 
 }

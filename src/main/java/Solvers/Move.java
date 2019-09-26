@@ -9,21 +9,25 @@ import Instances.Maps.I_MapCell;
 public class Move {
     /**
      * The {@link Agent} making the move.
+     * Ignored in {@link #equals(Object)} and {@link #hashCode()}. This allows this class to be used as-is in
+     * {@link java.util.Set}s for efficiently finding conflicts between different {@link Agent}'s {@link Move}s. It also
+     * makes more sense when comparing two {@link Move}s made by different {@link Agent}s, as one would want to ask the
+     * question "are these two agents making the same move?" when calling {@link #equals(Object)}.
      */
-    final Agent agent;
+    public final Agent agent;
     /**
      * The time at the end of the move.
      * If an agent was at v0 at t0, and it moved to v1 at t1, then timeNow for that move equals t1.
      */
-    final int timeNow;
+    public final int timeNow;
     /**
      * The agent's location before the move. Can equal {@link #currLocation}.
      */
-    final I_MapCell prevLocation;
+    public final I_MapCell prevLocation;
     /**
      * The {@link #agent}'s location at the end of the move
      */
-    final I_MapCell currLocation;
+    public final I_MapCell currLocation;
 
     public Move(Agent agent, int timeNow, I_MapCell prevLocation, I_MapCell currLocation) {
         if(agent == null || timeNow<1 || prevLocation == null || currLocation == null){
@@ -33,5 +37,42 @@ public class Move {
         this.timeNow = timeNow;
         this.prevLocation = prevLocation;
         this.currLocation = currLocation;
+    }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+//                "agent=" + agent +
+                ", timeNow=" + timeNow +
+                ", prevLocation=" + prevLocation +
+                ", currLocation=" + currLocation +
+                '}';
+    }
+
+    /**
+     * Ignores the {@link #agent} field.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Move move = (Move) o;
+
+        if (timeNow != move.timeNow) return false;
+        if (!prevLocation.equals(move.prevLocation)) return false;
+        return currLocation.equals(move.currLocation);
+
+    }
+
+    /**
+     * Ignores the {@link #agent} field.
+     */
+    @Override
+    public int hashCode() {
+        int result = timeNow;
+        result = 31 * result + prevLocation.hashCode();
+        result = 31 * result + currLocation.hashCode();
+        return result;
     }
 }

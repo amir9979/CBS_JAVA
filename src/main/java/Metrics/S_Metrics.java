@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * This is a static class, responsible for collecting and exporting metrics generated during experiments.
@@ -359,6 +356,15 @@ public class S_Metrics {
         }
     }
 
+    private static String[] createHeaderFromCurrentReports(){
+        Set<String> headerSet = new HashSet<>();
+        for (InstanceReport report :
+                S_Metrics.reports) {
+            headerSet.addAll(report.getAllFields());
+        }
+        return headerSet.toArray(String[]::new);
+    }
+
     ////        OUTPUT API      ////
 
     /**
@@ -422,6 +428,16 @@ public class S_Metrics {
         outputAllInstanceReportsToStream(outputStream,
                 instanceReport -> S_Metrics.instanceReportToStringCSV(instanceReport, ',', headerArray));
         outputStream.flush();
+    }
+
+    /**
+     * Exports all the {@link InstanceReport}s to the given OutputStream, in CSV format. Creates a header that contains
+     * all fields from all {@link InstanceReport}s.
+     * @param outputStream the OutputStream to write to. Typically a {@link java.io.FileOutputStream}.
+     * @throws IOException if an I/O error occurs
+     */
+    public static void exportCSV(OutputStream outputStream) throws IOException {
+        exportCSV(outputStream, createHeaderFromCurrentReports());
     }
 
 }
