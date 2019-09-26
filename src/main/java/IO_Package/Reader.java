@@ -52,6 +52,11 @@ public class Reader {
             // Means scanner created successfully
             if ( this.scanner != null ){
 
+                // Check if file is open in list
+                if(this.io_manager.isOpen(this.file.getPath())){
+                    return Enum_IO.CURRENT_FILE_STILL_OPEN;
+                }
+
                 if( this.io_manager.addOpenPath(this.file.getPath()) ){
                     return Enum_IO.OPENED;
                 }

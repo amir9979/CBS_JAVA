@@ -31,7 +31,7 @@ public class ReaderTest {
 
     @After
     public void after(){
-        IO_Manager.getInstance().removeOpenPath(this.filePath);
+        Assert.assertTrue(IO_Manager.getInstance().removeOpenPath(this.filePath));
     }
 
 

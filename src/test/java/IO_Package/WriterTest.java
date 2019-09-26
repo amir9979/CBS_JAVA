@@ -7,14 +7,12 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
-
 public class WriterTest {
 
     private Writer writer;
     private final String[] linesToWrite = IO_ManagerTest.linesToWrite;
 
-    private final String directoryPath = IO_ManagerTest.test_resources_path;
+    private final String directoryPath = IO_ManagerTest.testResources_path;
     private final String fileName = IO_ManagerTest.fileToWriteName;
 
     @Before

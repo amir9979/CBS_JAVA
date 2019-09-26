@@ -1,5 +1,7 @@
 package IO_Package;
 
+import Instances.InstanceManager;
+
 import java.io.File;
 import java.util.HashSet;
 
@@ -7,8 +9,9 @@ public class IO_Manager { // Singleton class
     // testme
 
     private HashSet<String> openedPaths; // Keeps track on opened files
-    public static final String workingDirectory = System.getProperty("user.dir") + "\\src\\main"; // absolute path to main
     public static final String pathSeparator = System.getProperty("file.separator");
+    public static final String workingDirectory = System.getProperty("user.dir") + "\\src"; // absolute path to src
+    public static final String testResources_Directory = buildPath(new String[]{workingDirectory,"test\\resources"});
 
 
     /* Singleton */
@@ -93,7 +96,6 @@ public class IO_Manager { // Singleton class
     public Enum_IO deleteFile(File toDelete){
 
         if ( pathExists(toDelete)) {
-            // fixme - toDelete file exists but won't delete ( sometimes does )
             if (toDelete.delete()){
                 // returns true also when file not listed in openPath list
                 if( this.removeOpenPath(toDelete.getPath()) ){
@@ -125,7 +127,7 @@ public class IO_Manager { // Singleton class
         // concat input in format: input[0] + "\" + input[1]
         String result = input[0];
         for (int i = 1; i < input.length ; i++) {
-            result += "\\" + input[i];
+            result += pathSeparator + input[i];
         }
 
         // returns the concat path
@@ -134,18 +136,18 @@ public class IO_Manager { // Singleton class
 
 
 
-    public static String[] getFilesFromDirectory(String directoryPath){
+    public static InstanceManager.InstancePath[] getFilesFromDirectory(String directoryPath){
         /*  Return null in case of an error */
 
         if ( isDirectory( new File(directoryPath))){
             File directory = new File(directoryPath);
             File[] listOfFiles = directory.listFiles();
 
-            String[] pathList = new String[listOfFiles.length];
+            InstanceManager.InstancePath[] pathList = new InstanceManager.InstancePath[listOfFiles.length];
 
             for (int i = 0; i < listOfFiles.length ; i++) {
 
-                pathList[i] = listOfFiles[i].getPath();
+                pathList[i] = new InstanceManager.InstancePath(listOfFiles[i].getPath());
             }
 
             return pathList;

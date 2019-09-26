@@ -8,30 +8,31 @@ import org.junit.Test;
 import java.io.File;
 
 public class IO_ManagerTest {
+    // Todo - delete 'file to write' after test
     // imp - write missing tests
 
     IO_Manager io_manager = IO_Manager.getInstance();
 
 
-    static final String test_resources_path = IO_Manager.buildPath(new String[]{ IO_Manager.workingDirectory,"test_resources"});
+    static final String testResources_path = IO_Manager.testResources_Directory;
 
 
     /***    ReaderTest   ***/
 
-    static final String fileToReadName = "test_reader_file.txt";
-    static final String fileToReadPath = IO_Manager.buildPath(new String[]{ test_resources_path, fileToReadName});
+    static final String fileToReadName = "IO_Package\\test_reader_file.txt";
+    static final String fileToReadPath = IO_Manager.buildPath(new String[]{testResources_path, fileToReadName});
     static final String[] linesToRead = {   "This file has 3 lines" ,
-                                            "This is the second line",
-                                            "This is the last line"};
+            "This is the second line",
+            "This is the last line"};
 
 
     /***    WriterTest   ***/
     static final String fileToWriteName = "write_test.txt";
-    static final String fileToWritePath = IO_Manager.buildPath(new String[]{ test_resources_path, fileToWriteName});
+    static final String fileToWritePath = IO_Manager.buildPath(new String[]{testResources_path, fileToWriteName});
 
     static final String[] linesToWrite = {  "Try to write\n" ,
-                                            "Wrote the second line\n",
-                                            "Wrote the last line"};
+            "Wrote the second line\n",
+            "Wrote the last line"};
 
 
 
@@ -47,11 +48,12 @@ public class IO_ManagerTest {
 
     }
 
-    static void deleteFileToWrite(){
+    public static void deleteFileToWrite(){
+        boolean deleted = false;
         // Check that file not exists
         File file = new File(fileToWritePath);
         if ( IO_Manager.pathExists(file) ){
-            file.delete();
+            deleted = file.delete();
         }
     }
 
@@ -77,18 +79,18 @@ public class IO_ManagerTest {
     @Test
     public void getWriter() {
 
-        File file = new File(test_resources_path,fileToWriteName);
+        File file = new File(testResources_path,fileToWriteName);
         if ( IO_Manager.pathExists(file) ){
             file.delete();
         }
 
         /***       Valid values   ***/
-        Writer writer = io_manager.getWriter(test_resources_path,fileToWriteName);
+        Writer writer = io_manager.getWriter(testResources_path,fileToWriteName);
         Assert.assertNotNull(writer);
 
 
         /***       Invalid values   ***/
-        writer = io_manager.getWriter(test_resources_path,fileToWriteName); // path still open
+        writer = io_manager.getWriter(testResources_path,fileToWriteName); // path still open
         Assert.assertNull(writer);
 
         deleteFileToWrite();

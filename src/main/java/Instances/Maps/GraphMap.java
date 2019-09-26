@@ -1,6 +1,7 @@
 package Instances.Maps;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Represents a {@link I_Map map} as an abstract graph. This implementation can, in principle, support any domain -
@@ -41,5 +42,6 @@ public class GraphMap implements I_Map {
     public int getNumMapCells(){
         return allGraphCells.size();
     }
+
 
 }

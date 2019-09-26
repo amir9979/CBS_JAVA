@@ -1,23 +1,30 @@
 package Experiments;
 
 import Instances.InstanceManager;
-
-import java.util.List;
-
+import Solvers.I_Solver;
 public abstract class A_Experiment {
-   private InstanceManager instanceManager;
-//   private List<Instance> instances;
 
-    public A_Experiment(int numOfAgents, double obstacleRate, int boardHeight, int BoardWidth, int numOfInstances ) {
-    }
 
-    private void generateProblem(int instanceIndex){
-    }
 
-    public abstract void runExperiment();
+ protected InstanceManager instanceManager;
+ public final int numOfInstances;
 
-//    public I_instance getInstancesSafeCopy(){
-//
-//    }
+ public A_Experiment(InstanceManager instanceManager, int numOfInstances) {
+  this.instanceManager = instanceManager;
+  this.numOfInstances = numOfInstances;
+
+ }
+
+ private void generateProblem(int instanceIndex){
+
+ }
+
+ public abstract void runExperiment(I_Solver solver);
+
+
+
+ public void getInstances_safeCopy(){
+
+ }
 
 }
