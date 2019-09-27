@@ -21,7 +21,7 @@ public class Solution implements Iterable<SingleAgentPlan>{
         this.agentPlans = Map.copyOf(agentPlans);
     }
 
-    public Solution(Collection<SingleAgentPlan> plans) {
+    public Solution(Collection<? extends SingleAgentPlan> plans) {
         Map<Agent, SingleAgentPlan> agentPlanMap = new HashMap<>();
         for (SingleAgentPlan plan :
                 plans) {
