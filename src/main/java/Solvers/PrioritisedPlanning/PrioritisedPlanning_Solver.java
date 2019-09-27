@@ -13,6 +13,8 @@ import java.util.*;
 
 /**
  * An implementation of the Prioritised Planning algorithm for Multi Agent Path Finding.
+ * It solves {@link MAPF_Instance MAPF problems} very quickly, but does not guarantee optimality, and will very likely
+ * return a sub-optimal {@link Solution}.
  */
 public class PrioritisedPlanning_Solver implements I_Solver {
 
@@ -29,6 +31,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     private long maximumRuntime;
     private ConstraintSet constraints;
     private InstanceReport instanceReport;
+    private boolean commitReport;
 
     private long startTime;
     private long endTime;
@@ -60,7 +63,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     @Override
     public Solution solve(MAPF_Instance instance, RunParameters parameters) {
         init(instance, parameters);
-        Solution solution = solvePrioritisedPlanning();
+        Solution solution = solvePrioritisedPlanning(this.agents, instance, constraints);
         writeMetricsToReport(solution);
         releaseMemory();
         return solution;
@@ -77,6 +80,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         if(instance == null || runParameters == null){throw new IllegalArgumentException();}
 
         this.startTime = System.currentTimeMillis();
+        this.endTime = 0;
         this.abortedForTimeout = false;
 
         this.agents = new ArrayList<>(instance.agents);
@@ -87,6 +91,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
                 : new ConstraintSet(runParameters.constraints);
         this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
                 : runParameters.instanceReport;
+        this.commitReport = runParameters.instanceReport == null;
 
         if(runParameters instanceof RunParameters_PP){
             RunParameters_PP parameters = (RunParameters_PP)runParameters;
@@ -112,57 +117,106 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = algorithm =  */
 
-    protected Solution solvePrioritisedPlanning() {
-        Map<Agent, SingleAgentPlan> agentPlans = new HashMap<>(this.agents.size());
 
-        //solve for each agent while avoiding the plans of previous agents.
-        for (int i = 0; i < this.agents.size(); i++) {
-            if(System.currentTimeMillis()-startTime > maximumRuntime){
-                this.abortedForTimeout = true;
-                break;
-            }
-            Agent currentAgent = this.agents.get(i);
+    /**
+     * The main loop that solves the MAPF problem.
+     * The basic idea of the algorithm is to solve a single agent path finding problem for each agent while avoiding the
+     * plans of previous agents.
+     * It returns a valid solution, but does not guarantee optimality.
+     * @return a valid, yet non-optimal {@link Solution} to an {@link MAPF_Instance}.
+     * @param agents
+     * @param instance
+     * @param initialConstraints
+     */
+    protected Solution solvePrioritisedPlanning(List<Agent> agents, MAPF_Instance instance, List<Constraint> initialConstraints) {
+        List<SingleAgentPlan> agentPlans = new ArrayList<>(agents.size());
 
-            //create a sub-problem
-            MAPF_Instance subproblem = instance.getSubproblemFor(this.agents.get(i));
-            InstanceReport subproblemReport = S_Metrics.newInstanceReport();
-            subproblemReport.putStingValue("Parent Instance", this.instance.name);
-            subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
-            RunParameters subproblemParameters = new RunParameters(this.constraints.getOriginalConstraints(), subproblemReport);
+        //solve for each agent while avoiding the plans of previous agents
+        for (int i = 0; i < agents.size(); i++) {
+            if (checkTimeout()) break;
 
-            //solve sub-problem
-            SingleAgentPlan planForAgent = lowLevelSolver.solve(subproblem, subproblemParameters).getPlanFor(currentAgent);
-            try {
-                subproblemReport.commit();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //save
-            agentPlans.put(currentAgent, planForAgent);
+            //solve the subproblem for one agent
+            SingleAgentPlan planForAgent = solveSubproblem(agents.get(i), instance, initialConstraints);
+
+            //save the plan for this agent
+            agentPlans.add(planForAgent);
+
             //add constraints to prevent the next agents from conflicting with the new plan
-            constraints.addAll(swappingConstraintsForPlan(planForAgent));
-            constraints.addAll(vertexConstraintsForPlan(planForAgent));
+            constraints.addAll(allConstraintsForPlan(planForAgent));
         }
 
         endTime = System.currentTimeMillis();
         return new Solution(agentPlans);
     }
 
+    private boolean checkTimeout() {
+        if(System.currentTimeMillis()-startTime > maximumRuntime){
+            this.abortedForTimeout = true;
+            return true;
+        }
+        return false;
+    }
+
+    protected SingleAgentPlan solveSubproblem(Agent currentAgent, MAPF_Instance fullInstance, List<Constraint> constraints) {
+        //create a sub-problem
+        MAPF_Instance subproblem = fullInstance.getSubproblemFor(currentAgent);
+        InstanceReport subproblemReport = initSubproblemReport(fullInstance);
+        RunParameters subproblemParameters = getSubproblemParameters(subproblemReport, constraints);
+
+        //solve sub-problem
+        SingleAgentPlan planForAgent = this.lowLevelSolver.solve(subproblem, subproblemParameters).getPlanFor(currentAgent);
+        try {
+            subproblemReport.commit();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return planForAgent;
+    }
+
+    private static InstanceReport initSubproblemReport(MAPF_Instance instance) {
+        InstanceReport subproblemReport = S_Metrics.newInstanceReport();
+        subproblemReport.putStingValue("Parent Instance", instance.name);
+        subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
+        return subproblemReport;
+    }
+
+    private static RunParameters getSubproblemParameters(InstanceReport subproblemReport, List<Constraint> constraints) {
+        return new RunParameters(new ArrayList<>(constraints), subproblemReport);
+    }
+
     protected List<Constraint> vertexConstraintsForPlan(SingleAgentPlan planForAgent) {
         List<Constraint> constraints = new LinkedList<>();
         for (Move move :
                 planForAgent) {
-            constraints.add(new Constraint(null, move.timeNow, move.currLocation));
+            constraints.add(vertexConstraintsForMove(move));
         }
         return constraints;
+    }
+
+    private Constraint vertexConstraintsForMove(Move move){
+        return new Constraint(null, move.timeNow, move.currLocation);
     }
 
     protected List<Constraint> swappingConstraintsForPlan(SingleAgentPlan planForAgent) {
         List<Constraint> constraints = new LinkedList<>();
         for (Move move :
                 planForAgent) {
-            constraints.add(new Constraint(null, move.timeNow,
-                    /*the constraint is in opposite direction of the move*/ move.currLocation, move.prevLocation));
+            constraints.add(swappingConstraintsForMove(move));
+        }
+        return constraints;
+    }
+
+    private Constraint swappingConstraintsForMove(Move move){
+        return new Constraint(null, move.timeNow,
+                /*the constraint is in opposite direction of the move*/ move.currLocation, move.prevLocation);
+    }
+
+    private List<Constraint> allConstraintsForPlan(SingleAgentPlan planForAgent) {
+        List<Constraint> constraints = new LinkedList<>();
+        for (Move move :
+                planForAgent) {
+            constraints.add(vertexConstraintsForMove(move));
+            constraints.add(swappingConstraintsForMove(move));
         }
         return constraints;
     }
