@@ -2,6 +2,7 @@ package Solvers;
 
 import Instances.Agents.Agent;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class OnlineSolution extends Solution{
@@ -15,6 +16,17 @@ public class OnlineSolution extends Solution{
     }
 
     private static Map<Agent, SingleAgentPlan> mergeSolutions(Map<Integer, Solution> solutionsAtTimes) {
-        return null;   //imp
+        // fixme - this currently only works for Prioritised Planning, since it assumes no overlap between solutions/agents in solutionsAtTimes
+        Map<Agent, SingleAgentPlan> merged = new HashMap<>();
+        for (Solution s :
+                solutionsAtTimes.values()) {
+            for (SingleAgentPlan plan :
+                    s) {
+                merged.put(plan.agent, plan);
+            }
+        }
+        return merged;
     }
+
+
 }
