@@ -43,7 +43,7 @@ public class Move {
     public String toString() {
         return "Move{" +
 //                "agent=" + agent +
-                ", timeNow=" + timeNow +
+                "timeNow=" + timeNow +
                 ", prevLocation=" + prevLocation +
                 ", currLocation=" + currLocation +
                 '}';
