@@ -145,6 +145,16 @@ public class ConstraintSet {
     }
 
     /**
+     * Removes constraints for times that are not in the given range.
+     * @param minTime the minimum time (inclusive).
+     * @param maxTime the maximum time (exclusive).
+     */
+    public void trimToTimeRange(int minTime, int maxTime){
+        this.originalConstraints.removeIf(constraint -> constraint.time < minTime || constraint.time >= maxTime);
+        this.constraints.keySet().removeIf(constraintWrapper -> constraintWrapper.time < minTime || constraintWrapper.time >= maxTime);
+    }
+
+    /**
      * replaces the constraint with a simple wrapper that is quick to find in a set.
      */
     private class ConstraintWrapper{

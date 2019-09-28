@@ -221,4 +221,11 @@ class SingleAgentPlanTest {
         existingPlanAgent1.addMove(move4agent1);
         assertEquals(4, existingPlanAgent1.getTotalTime());
     }
+
+    @Test
+    void testToString(){
+        System.out.println(existingPlanAgent1.toString());
+        System.out.println(existingPlanAgent2.toString());
+
+    }
 }

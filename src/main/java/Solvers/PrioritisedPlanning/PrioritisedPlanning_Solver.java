@@ -33,7 +33,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     private boolean commitReport;
 
     private long startTime;
-    private long endTime;
+    protected long endTime;
     private boolean abortedForTimeout;
 
     /*  =  = Fields related to the class =  */
@@ -126,7 +126,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * @param instance
      * @param initialConstraints
      */
-    protected Solution solvePrioritisedPlanning(List<Agent> agents, MAPF_Instance instance, List<Constraint> initialConstraints) {
+    protected Solution solvePrioritisedPlanning(List<? extends Agent> agents, MAPF_Instance instance, List<Constraint> initialConstraints) {
         List<SingleAgentPlan> agentPlans = new ArrayList<>(agents.size());
 
         //solve for each agent while avoiding the plans of previous agents
@@ -140,14 +140,14 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             agentPlans.add(planForAgent);
 
             //add constraints to prevent the next agents from conflicting with the new plan
-            constraints.addAll(allConstraintsForPlan(planForAgent));
+            initialConstraints.addAll(allConstraintsForPlan(planForAgent));
         }
 
         endTime = System.currentTimeMillis();
         return new Solution(agentPlans);
     }
 
-    private boolean checkTimeout() {
+    protected boolean checkTimeout() {
         if(System.currentTimeMillis()-startTime > maximumRuntime){
             this.abortedForTimeout = true;
             return true;
@@ -163,10 +163,12 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
         //solve sub-problem
         SingleAgentPlan planForAgent = this.lowLevelSolver.solve(subproblem, subproblemParameters).getPlanFor(currentAgent);
-        try {
-            subproblemReport.commit();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(commitReport){
+            try {
+                subproblemReport.commit();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return planForAgent;
     }
