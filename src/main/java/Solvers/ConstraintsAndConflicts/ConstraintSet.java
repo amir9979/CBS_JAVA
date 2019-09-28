@@ -22,7 +22,7 @@ public class ConstraintSet {
      * As a side effect, it essentially eliminates all swapping constraints that are made redundant by some vertex constraint.
      */
     private Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
-    private List<Constraint> originalConstraints = new LinkedList<>();
+    private Set<Constraint> originalConstraints = new HashSet<>();
 
     public ConstraintSet() {
     }
@@ -62,7 +62,9 @@ public class ConstraintSet {
         }
         changed |= this.constraints.get(dummy).add(constraint.agent);
         changed |= this.constraints.get(dummy).add(constraint.prevLocation);
-        if(changed){this.originalConstraints.add(constraint);}
+
+        this.originalConstraints.add(constraint);
+
         return  changed;
     }
 
