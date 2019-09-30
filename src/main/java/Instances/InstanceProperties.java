@@ -1,8 +1,5 @@
 package Instances;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 public class InstanceProperties {
 
     public final String SEPARATOR;
