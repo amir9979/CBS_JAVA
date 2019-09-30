@@ -52,10 +52,6 @@ public class SingleAgentPlan implements Iterable<Move> {
 
     private static boolean isValidMoveSequenceForAgent(List<Move> moves, Agent agent) {
         if(moves.isEmpty()){return true;}
-        else if(!moves.get(0).prevLocation.getCoordinate().equals(agent.source)){
-            // the plan starts at a different coordinate than the agent.
-            return false;
-        }
         else{
             boolean result = true;
             Move prevMove = moves.get(0);
