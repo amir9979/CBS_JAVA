@@ -104,7 +104,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
         public Collection<? extends AStarState> generateChildStates() {
             // can move to neighboring cells or stay put
-            List<I_MapCell> neighborCellsIncludingCurrent = move.currLocation.getNeighbors();
+            List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(move.currLocation.getNeighbors());
             neighborCellsIncludingCurrent.add(this.move.currLocation);
 
             List<AStarState> children = new ArrayList<>(neighborCellsIncludingCurrent.size());
