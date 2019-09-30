@@ -10,16 +10,17 @@ import Solvers.I_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
 
+import java.io.IOException;
 import java.util.List;
 
 public class GridExperiment extends A_Experiment {
 
-    private static final String EXPERIMENT_NAME = "Grid Experiment";
+    private static String EXPERIMENT_NAME;
 
 
-    public GridExperiment(InstanceManager instanceManager, int numOfInstances) {
+    public GridExperiment(InstanceManager instanceManager, int numOfInstances, String experimentName) {
         super(instanceManager, numOfInstances);
-
+        this.EXPERIMENT_NAME = experimentName;
     }
 
     @Override
@@ -27,6 +28,7 @@ public class GridExperiment extends A_Experiment {
 
         for (int i = 0; i < this.numOfInstances; i++) {
             MAPF_Instance instance = instanceManager.getNextInstance();
+            if(instance == null) {break;}
 
             InstanceReport instanceReport = S_Metrics.newInstanceReport();
 
@@ -34,6 +36,14 @@ public class GridExperiment extends A_Experiment {
             instanceReport.putStingValue(InstanceReport.StandardFields.instanceName,instance.name);
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
+            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
+
+            try {
+                instanceReport.commit();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             // Todo - what to do with solution
         }
     }
