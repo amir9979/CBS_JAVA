@@ -30,7 +30,7 @@ public class Move {
     public final I_MapCell currLocation;
 
     public Move(Agent agent, int timeNow, I_MapCell prevLocation, I_MapCell currLocation) {
-        if(agent == null || timeNow<1 || currLocation == null){
+        if(agent == null || timeNow<1 || prevLocation == null || currLocation == null){
             throw new IllegalArgumentException();
         }
         this.agent = agent;

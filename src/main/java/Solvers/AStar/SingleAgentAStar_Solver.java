@@ -71,9 +71,12 @@ public class SingleAgentAStar_Solver implements I_Solver {
     }
 
     private AStarState generateRootState() {
+        //first time is the time of the agent, or 1.
         int moveTime = this.agent instanceof OnlineAgent ? ((OnlineAgent)this.agent).arrivalTime + 1 : 1;
-        return new AStarState(new Move(this.agent, moveTime,null, this.map.getMapCell(this.agent.source)),
-                                null, 1);
+        // first move is always to stay at current location (thus the minimal solution length is 1).
+        Move firstMove = new Move(this.agent, moveTime,this.map.getMapCell(this.agent.source), this.map.getMapCell(this.agent.source));
+
+        return new AStarState(firstMove,null, 1);
     }
 
     protected void writeMetricsToReport(Solution solution) {
