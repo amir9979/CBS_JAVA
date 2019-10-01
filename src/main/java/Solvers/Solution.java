@@ -73,9 +73,11 @@ public class Solution implements Iterable<SingleAgentPlan>{
 
     public String readableToString(){
         StringBuilder sb = new StringBuilder();
-        for(Map.Entry<Agent,SingleAgentPlan> entry : this.agentPlans.entrySet()){
-            sb.append("\nPlan for agent ").append(entry.getKey().iD);
-            for(Move move : entry.getValue()){
+        List<Agent> agents = new ArrayList<>(this.agentPlans.keySet());
+        Collections.sort(agents, Comparator.comparing(agent -> agent.iD));
+        for(Agent agent : agents){
+            sb.append("\nPlan for agent ").append(agent.iD);
+            for(Move move : this.agentPlans.get(agent)){
                 sb.append('\n').append(move.timeNow).append(": ").append(move.prevLocation.getCoordinate()).append(" -> ").append(move.currLocation.getCoordinate());
             }
         }
