@@ -36,7 +36,7 @@ public class GridExperiment extends A_Experiment {
             instanceReport.putStingValue(InstanceReport.StandardFields.instanceName,instance.name);
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
-            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
+            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.readableToString());
 
             try {
                 instanceReport.commit();
@@ -44,7 +44,6 @@ public class GridExperiment extends A_Experiment {
                 e.printStackTrace();
             }
 
-            // Todo - what to do with solution
         }
     }
 

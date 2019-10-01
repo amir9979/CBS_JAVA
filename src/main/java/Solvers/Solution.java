@@ -63,10 +63,24 @@ public class Solution implements Iterable<SingleAgentPlan>{
         return true;
     }
 
+    //todo add String serialization and deserialization
+
     @Override
     public String toString() {
         return agentPlans.values().toString();
         //nicetohave JSON string or something
+    }
+
+    public String readableToString(){
+        StringBuilder sb = new StringBuilder();
+        for(Map.Entry<Agent,SingleAgentPlan> entry : this.agentPlans.entrySet()){
+            sb.append("\nPlan for agent ").append(entry.getKey().iD);
+            for(Move move : entry.getValue()){
+                sb.append('\n').append(move.timeNow).append(": ").append(move.prevLocation.getCoordinate()).append(" -> ").append(move.currLocation.getCoordinate());
+            }
+        }
+        sb.append('\n');
+        return sb.toString();
     }
 
     /*  = Iterator Interface =  */

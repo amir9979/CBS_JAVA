@@ -32,10 +32,7 @@ public class Coordinate_2D implements I_Coordinate {
 
     @Override
     public String toString() {
-        return "Coordinate_2D{" +
-                "x_value=" + this.x_value +
-                ", y_value=" + this.y_value +
-                '}';
+        return "(" + this.x_value + "," + this.y_value + ")";
     }
 
     public float euclideanDistance(I_Coordinate other) {
