@@ -14,6 +14,8 @@ import java.util.*;
 
 public class SingleAgentAStar_Solver implements I_Solver {
 
+    private static final int MAX_STATES_THRESHOLD = 2000000;
+
     private long maximumRuntime;
     private ConstraintSet constraints;
     private InstanceReport instanceReport;
@@ -50,7 +52,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
     protected Solution solveAStar() {
         this.openList.add(generateRootState());
-        while (!openList.isEmpty()){
+        while (!openList.isEmpty() && openList.size() < MAX_STATES_THRESHOLD){
             //dequeu
             AStarState currentState = openList.remove();
             if (isGoalState(currentState)){

@@ -11,10 +11,11 @@ import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
 
 public class SimpleRunManager extends A_RunManager {
 
+    InstanceProperties properties = new InstanceProperties(new int[]{512,512},0,50,"-");
 
     @Override
     void setSolvers() {
-        this.solvers.add(new AStar_Solver());
+        this.solvers.add(new SingleAgentAStar_Solver());
     }
 
     void addPrioritisedPlanningSolver(){
@@ -35,8 +36,7 @@ public class SimpleRunManager extends A_RunManager {
 
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
-        int numOfInstances = 2;
+        int numOfInstances = 20;
 
         /*  =   Set Instance Manager   =  */
         InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
@@ -54,7 +54,6 @@ public class SimpleRunManager extends A_RunManager {
         InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
         int numOfInstances = 17;
 
         /*  =   Set Instance Manager   =  */
@@ -73,7 +72,7 @@ public class SimpleRunManager extends A_RunManager {
         InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
+
         int numOfInstances = 17;
 
         /*  =   Set Instance Manager   =  */
@@ -92,7 +91,6 @@ public class SimpleRunManager extends A_RunManager {
         InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
         int numOfInstances = 17;
 
         /*  =   Set Instance Manager   =  */

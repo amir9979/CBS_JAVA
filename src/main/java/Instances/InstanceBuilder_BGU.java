@@ -41,23 +41,27 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return null; // couldn't open the file
         }
 
-        String nextLine = reader.getNextLine(); // first line
-        if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)){
-            reader.closeFile();
-            return null; // first line isn't an index indicator
-        }
-
         /*  =Init values=  */
         MAPF_Instance mapf_instance = null;
         int[] dimensionsFromProperties = instanceProperties.boardSize;
         GraphMap graphMap = null;
         Agent[] agents = null;
-        int instance_id = Integer.parseInt(nextLine); // get instance id,
 
+
+        int instance_id;
+        String nextLine = reader.getNextLine(); // first line
+        if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)){
+//            reader.closeFile();
+//            return null; // first line isn't an index indicator
+            instance_id = 0;
+        }
+        else {
+            instance_id = Integer.parseInt(nextLine); // get instance id,
+            nextLine = reader.getNextLine(); // Second line
+        }
 
         /*  =Get data from reader=  */
 
-        nextLine = reader.getNextLine(); // Second line
 
         while ( nextLine != null ){
 

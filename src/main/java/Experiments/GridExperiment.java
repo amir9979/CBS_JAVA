@@ -15,7 +15,7 @@ import java.util.List;
 
 public class GridExperiment extends A_Experiment {
 
-    private static String EXPERIMENT_NAME;
+    private String EXPERIMENT_NAME;
 
 
     public GridExperiment(InstanceManager instanceManager, int numOfInstances, String experimentName) {
@@ -36,7 +36,8 @@ public class GridExperiment extends A_Experiment {
             instanceReport.putStingValue(InstanceReport.StandardFields.instanceName,instance.name);
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
-            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.readableToString());
+//            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.readableToString());
+            instanceReport.putStingValue(InstanceReport.StandardFields.solution, "");
 
             try {
                 instanceReport.commit();

@@ -3,12 +3,14 @@ package Solvers.PrioritisedPlanning;
 import Instances.Agents.Agent;
 import Instances.Agents.OnlineAgent;
 import Instances.MAPF_Instance;
+import Metrics.InstanceReport;
 import Solvers.ConstraintsAndConflicts.Constraint;
 import Solvers.I_Solver;
 import Solvers.OnlineSolution;
 import Solvers.SingleAgentPlan;
 import Solvers.Solution;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -108,5 +110,19 @@ public class OnlinePP_Solver extends PrioritisedPlanning_Solver {
         return onlineAgents;
     }
 
-
+    @Override
+    protected void writeMetricsToReport(Solution solution) {
+        boolean commit = commitReport;
+        commitReport = false;
+        super.writeMetricsToReport(solution);
+        instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.readableToString());
+        commitReport = commit;
+        if(commitReport){
+            try {
+                instanceReport.commit();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

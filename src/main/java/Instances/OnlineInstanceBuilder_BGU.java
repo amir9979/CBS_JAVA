@@ -37,7 +37,7 @@ public class OnlineInstanceBuilder_BGU extends InstanceBuilder_BGU {
             int target_yValue = Integer.valueOf(agentLine[2]);
             Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
             // add arrival time for online agents
-            int arrivalTime = Integer.valueOf(agentLine[5]);
+            int arrivalTime = (agentLine.length >= 6) ? Integer.valueOf(agentLine[5]) : 0;
 
             return new OnlineAgent(agentID, source, target, arrivalTime);
         }
@@ -55,7 +55,7 @@ public class OnlineInstanceBuilder_BGU extends InstanceBuilder_BGU {
             int target_zValue = Integer.valueOf(agentLine[3]);
             Coordinate_3D target = new Coordinate_3D(target_xValue, target_yValue, target_zValue);
             // add arrival time for online agents
-            int arrivalTime = Integer.valueOf(agentLine[7]);
+            int arrivalTime =  (agentLine.length >= 8) ? Integer.valueOf(agentLine[7]) : 0;
 
             return new OnlineAgent(agentID, source, target, arrivalTime);
         }

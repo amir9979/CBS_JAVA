@@ -26,10 +26,10 @@ public class Main {
         SimpleRunManager simpleRunManager = new SimpleRunManager();
         simpleRunManager.addOnlinePrioritisedPlanningSolver();
 
-        simpleRunManager.setExperiments();
-//        simpleRunManager.addOnlineExperiment1();
-//        simpleRunManager.addOnlineExperiment2();
-//        simpleRunManager.addOnlineExperiment3();
+//        simpleRunManager.setExperiments();
+        simpleRunManager.addOnlineExperiment1();
+        simpleRunManager.addOnlineExperiment2();
+        simpleRunManager.addOnlineExperiment3();
 
         simpleRunManager.runAllExperiments();
 

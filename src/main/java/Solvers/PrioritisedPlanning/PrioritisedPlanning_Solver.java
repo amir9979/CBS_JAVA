@@ -29,8 +29,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     private long maximumRuntime;
     private List<Constraint> constraints;
-    private InstanceReport instanceReport;
-    private boolean commitReport;
+    protected InstanceReport instanceReport;
+    protected boolean commitReport;
 
     private long startTime;
     protected long endTime;
@@ -136,11 +136,13 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             //solve the subproblem for one agent
             SingleAgentPlan planForAgent = solveSubproblem(agents.get(i), instance, initialConstraints);
 
-            //save the plan for this agent
-            agentPlans.add(planForAgent);
+            if(planForAgent != null) {
+                //save the plan for this agent
+                agentPlans.add(planForAgent);
 
-            //add constraints to prevent the next agents from conflicting with the new plan
-            initialConstraints.addAll(allConstraintsForPlan(planForAgent));
+                //add constraints to prevent the next agents from conflicting with the new plan
+                initialConstraints.addAll(allConstraintsForPlan(planForAgent));
+            }
         }
 
         endTime = System.currentTimeMillis();
@@ -162,15 +164,13 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         RunParameters subproblemParameters = getSubproblemParameters(subproblemReport, constraints);
 
         //solve sub-problem
-        SingleAgentPlan planForAgent = this.lowLevelSolver.solve(subproblem, subproblemParameters).getPlanFor(currentAgent);
-        if(commitReport){
-            try {
-                subproblemReport.commit();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        Solution singleAgentSolution = this.lowLevelSolver.solve(subproblem, subproblemParameters);
+        if (singleAgentSolution != null){
+            return singleAgentSolution.getPlanFor(currentAgent);
         }
-        return planForAgent;
+        else{
+            return null;
+        }
     }
 
     private static InstanceReport initSubproblemReport(MAPF_Instance instance) {
@@ -224,11 +224,18 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = wind down =  */
 
-    private void writeMetricsToReport(Solution solution) {
+    protected void writeMetricsToReport(Solution solution) {
         instanceReport.putIntegerValue("Timeout", abortedForTimeout ? 1 : 0);
         instanceReport.putStingValue("start Time", new Date(endTime).toString());
         instanceReport.putIntegerValue("Time Elapsed (ms)", (int)(endTime-startTime));
         instanceReport.putStingValue("Solution", solution.toString());
+        if(commitReport){
+            try {
+                instanceReport.commit();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -236,7 +243,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * All fields should be cleared by this method. Any data that might be relevant later should be passed as part
      * of the {@link Solution} that is output by {@link #solve(MAPF_Instance, RunParameters)}, or written to an {@link Metrics.InstanceReport}.
      */
-    private void releaseMemory() {
+    protected void releaseMemory() {
         this.constraints = null;
         this.agents = null;
         this.instance = null;
