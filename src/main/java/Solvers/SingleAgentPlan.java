@@ -4,10 +4,7 @@ import Instances.Agents.Agent;
 import Solvers.ConstraintsAndConflicts.SwappingConflict;
 import Solvers.ConstraintsAndConflicts.VertexConflict;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -73,7 +70,7 @@ public class SingleAgentPlan implements Iterable<Move> {
      * @param newMove a {@link Move} to add to the plan. The new move's {@link Move#timeNow} must be exactly 1 more than
      *               the current latest move.
      */
-    void addMove(Move newMove){
+    public void addMove(Move newMove){
         if(isValidNextMoveForAgent(this.moves, newMove, this.agent)){
             this.moves.add(newMove);
         }
@@ -85,7 +82,7 @@ public class SingleAgentPlan implements Iterable<Move> {
      * {@link #setMoves(List)}.
      * @param newMoves a sequence of moves to append to the current plan.
      */
-    void addMoves(List<Move> newMoves){
+    public void addMoves(List<Move> newMoves){
         if(newMoves == null){throw new IllegalArgumentException();}
         List<Move> tmpMoves = new ArrayList<>(this.moves);
         tmpMoves.addAll(newMoves);
@@ -97,7 +94,7 @@ public class SingleAgentPlan implements Iterable<Move> {
         }
     }
 
-    void clearMoves(){this.moves.clear();}
+    public void clearMoves(){this.moves.clear();}
 
     /**
      * Replaces the current plan with a copy of the given sequence of moves.
@@ -105,7 +102,7 @@ public class SingleAgentPlan implements Iterable<Move> {
      * {@link Move#timeNow} must form an ascending series with d=1. Must start at {@link #agent}s source.
      * @param newMoves a sequence of moves for the agent.
      */
-    void setMoves(List<Move> newMoves){
+    public void setMoves(List<Move> newMoves){
         if(newMoves == null) throw new IllegalArgumentException();
         if(isValidMoveSequenceForAgent(newMoves, agent)){
             this.moves = new ArrayList<>(newMoves);
@@ -189,6 +186,19 @@ public class SingleAgentPlan implements Iterable<Move> {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SingleAgentPlan moves1 = (SingleAgentPlan) o;
+        return moves.equals(moves1.moves) &&
+                agent.equals(moves1.agent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(moves, agent);
+    }
 
     /*  = Iterable Interface =  */
 

@@ -83,6 +83,19 @@ public class Solution implements Iterable<SingleAgentPlan>{
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Solution that = (Solution) o;
+        return agentPlans.equals(that.agentPlans);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(agentPlans);
+    }
+
     /*  = Iterator Interface =  */
 
     @Override
