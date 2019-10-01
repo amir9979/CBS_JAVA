@@ -43,7 +43,7 @@ public class InstanceReport {
      */
     public String putStingValue(String fieldName, String fieldValue){
         if(!canPutToMap(fieldName, stringFields)) {return null;}
-        return this.stringFields.put(fieldName, fieldValue);
+        return this.stringFields.put(fieldName, "\"" + fieldValue + "\"");
     }
 
     /**

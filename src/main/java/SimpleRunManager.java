@@ -36,7 +36,7 @@ public class SimpleRunManager extends A_RunManager {
 
         /*  =   Set Properties   =  */
         InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
-        int numOfInstances = 1;
+        int numOfInstances = 2;
 
         /*  =   Set Instance Manager   =  */
         InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
@@ -48,12 +48,17 @@ public class SimpleRunManager extends A_RunManager {
 
     void addOnlineExperiment1(){
 
+        /*  =   Set Path   =*/
+        String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
+                "converted - 1 agent every timestep"});
+        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
+
         /*  =   Set Properties   =  */
         InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
         int numOfInstances = 17;
 
         /*  =   Set Instance Manager   =  */
-        InstanceManager instanceManager = new InstanceManager("C:\\Users\\John\\Google Drive\\Documents\\1Uni\\Thesis\\Code\\Online Instances BGU format\\converted - 1 agent every timestep",
+        InstanceManager instanceManager = new InstanceManager(path,
                 new OnlineInstanceBuilder_BGU(), properties);
 
         /*  =   Add new experiment   =  */
@@ -62,12 +67,17 @@ public class SimpleRunManager extends A_RunManager {
 
     void addOnlineExperiment2(){
 
+        /*  =   Set Path   =*/
+        String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
+                "converted - 20percent agent arrival rate"});
+        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
+
         /*  =   Set Properties   =  */
         InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
         int numOfInstances = 17;
 
         /*  =   Set Instance Manager   =  */
-        InstanceManager instanceManager = new InstanceManager("C:\\Users\\John\\Google Drive\\Documents\\1Uni\\Thesis\\Code\\Online Instances BGU format\\converted - 20percent agent arrival rate",
+        InstanceManager instanceManager = new InstanceManager(path,
                 new OnlineInstanceBuilder_BGU(), properties);
 
         /*  =   Add new experiment   =  */
@@ -76,12 +86,17 @@ public class SimpleRunManager extends A_RunManager {
 
     void addOnlineExperiment3(){
 
+        /*  =   Set Path   =*/
+        String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
+                "converted - 80percent agent arrival rate"});
+        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
+
         /*  =   Set Properties   =  */
         InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
         int numOfInstances = 17;
 
         /*  =   Set Instance Manager   =  */
-        InstanceManager instanceManager = new InstanceManager("C:\\Users\\John\\Google Drive\\Documents\\1Uni\\Thesis\\Code\\Online Instances BGU format\\converted - 80percent agent arrival rate",
+        InstanceManager instanceManager = new InstanceManager(path,
                 new OnlineInstanceBuilder_BGU(), properties);
 
         /*  =   Add new experiment   =  */

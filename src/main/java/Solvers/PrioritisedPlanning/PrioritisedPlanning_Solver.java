@@ -174,10 +174,11 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     }
 
     private static InstanceReport initSubproblemReport(MAPF_Instance instance) {
-        InstanceReport subproblemReport = S_Metrics.newInstanceReport();
-        subproblemReport.putStingValue("Parent Instance", instance.name);
-        subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
-        return subproblemReport;
+        return null;
+//        InstanceReport subproblemReport = S_Metrics.newInstanceReport();
+//        subproblemReport.putStingValue("Parent Instance", instance.name);
+//        subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
+//        return subproblemReport;
     }
 
     private static RunParameters getSubproblemParameters(InstanceReport subproblemReport, List<Constraint> constraints) {
