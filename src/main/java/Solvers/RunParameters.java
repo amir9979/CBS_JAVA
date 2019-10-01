@@ -34,6 +34,8 @@ public class RunParameters {
     /**
      * An {@link InstanceReport} where to {@link I_Solver} will write metrics generated from the run.
      * Can be null.
+     * It is best to not {@link InstanceReport#commit() commit} this report. If instead it was null, and thus a
+     * replacement report was generated in the solver, that report should be committed.
      */
     public final InstanceReport instanceReport;
 
