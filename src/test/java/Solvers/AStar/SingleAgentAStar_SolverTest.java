@@ -6,12 +6,13 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
-import Instances.Maps.Coordinate_2D;
-import Instances.Maps.Enum_MapCellType;
-import Instances.Maps.I_Map;
-import Instances.Maps.MapFactory;
+import Instances.Maps.*;
+import Solvers.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,19 +45,32 @@ class SingleAgentAStar_SolverTest {
 
     InstanceBuilder_BGU builder = new InstanceBuilder_BGU();
     InstanceManager im = new InstanceManager(IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,"Instances"}),
-            new InstanceBuilder_BGU(), new InstanceProperties(new int[]{16,16},0,7,"-"));
+            new InstanceBuilder_BGU(), new InstanceProperties(new int[]{6,6},0,1,"-"));
 
-    private MAPF_Instance instanceCircle = builder.getInstance();
-    private MAPF_Instance instanceOpen;
+    private MAPF_Instance instanceEmpty = im.getNextInstance();
+    private MAPF_Instance instance1stepSolution = im.getNextInstance();
+    private MAPF_Instance instanceCircle1 = im.getNextInstance();
+    private MAPF_Instance instanceCircle2 = im.getNextInstance();
+
+    I_Solver aStar = new SingleAgentAStar_Solver();
 
     @BeforeEach
     void setUp() {
 
-        instanceCircle
     }
 
     @Test
     void solve() {
+        MAPF_Instance testInstance = instance1stepSolution;
+        Solution s = aStar.solve(testInstance, new RunParameters());
 
+        Map<Agent, SingleAgentPlan> plans = new HashMap<>();
+        SingleAgentPlan plan = new SingleAgentPlan(testInstance.agents.get(0));
+        I_MapCell cell = testInstance.map.getMapCell(new Coordinate_2D(2,3));
+        plan.addMove(new Move(testInstance.agents.get(0), 1, cell, cell));
+        plans.put(testInstance.agents.get(0), plan);
+        Solution expected = new Solution(plans);
+
+        assertEquals(s, expected);
     }
 }
