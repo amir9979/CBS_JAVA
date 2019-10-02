@@ -26,6 +26,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private Set<AStarState> closed;
     private Agent agent;
     private I_Map map;
+    private int expandedNodes;
+    private int generatedNodes;
 
     @Override
     public Solution solve(MAPF_Instance instance, RunParameters parameters) {
@@ -38,16 +40,19 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
 
     protected void init(MAPF_Instance instance, RunParameters runParameters){
-        this.startTime = System.currentTimeMillis();
-        this.endTime = 0;
-        this.abortedOnTimeout = false;
+        this.instanceReport = runParameters.instanceReport;
         this.constraints = runParameters.constraints == null ? new ConstraintSet()
                 : new ConstraintSet(runParameters.constraints);
         this.agent = instance.agents.get(0);
         this.map = instance.map;
 
+        this.abortedOnTimeout = false;
+        this.startTime = System.currentTimeMillis();
+        this.endTime = 0;
         this.openList = new PriorityQueue<AStarState>(Comparator.comparing(AStarState::getF));
+        this.expandedNodes = 0;
         this.closed = new HashSet<AStarState>();
+        this.generatedNodes = 0;
     }
 
     protected Solution solveAStar() {
@@ -55,7 +60,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
         while (!openList.isEmpty() && openList.size() < MAX_STATES_THRESHOLD){
             //dequeu
             AStarState currentState = openList.remove();
-            if(!closed.contains(currentState)){ //if new state
+            if(!closed.contains(currentState)){ // if you implement having no duplicates in open, then this is unnecessary
                 if (isGoalState(currentState)){
                     Map<Agent, SingleAgentPlan> plan =  new HashMap<>();
                     plan.put(this.agent, currentState.backTracePlan());
@@ -63,8 +68,11 @@ public class SingleAgentAStar_Solver implements I_Solver {
                 }
                 else{ //expand
                     closed.add(currentState);
-                    openList.addAll(currentState.generateChildStates()); //doesn't generate closed states
+                    this.expandedNodes++;
+                    currentState.expand(); //doesn't generate closed or duplicate states
+//                openList.addAll(currentState.generateChildStates());
                 }
+
             }
         }
         return null; //no goal state found (problem unsolvable)
@@ -84,7 +92,10 @@ public class SingleAgentAStar_Solver implements I_Solver {
     }
 
     protected void writeMetricsToReport(Solution solution) {
-        //imp - write some metrics about the run
+        if(instanceReport != null){
+            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.expandedNodes);
+            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.generatedNodes);
+        }
     }
 
     protected void releaseMemory() {
@@ -109,24 +120,51 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.h = move.currLocation.getCoordinate().euclideanDistance(move.agent.target);
         }
 
-        public Collection<? extends AStarState> generateChildStates() {
+        public void expand() {
             // can move to neighboring cells or stay put
-            List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(move.currLocation.getNeighbors());
+            List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(this.move.currLocation.getNeighbors());
             neighborCellsIncludingCurrent.add(this.move.currLocation);
-
-            List<AStarState> children = new ArrayList<>(neighborCellsIncludingCurrent.size());
 
             for (I_MapCell destination: neighborCellsIncludingCurrent){
                 Move possibleMove = new Move(this.move.agent, this.move.timeNow+1, this.move.currLocation, destination);
                 if(constraints.accepts(possibleMove)){ //move not prohibited by existing constraint
                     AStarState child = new AStarState(possibleMove, this, this.g + 1);
-                    if(!closed.contains(child)){ // state not visited already
-                        children.add(child);
-                    }
+                    generatedNodes++; //field in containing class
 
+                    AStarState existingState;
+                    if(closed.contains(child)){ // state visited already
+                        // for non consistent heuristics - if the new one has a lower f, remove the old one from closed
+                        // and add the new one to open
+                    }
+                    // todo - commented for now because too expensive. need to reduce runtime of getFromOpen(). if implemented, remove check of !closed.contains(currentState) in solveAStar()
+//                    else if(null != (existingState = getFromOpen(child)) ){ //an equal state is waiting in open
+//                        //keep the one with min G
+//                        removeMaxGAndAddMinG(child, existingState); //O(LOG(n))
+//                    }
+                    else{ // it's a new state
+                        openList.add(child);
+                    }
                 }
             }
-            return children;
+        }
+
+        private void removeMaxGAndAddMinG(AStarState newState, AStarState existingState) {
+            boolean shouldSwap = newState.g < existingState.g;
+            if(shouldSwap){
+                openList.remove(existingState);
+                openList.add(newState);
+            }
+        }
+
+
+        /**
+         * looks for a {@link AStarState} equal to state, in {@link #openList}. If found, returns the found state, else returns null.
+         */
+        private AStarState getFromOpen(AStarState state) {
+            for(AStarState existingState : openList){
+                if(state.equals(existingState)) return existingState;
+            }
+            return null;
         }
 
         public SingleAgentPlan backTracePlan() {

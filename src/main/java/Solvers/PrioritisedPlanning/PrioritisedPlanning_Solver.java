@@ -35,6 +35,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     private long startTime;
     protected long endTime;
     private boolean abortedForTimeout;
+    private int totalLowLevelStatesGenerated;
+    private int totalLowLevelStatesExpanded;
 
     /*  =  = Fields related to the class =  */
 
@@ -81,6 +83,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.startTime = System.currentTimeMillis();
         this.endTime = 0;
         this.abortedForTimeout = false;
+        this.totalLowLevelStatesGenerated = 0;
+        this.totalLowLevelStatesExpanded = 0;
 
         this.agents = new ArrayList<>(instance.agents);
         this.instance = instance;
@@ -165,6 +169,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
         //solve sub-problem
         Solution singleAgentSolution = this.lowLevelSolver.solve(subproblem, subproblemParameters);
+        digestSubproblemReport(subproblemReport);
         if (singleAgentSolution != null){
             return singleAgentSolution.getPlanFor(currentAgent);
         }
@@ -178,6 +183,14 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         subproblemReport.putStingValue("Parent Instance", instance.name);
         subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
         return subproblemReport;
+    }
+
+    private void digestSubproblemReport(InstanceReport subproblemReport) {
+        Integer statesGenerated = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodes);
+        this.totalLowLevelStatesGenerated += statesGenerated==null ? 0 : statesGenerated;
+        Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodes);
+        this.totalLowLevelStatesExpanded += statesExpanded==null ? 0 : statesExpanded;
+        S_Metrics.removeReport(subproblemReport);
     }
 
     private static RunParameters getSubproblemParameters(InstanceReport subproblemReport, List<Constraint> constraints) {
@@ -228,6 +241,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         instanceReport.putStingValue("start Time", new Date(endTime).toString());
         instanceReport.putIntegerValue("Time Elapsed (ms)", (int)(endTime-startTime));
         instanceReport.putStingValue("Solution", solution.toString());
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.totalLowLevelStatesGenerated);
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.totalLowLevelStatesExpanded);
         if(commitReport){
             try {
                 instanceReport.commit();
