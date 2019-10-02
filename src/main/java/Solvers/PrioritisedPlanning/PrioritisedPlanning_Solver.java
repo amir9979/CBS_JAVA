@@ -136,7 +136,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             //solve the subproblem for one agent
             SingleAgentPlan planForAgent = solveSubproblem(agents.get(i), instance, initialConstraints);
 
-            if(planForAgent != null) {
+            if(planForAgent != null) { //agent is solvabe (solution was found)
                 //save the plan for this agent
                 agentPlans.add(planForAgent);
 
@@ -168,17 +168,16 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         if (singleAgentSolution != null){
             return singleAgentSolution.getPlanFor(currentAgent);
         }
-        else{
+        else{ //agent is unsolvable
             return null;
         }
     }
 
     private static InstanceReport initSubproblemReport(MAPF_Instance instance) {
-        return null;
-//        InstanceReport subproblemReport = S_Metrics.newInstanceReport();
-//        subproblemReport.putStingValue("Parent Instance", instance.name);
-//        subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
-//        return subproblemReport;
+        InstanceReport subproblemReport = S_Metrics.newInstanceReport();
+        subproblemReport.putStingValue("Parent Instance", instance.name);
+        subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
+        return subproblemReport;
     }
 
     private static RunParameters getSubproblemParameters(InstanceReport subproblemReport, List<Constraint> constraints) {

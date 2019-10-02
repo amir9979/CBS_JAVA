@@ -14,7 +14,7 @@ import java.util.*;
 
 public class SingleAgentAStar_Solver implements I_Solver {
 
-    private static final int MAX_STATES_THRESHOLD = 2000000;
+    private static final int MAX_STATES_THRESHOLD = Integer.MAX_VALUE;
 
     private long maximumRuntime;
     private ConstraintSet constraints;
@@ -55,14 +55,16 @@ public class SingleAgentAStar_Solver implements I_Solver {
         while (!openList.isEmpty() && openList.size() < MAX_STATES_THRESHOLD){
             //dequeu
             AStarState currentState = openList.remove();
-            if (isGoalState(currentState)){
-                Map<Agent, SingleAgentPlan> plan =  new HashMap<>();
-                plan.put(this.agent, currentState.backTracePlan());
-                return new Solution(plan);
-            }
-            else{
-                closed.add(currentState);
-                openList.addAll(currentState.generateChildStates());
+            if(!closed.contains(currentState)){ //if new state
+                if (isGoalState(currentState)){
+                    Map<Agent, SingleAgentPlan> plan =  new HashMap<>();
+                    plan.put(this.agent, currentState.backTracePlan());
+                    return new Solution(plan);
+                }
+                else{ //expand
+                    closed.add(currentState);
+                    openList.addAll(currentState.generateChildStates()); //doesn't generate closed states
+                }
             }
         }
         return null; //no goal state found (problem unsolvable)
@@ -138,19 +140,22 @@ public class SingleAgentAStar_Solver implements I_Solver {
             return new SingleAgentPlan(this.move.agent, moves);
         }
 
-        // todo - currently doing equals by move.cuurLocation. is this good?
-
+        /**
+         * equality is determined by location (current), and time.
+         * @param o
+         * @return
+         */
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             AStarState that = (AStarState) o;
-            return move.currLocation.equals(that.move.currLocation);
+            return move.currLocation.equals(that.move.currLocation) && move.timeNow == that.move.timeNow;
         }
 
         @Override
         public int hashCode() {
-            return move.currLocation.hashCode();
+            return Objects.hash(move.currLocation.hashCode(), move.timeNow);
         }
 
         public float getF(){

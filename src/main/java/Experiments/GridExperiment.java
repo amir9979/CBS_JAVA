@@ -37,7 +37,7 @@ public class GridExperiment extends A_Experiment {
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
 //            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.readableToString());
-            instanceReport.putStingValue(InstanceReport.StandardFields.solution, "");
+//            instanceReport.putStingValue(InstanceReport.StandardFields.solution, "");
 
             try {
                 instanceReport.commit();
