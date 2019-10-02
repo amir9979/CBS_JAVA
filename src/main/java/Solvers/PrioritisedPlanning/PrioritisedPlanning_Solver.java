@@ -188,7 +188,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     private void digestSubproblemReport(InstanceReport subproblemReport) {
         Integer statesGenerated = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodes);
         this.totalLowLevelStatesGenerated += statesGenerated==null ? 0 : statesGenerated;
-        Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodes);
+        Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.expandedNodes);
         this.totalLowLevelStatesExpanded += statesExpanded==null ? 0 : statesExpanded;
         S_Metrics.removeReport(subproblemReport);
     }
