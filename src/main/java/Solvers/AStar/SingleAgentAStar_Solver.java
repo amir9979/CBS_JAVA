@@ -7,12 +7,15 @@ import Instances.Maps.I_Map;
 import Instances.Maps.I_MapCell;
 import Metrics.InstanceReport;
 import Solvers.*;
-import Solvers.ConstraintsAndConflicts.Constraint;
 import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
 import java.util.*;
 
+/**
+ * An A*
+ */
 public class SingleAgentAStar_Solver implements I_Solver {
+    //testme
 
     private static final int MAX_STATES_THRESHOLD = Integer.MAX_VALUE;
 
@@ -26,6 +29,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private Set<AStarState> closed;
     private Agent agent;
     private I_Map map;
+    private SingleAgentPlan existingPlan;
+    private Solution existingSolution;
     private int expandedNodes;
     private int generatedNodes;
 
@@ -45,6 +50,17 @@ public class SingleAgentAStar_Solver implements I_Solver {
                 : new ConstraintSet(runParameters.constraints);
         this.agent = instance.agents.get(0);
         this.map = instance.map;
+        if(runParameters.existingSolution != null && runParameters.existingSolution.getPlanFor(this.agent) != null){
+            this.existingPlan = runParameters.existingSolution.getPlanFor(this.agent);
+            this.existingSolution = runParameters.existingSolution;
+        }
+        else{
+            //make a new solution and plan and initialize it with a default first move
+            this.existingSolution = new Solution();
+            this.existingPlan = new SingleAgentPlan(this.agent);
+            this.existingPlan.addMove(getFirstMove(this.agent));
+            this.existingSolution.putPlan(this.existingPlan);
+        }
 
         this.abortedOnTimeout = false;
         this.startTime = System.currentTimeMillis();
@@ -55,6 +71,14 @@ public class SingleAgentAStar_Solver implements I_Solver {
         this.generatedNodes = 0;
     }
 
+    private Move getFirstMove(Agent agent) {
+        //first time is the time of the agent, or 1.
+        int moveTime = this.agent instanceof OnlineAgent ? ((OnlineAgent)this.agent).arrivalTime + 1 : 1;
+        // first move is always to stay at current location (thus the minimal solution length is 1).
+        Move firstMove = new Move(this.agent, moveTime, this.map.getMapCell(this.agent.source), this.map.getMapCell(this.agent.source));
+        return firstMove;
+    }
+
     protected Solution solveAStar() {
         this.openList.add(generateRootState());
         while (!openList.isEmpty() && openList.size() < MAX_STATES_THRESHOLD){
@@ -62,9 +86,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
             AStarState currentState = openList.remove();
             if(!closed.contains(currentState)){ // if you implement having no duplicates in open, then this is unnecessary
                 if (isGoalState(currentState)){
-                    Map<Agent, SingleAgentPlan> plan =  new HashMap<>();
-                    plan.put(this.agent, currentState.backTracePlan());
-                    return new Solution(plan);
+                    currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
+                    return this.existingSolution;
                 }
                 else{ //expand
                     closed.add(currentState);
@@ -83,12 +106,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
     }
 
     private AStarState generateRootState() {
-        //first time is the time of the agent, or 1.
-        int moveTime = this.agent instanceof OnlineAgent ? ((OnlineAgent)this.agent).arrivalTime + 1 : 1;
-        // first move is always to stay at current location (thus the minimal solution length is 1).
-        Move firstMove = new Move(this.agent, moveTime,this.map.getMapCell(this.agent.source), this.map.getMapCell(this.agent.source));
-
-        return new AStarState(firstMove,null, 1);
+        return new AStarState(existingPlan.moveAt(existingPlan.getEndTime()),null, /*g=number of moves*/existingPlan.size());
     }
 
     protected void writeMetricsToReport(Solution solution) {
@@ -105,6 +123,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
         this.closed = null;
         this.agent = null;
         this.map = null;
+        this.existingSolution = null;
+        this.existingPlan = null;
     }
 
     private class AStarState{
@@ -117,7 +137,12 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.move = move;
             this.prev = prevState;
             this.g = g;
-            this.h = move.currLocation.getCoordinate().euclideanDistance(move.agent.target);
+            this.h = getH();
+        }
+
+        // todo - extract heuristic to a separate (provided at runtime) class to support different heuristics.
+        private float getH() {
+            return move.currLocation.getCoordinate().distance(move.agent.target);
         }
 
         public void expand() {
@@ -175,7 +200,11 @@ public class SingleAgentAStar_Solver implements I_Solver {
                 currentState = currentState.prev;
             }
             Collections.reverse(moves); //reorder moves because they were reversed
-            return new SingleAgentPlan(this.move.agent, moves);
+
+            //if there was an existing plan before solving, then we started from its last move, and don't want to duplicate it.
+            if(existingPlan.size() > 0) {moves.remove(0);}
+            /*containing class.*/ existingPlan.addMoves(moves);
+            return existingPlan;
         }
 
         /**

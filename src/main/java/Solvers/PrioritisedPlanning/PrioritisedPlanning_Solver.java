@@ -165,7 +165,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         //create a sub-problem
         MAPF_Instance subproblem = fullInstance.getSubproblemFor(currentAgent);
         InstanceReport subproblemReport = initSubproblemReport(fullInstance);
-        RunParameters subproblemParameters = getSubproblemParameters(subproblemReport, constraints);
+        RunParameters subproblemParameters = getSubproblemParameters(subproblem, subproblemReport, constraints);
 
         //solve sub-problem
         Solution singleAgentSolution = this.lowLevelSolver.solve(subproblem, subproblemParameters);
@@ -193,7 +193,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         S_Metrics.removeReport(subproblemReport);
     }
 
-    private static RunParameters getSubproblemParameters(InstanceReport subproblemReport, List<Constraint> constraints) {
+    protected RunParameters getSubproblemParameters(MAPF_Instance subproblem, InstanceReport subproblemReport, List<Constraint> constraints) {
         return new RunParameters(new ArrayList<>(constraints), subproblemReport);
     }
 
@@ -237,10 +237,10 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     /*  = wind down =  */
 
     protected void writeMetricsToReport(Solution solution) {
-        instanceReport.putIntegerValue("Timeout", abortedForTimeout ? 1 : 0);
-        instanceReport.putStingValue("start Time", new Date(endTime).toString());
-        instanceReport.putIntegerValue("Time Elapsed (ms)", (int)(endTime-startTime));
-        instanceReport.putStingValue("Solution", solution.toString());
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeout, abortedForTimeout ? 1 : 0);
+        instanceReport.putStingValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
+        instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
         instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.totalLowLevelStatesGenerated);
         instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.totalLowLevelStatesExpanded);
         if(commitReport){

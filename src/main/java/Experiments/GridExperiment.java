@@ -1,7 +1,6 @@
 package Experiments;
 
 import Instances.InstanceManager;
-import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
 import Metrics.InstanceReport;
 import Metrics.S_Metrics;
@@ -11,7 +10,6 @@ import Solvers.RunParameters;
 import Solvers.Solution;
 
 import java.io.IOException;
-import java.util.List;
 
 public class GridExperiment extends A_Experiment {
 

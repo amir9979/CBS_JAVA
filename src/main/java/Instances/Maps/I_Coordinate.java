@@ -4,22 +4,16 @@ package Instances.Maps;
  * Represents a unique location in Euclidean space.
  */
 public interface I_Coordinate {
-    // todo generalize to include non-euclidean space? replace methods with one abstract h() function?
-    /**
-     * Returns the euclidean distance to another {@link I_Coordinate coordinate}. Should return 0 iff this.equals(other)
-     * return true.  If other is null, or is not of the same runtime type as this, returns -1.
-     * @param other a {@link I_Coordinate coordinate}.
-     * @return the euclidean distance to another {@link I_Coordinate coordinate}. If other is null, or is not of the
-     * same runtime type as this, returns -1.
-     */
-    float euclideanDistance(I_Coordinate other);
 
     /**
-     * Returns the manhattan distance to another {@link I_Coordinate coordinate}. Should return 0 iff this.equals(other)
-     * return true.  If other is null, or is not of the same runtime type as this, returns -1.
-     * @param other a {@link I_Coordinate coordinate}.
-     * @return the manhattan distance to another {@link I_Coordinate coordinate}.  If other is null, or is not of the
-     * same runtime type as this, returns -1.
+     * A distance measure from one coordinate to another.
+     * e.g. euclidean distance or cosine similarity in euclidean space, manhattanDistance in grids...
+     * This distance may be used as a heuristic, so it is best to consider its most likely use-case, and make sure that
+     * it will function as an admissible and consistent heuristic function.
+     * If the concept of distance is inapplicable to the domain of this coordinate, implement this method by returning 0;
+     * @param other
+     * @return
      */
-    int manhattanDistance(I_Coordinate other);
+    float distance(I_Coordinate other);
+
 }

@@ -13,12 +13,12 @@ import java.util.function.Consumer;
  */
 public class Solution implements Iterable<SingleAgentPlan>{
     /**
-     * An unmodifiable {@link Map}, mapping {@link Agent agents} to their {@link SingleAgentPlan plans}.
+     * A {@link Map}, mapping {@link Agent agents} to their {@link SingleAgentPlan plans}.
      */
     private final Map<Agent, SingleAgentPlan> agentPlans;
 
     public Solution(Map<Agent, SingleAgentPlan> agentPlans) {
-        this.agentPlans = Map.copyOf(agentPlans);
+        this.agentPlans = new HashMap<>(agentPlans);
     }
 
     public Solution(Collection<? extends SingleAgentPlan> plans) {
@@ -30,8 +30,17 @@ public class Solution implements Iterable<SingleAgentPlan>{
         this.agentPlans = agentPlanMap;
     }
 
+    public Solution(){
+        this(new HashMap<>());
+    }
+
     public SingleAgentPlan getPlanFor(Agent agent){
         return agentPlans.get(agent);
+    }
+
+    public SingleAgentPlan putPlan(SingleAgentPlan singleAgentPlan){
+        if(singleAgentPlan == null) {throw new IllegalArgumentException();}
+        return this.agentPlans.put(singleAgentPlan.agent, singleAgentPlan);
     }
 
     /**

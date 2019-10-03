@@ -3,12 +3,10 @@ package Solvers.PrioritisedPlanning;
 import Instances.Agents.Agent;
 import Instances.Agents.OnlineAgent;
 import Instances.MAPF_Instance;
+import Instances.Maps.PrivateGarage;
 import Metrics.InstanceReport;
+import Solvers.*;
 import Solvers.ConstraintsAndConflicts.Constraint;
-import Solvers.I_Solver;
-import Solvers.OnlineSolution;
-import Solvers.SingleAgentPlan;
-import Solvers.Solution;
 
 import java.io.IOException;
 import java.util.*;
@@ -66,6 +64,24 @@ public class OnlinePP_Solver extends PrioritisedPlanning_Solver {
 
         super.endTime = System.currentTimeMillis();
         return new OnlineSolution(solutionsAtTimes);
+    }
+
+    @Override
+    protected RunParameters getSubproblemParameters(MAPF_Instance subproblem, InstanceReport subproblemReport, List<Constraint> constraints) {
+        RunParameters parameters = super.getSubproblemParameters(subproblem, subproblemReport, constraints);
+        Solution oneAgentSolution = new Solution();
+
+        // make an initial plan with just a "stay" move in the private garage.
+        Agent agent = subproblem.agents.get(0);
+        int firstMoveTime = agent instanceof OnlineAgent ? ((OnlineAgent)agent).arrivalTime + 1 : 1;
+        SingleAgentPlan initialPlan = new SingleAgentPlan(agent);
+        PrivateGarage garage = new PrivateGarage(agent, subproblem.map.getMapCell(agent.source));
+        initialPlan.addMove(new Move(agent, firstMoveTime, garage, garage));
+
+        oneAgentSolution.putPlan(initialPlan);
+        parameters.existingSolution = oneAgentSolution;
+
+        return parameters;
     }
 
     private void trimOutdatedConstraints(List<Constraint> initialConstraints, int minTime) {

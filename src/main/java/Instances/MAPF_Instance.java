@@ -29,7 +29,7 @@ public class MAPF_Instance {
     public final List<Agent> agents;
 
 
-    MAPF_Instance(String name, I_Map map, Agent[] agents) {
+    public MAPF_Instance(String name, I_Map map, Agent[] agents) {
         if(name == null || map == null || agents == null){throw new IllegalArgumentException();}
         this.name = name;
         this.map = map;

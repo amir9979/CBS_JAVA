@@ -128,33 +128,38 @@ public class SingleAgentPlan implements Iterable<Move> {
      * that time.
      */
     public Move moveAt(int time){
-        int startTime = getStartTime();
-        if(time < startTime || time > getEndTime()){ return null;}
-        else{
-            return moves.get(time - startTime); // return the move at the specified time
-        }
+        if(moves.isEmpty()) return null;
+        int requestedIndex = time - getFirstMoveTime();
+        return requestedIndex > moves.size() || requestedIndex < 0 ? null : moves.get(requestedIndex);
     }
 
     /**
      * @return the start time of the plan, which is 1 less than the time of the first move. returns -1 if plan is empty.
      */
-    public int getStartTime(){
-        return moves.isEmpty() ? -1 : moves.get(0).timeNow-1;
+    public int getPlanStartTime(){
+        return moves.isEmpty() ? -1 : moves.get(0).timeNow - 1;
         // since the first move represents one timestep after the start, the start time is timeNow of the first move -1
     }
 
     /**
-     * @return the start time of the plan, which is the time of the last move. returns -1 if plan is empty.
+     * @return the {@link Move#timeNow time} of the first move in the plan.
+     */
+    public int getFirstMoveTime(){
+        return moves.isEmpty() ? -1 : moves.get(0).timeNow;
+    }
+
+    /**
+     * @return the end time of the plan, which is the time of the last move. returns -1 if plan is empty.
      */
     public int getEndTime(){
         return moves.isEmpty() ? -1 : moves.get(moves.size()-1).timeNow;
     }
 
     /**
-     * Returns the total time of the plan, which is the difference between end and start times.
-     * @return the total time of the plan, which is the difference between end and start times. Return -1 if plan is empty.
+     * Returns the total time of the plan, which is the difference between end and start times. It is the same as the number of moves in the plan.
+     * @return the total time of the plan, which is the difference between end and start times. Return 0 if plan is empty.
      */
-    public int getTotalTime(){return moves.isEmpty() ? -1 : this.getEndTime()-this.getStartTime();}
+    public int size(){return moves.isEmpty() ? 0 : this.getEndTime()-this.getPlanStartTime();}
 
     /**
      * Compares with another {@link SingleAgentPlan}, looking for vertex conflicts ({@link VertexConflict}) or

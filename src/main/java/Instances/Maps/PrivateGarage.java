@@ -1,5 +1,7 @@
 package Instances.Maps;
 
+import Instances.Agents.Agent;
+
 import java.util.List;
 
 /**
@@ -15,10 +17,15 @@ public class PrivateGarage implements I_MapCell {
      * the {@link I_Map map} through.
      */
     public final I_MapCell mapEntryPoint;
+    private final I_Coordinate coordinate;
+    private final Agent owner;
 
-    public PrivateGarage(I_MapCell mapEntryPoint) {
+    public PrivateGarage(Agent owner, I_MapCell mapEntryPoint) {
         if(mapEntryPoint == null) {throw new IllegalArgumentException("PrivateGarage: mapEntryPoint can't be null.");}
+        if(owner == null) {throw new IllegalArgumentException("PrivateGarage: owner can't be null.");}
+        this.owner = owner;
         this.mapEntryPoint = mapEntryPoint;
+        this.coordinate = new GarageCoordinate();
     }
 
     @Override
@@ -38,8 +45,7 @@ public class PrivateGarage implements I_MapCell {
      */
     @Override
     public I_Coordinate getCoordinate() {
-        //testme - make sure this doesn't cause any problem elsewhere. equality should always be checked through this class's equals(), but someone might use the coordinate somewhere.
-        return mapEntryPoint.getCoordinate();
+        return this.coordinate;
     }
 
     @Override
@@ -48,4 +54,21 @@ public class PrivateGarage implements I_MapCell {
     }
 
     // does not override equals() and hashCode(). since every agent has a unique and private garage, address equality is good.
+
+    private class GarageCoordinate implements I_Coordinate{
+
+        @Override
+        public float distance(I_Coordinate other) {
+            return other == PrivateGarage.this.mapEntryPoint.getCoordinate() ? 0 : -1;
+        }
+
+        @Override
+        public String toString() {
+//            return "(agent" + PrivateGarage.this.owner.iD + "'s garage)";
+            return "(garage" + PrivateGarage.this.owner.iD + ")";
+        }
+
+        // address equality is good enough, since these are supposed to be unique
+
+    }
 }
