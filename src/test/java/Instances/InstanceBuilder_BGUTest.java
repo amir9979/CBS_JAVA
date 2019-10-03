@@ -21,7 +21,7 @@ public class InstanceBuilder_BGUTest {
     private InstanceBuilder_BGU instanceBuilderBgu;
     private InstanceManager.InstancePath instancePath;
     private InstanceProperties instanceProperties = new InstanceProperties(
-                                                        new int[]{16,16},0,7,"-"
+                                                        new int[]{16,16},(float)0,7,"-"
                                                     );
 
     private final String path = IO_Manager.buildPath(
