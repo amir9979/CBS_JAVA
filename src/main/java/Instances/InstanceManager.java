@@ -7,7 +7,7 @@ import java.util.Stack;
 
 public class InstanceManager {
 
-    private final String sourceDirectory;
+    private String sourceDirectory;
     private I_InstanceBuilder instanceBuilder;
     private InstanceProperties instanceProperties;
 
@@ -29,7 +29,24 @@ public class InstanceManager {
         this.instanceBuilder    = instanceBuilder;
         this.instanceProperties = properties;
 
-        this.addInstancesPaths_toStack();
+        if(this.sourceDirectory != null){
+            this.addInstancesPaths_toStack( this.sourceDirectory );
+        }
+
+    }
+
+    public InstanceManager(I_InstanceBuilder instanceBuilder){
+        this.instanceBuilder = instanceBuilder;
+    }
+
+
+    public MAPF_Instance getSpecificInstance(InstancePath currentPath){
+
+        String regexSeparator = "\\\\"; //  this is actually: '\\'
+        String[] splitedPath = currentPath.path.split(regexSeparator); // Done - check if the "/" is correct
+        String instanceName = splitedPath[splitedPath.length-1];
+
+        return this.instanceBuilder.getInstance(instanceName, currentPath, this.instanceProperties);
 
     }
 
@@ -40,21 +57,18 @@ public class InstanceManager {
         while(nextInstance == null){
 
             if(this.instancesPaths_stack.empty()){
+                // NiceToHave - create new instances
                 return null;
             }
-            InstancePath nextPath = instancesPaths_stack.pop();
 
-            if(nextPath == null) {
-                break;
-            }
+            InstancePath currentPath = this.instancesPaths_stack.pop();
+
+//            if(currentPath == null) {
+//                break;
+//            }
 
 
-            String regexSeparator = "\\\\";
-            String[] splitedPath = nextPath.path.split(regexSeparator); // Done - check if the "/" is correct
-            String instanceName = splitedPath[splitedPath.length-1];
-
-            nextInstance = this.instanceBuilder.getInstance(instanceName, nextPath,this.instanceProperties);
-
+            nextInstance = getSpecificInstance(currentPath);
 
         }
 
@@ -62,9 +76,8 @@ public class InstanceManager {
     }
 
 
-    private void addInstancesPaths_toStack(){
+    private void addInstancesPaths_toStack(String directoryPath){
 
-        String directoryPath = this.sourceDirectory; // todo - might be a different path ?
         InstancePath[] instancePaths = this.instanceBuilder.getInstancesPaths(directoryPath);
 
         for (int i = 0; i < instancePaths.length ; i++) {
@@ -81,7 +94,7 @@ public class InstanceManager {
         public InstancePath(String path){ this.path = path; }
     }
 
-    private class Moving_AI_Path extends InstancePath{
+    public static class Moving_AI_Path extends InstancePath{
 
         public final String scenarioPath;
         public Moving_AI_Path(String mapPath, String scenarioPath) {

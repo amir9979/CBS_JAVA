@@ -4,6 +4,9 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Solvers.AStar.AStar_Solver;
+import Solvers.I_Solver;
+
+import java.util.ArrayList;
 
 public class SimpleRunManager extends A_RunManager {
 
@@ -19,11 +22,10 @@ public class SimpleRunManager extends A_RunManager {
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
                                                             "Instances"});
-        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
 
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new int[]{16,16},0,7,"-");
+        InstanceProperties properties = new InstanceProperties(new int[]{16,16}, (float)0,7,"-");
         int numOfInstances = 1;
 
         /*  =   Set Instance Manager   =  */

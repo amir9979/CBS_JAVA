@@ -41,7 +41,7 @@ public class Reader {
         this.file = new File(filePath);
 
         // Check that path exists
-        if ( !IO_Manager.pathExists(this.file) ){
+        if ( !this.file.isFile() ){
             return Enum_IO.INVALID_PATH;
         }
 
