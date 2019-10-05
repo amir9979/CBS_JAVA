@@ -9,9 +9,14 @@ import java.util.HashMap;
 
 public interface I_InstanceBuilder {
 
-    MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties);
+    void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties);
 
     InstanceManager.InstancePath[] getInstancesPaths(String directoryPath);
+
+
+    MAPF_Instance getNextExistingInstance();
+
+
 
 
     static String[] buildMapAsStringArray(Reader reader, int[] dimensions){
@@ -79,7 +84,7 @@ public interface I_InstanceBuilder {
         // If obstacle percentage is not null,
         // check that it matches the value from properties
         // Formulation: floor( obstaclesPercentage * BoardSize) = numOfObstacles
-        if ( obstaclePercentage != null && numOfObstacles != (obstaclePercentage *(numOfNonObstacles + numOfObstacles))){
+        if ( obstaclePercentage != -1 && numOfObstacles != (obstaclePercentage *(numOfNonObstacles + numOfObstacles))){
             // done - check with Dor that this is correct
             return null; // Invalid obstacle rate
         }
@@ -92,6 +97,47 @@ public interface I_InstanceBuilder {
         return null;
     }
 
+
+
+
+    /*  =Utils= */
+
+
+    static boolean equalsAll(int[] arr1, int[] arr2){
+        if( arr1 == null || arr2 == null){
+            return false;
+        }
+
+        if( arr1.length != arr2.length ){
+            return false;
+        }
+
+
+        for (int i = 0; i < arr1.length; i++) {
+            if( arr1[i] != arr2[i] ){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+    static int equalsAny(int lookFor, int[] values){
+        if( values == null ){
+            return -1;
+        }
+
+        for (int i = 0; i < values.length ; i++) {
+            if( lookFor == values[i] ){
+                return i;
+            }
+        }
+
+        return -1;
+
+    }
 
 }
 

@@ -6,10 +6,10 @@ public class InstanceProperties {
 
     public final int[] boardSize;
     private final Float obstacles;
-    public final int numOfAgents;
+    public final int[] numOfAgents; // Todo - array of num
 
 
-    public InstanceProperties(int[] boardSize, Float obstacles, int numOfAgents, String separator) {
+    public InstanceProperties(int[] boardSize, Float obstacles, int[] numOfAgents, String separator) {
         this.SEPARATOR = separator;
         this.boardSize = boardSize;
         this.obstacles = obstacles;
@@ -18,7 +18,10 @@ public class InstanceProperties {
 
     public int getObstaclePercentage(){
 
-        return Math.round(this.obstacles*100); // Returns 15
+        if ( this.obstacles == null){
+            return -1;
+        }
+        return Math.round(obstacles*100); // Returns 15
     }
 
     public Float getObstacleRate(){

@@ -7,6 +7,7 @@ import Instances.Agents.Agent;
 import Instances.Maps.*;
 
 import java.util.HashMap;
+import java.util.Stack;
 
 public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
@@ -18,6 +19,10 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     private final String SEPARATOR_AGENTS = ",";
     private final String INDICATOR_MAP = "Grid:";
     private final String SEPARATOR_DIMENSIONS = ",";
+
+
+    private final Stack<MAPF_Instance> instanceStack = new Stack<>();
+
 
 
     /*      =Cell Types=   */
@@ -32,7 +37,8 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
 
-    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
+
+    private MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
 
 
         Reader reader=new Reader();
@@ -62,23 +68,16 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
                     String dimensionsAsString = reader.getNextLine();
                     dimensions = getDimensions(dimensionsAsString);
 
-                    // Checks validity with instanceProperties:
-                    // numOfDimensions = dimensions from instanceProperties
-                    if (dimensions == null || (instanceProperties != null && dimensions.length != dimensionsFromProperties.length)){
-                        reader.closeFile();
-                        return null; // unexpected dimensions line
-                    }
 
-                    for (int i = 0; instanceProperties != null && i < dimensionsFromProperties.length; i++) {
-                        if( dimensions[i] != dimensionsFromProperties[i]){
-                            reader.closeFile();
-                            return null; // unexpected dimensions line
-                        }
+                    // Checks validity with instanceProperties:
+                    if (! this.checkMapDimensions(dimensions, instanceProperties, reader)){
+                        dimensions = null;
+                        // todo - continue
                     }
                     String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensions);
 
                     // If instanceProperties is not null check the obstacle percentage
-                    Integer obstaclePercentage = ( instanceProperties == null ? null : instanceProperties.getObstaclePercentage());
+                    Integer obstaclePercentage = ( instanceProperties == null ? -1 : instanceProperties.getObstaclePercentage());
                     // build map
                     graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, dimensions.length, cellTypeHashMap, obstaclePercentage);
 
@@ -89,10 +88,16 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
                     int dimensionsLength = (dimensions == null ? 0 : dimensions.length );
                     agents = buildAgents(reader, dimensionsLength);
 
-                    // Checks validity with instanceProperties
-                    if (agents == null || ( instanceProperties != null && agents.length != instanceProperties.numOfAgents)){
-                        agents = null; // different than instanceProperties
+                    if (agents == null ){
+                        break;
                     }
+
+                    int[] numOfAgentsFromProperties = ( instanceProperties == null ? null : instanceProperties.numOfAgents);
+                    int index = I_InstanceBuilder.equalsAny(agents.length, numOfAgentsFromProperties);
+                    if( index == -1 ){
+                        agents = null;
+                    }
+
                     break;
 
 
@@ -112,6 +117,47 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     }
 
+    @Override
+    public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties){
+        MAPF_Instance mapf_instance = this.getInstance(instanceName, instancePath, instanceProperties);
+        if ( mapf_instance != null ){
+            this.instanceStack.push(mapf_instance);
+        }
+    }
+
+
+
+    @Override
+    public MAPF_Instance getNextExistingInstance(){
+        if( ! this.instanceStack.empty() ){
+            return this.instanceStack.pop();
+        }
+        return null;
+    }
+
+
+
+
+    /***  =Validity check=  ***/
+    private boolean checkMapDimensions(int[] dimensions, InstanceProperties instanceProperties, Reader reader){
+
+        int[] dimensionsFromProperties = null;
+        if( instanceProperties != null ){
+            dimensionsFromProperties = instanceProperties.boardSize;
+        }else {
+            return true;
+        }
+
+        boolean isEquals = I_InstanceBuilder.equalsAll(dimensions,dimensionsFromProperties);
+
+        if( isEquals ){
+            return true;
+        }
+
+        reader.closeFile();
+        return false;
+
+    }
 
 
 
@@ -212,87 +258,6 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     }
 
 
-
-
-//    private String[] buildMapAsStringArray(Reader reader, int[] dimensions){
-//
-//        int xAxis_length = dimensions[0];
-//        String[] mapAsStringArray = new String[xAxis_length];
-//        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
-//
-//            String nextLine = reader.getNextLine();
-//            if ( nextLine != null ){
-//                mapAsStringArray[xIndex] = nextLine;
-//            }else {
-//                return null; // unexpected num of lines
-//            }
-//        }
-//        return mapAsStringArray;
-//    }
-//
-//
-//    private GraphMap buildGraphMap(String[] mapAsStrings, int numOfDimensions, Integer obstaclePercentage) {
-//
-//        switch ( numOfDimensions ){
-//            case 2:
-//                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsStrings, obstaclePercentage);
-//                return MapFactory.newSimple4Connected2D_GraphMap(mapAsCellType_2D);
-//
-//            case 3:
-//                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsStrings);
-//                return null; // niceToHave - change to newSimple 4Connected 3D_GraphMap if exists in MapFactory
-//        }
-//
-//
-//        return null; // If something went wrong ( should return in switch-case )
-//    }
-//
-//
-//    private Enum_MapCellType[][] build_2D_cellTypeMap(String[] mapAsStrings ,Integer obstaclePercentage) {
-//        // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
-//
-//        int xAxis_length = mapAsStrings.length;
-//        int yAxis_length = mapAsStrings[0].length();
-//
-//        // used to check obstacle percentage
-//        int numOfObstacles = 0;
-//        int numOfNonObstacles = 0;
-//
-//
-//        Enum_MapCellType[][] cellTypeMap = new Enum_MapCellType[xAxis_length][yAxis_length];
-//
-//        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
-//            for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
-//
-//                // done - convert using this.cellTypeHashMap
-//                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsStrings[xIndex].charAt(yIndex));
-//
-//                if ( cellType.equals(Enum_MapCellType.WALL)){
-//                    numOfObstacles++; // add one wall to counter
-//                }else{
-//                    numOfNonObstacles++; // add one to counter
-//                }
-//                cellTypeMap[xIndex][yIndex] = cellType;
-//            }
-//        }
-//
-//        // If obstacle percentage is not null,
-//        // check that it matches the value from properties
-//        // Formulation: floor( obstaclesPercentage * BoardSize) = numOfObstacles
-//        if ( obstaclePercentage != null && numOfObstacles != (obstaclePercentage *(numOfNonObstacles + numOfObstacles))){
-//            // done - check with Dor that this is correct
-//            return null; // Invalid obstacle rate
-//        }
-//
-//        return cellTypeMap;
-//    }
-//
-//    private Enum_MapCellType[][][] build_3D_cellTypeMap(String[] mapAsStrings) {
-//        // niceToHave - no need to implement for now
-//        return null;
-//    }
-//
-//
 
 
 

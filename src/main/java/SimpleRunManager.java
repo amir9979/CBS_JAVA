@@ -21,11 +21,11 @@ public class SimpleRunManager extends A_RunManager {
 
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
-                                                            "Instances"});
+                "Instances"});
 
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new int[]{16,16}, (float)0,7,"-");
+        InstanceProperties properties = new InstanceProperties(new int[]{16,16}, (float)0, new int[]{7},"-");
         int numOfInstances = 1;
 
         /*  =   Set Instance Manager   =  */

@@ -21,13 +21,13 @@ public class InstanceBuilder_BGUTest {
     private InstanceBuilder_BGU instanceBuilderBgu;
     private InstanceManager.InstancePath instancePath;
     private InstanceProperties instanceProperties = new InstanceProperties(
-                                                        new int[]{16,16},(float)0,7,"-"
-                                                    );
+            new int[]{16,16},(float)0,new int[]{7,10,15},"-"
+    );
 
     private final String path = IO_Manager.buildPath(
-                                                        new String[]{   IO_Manager.testResources_Directory,
-                                                                        "Instances\\Instance-16-0-7-0"}
-                                                     );
+            new String[]{   IO_Manager.testResources_Directory,
+                    "Instances\\Instance-16-0-7-0"}
+    );
 
 //
 //    private final String path = IO_Manager.buildPath(
@@ -89,7 +89,8 @@ public class InstanceBuilder_BGUTest {
 
 
         String instanceName = "Instance-16-0-7"; // Name from the InstanceManager
-        MAPF_Instance mapf_instance = instanceBuilderBgu.getInstance(instanceName, this.instancePath, this.instanceProperties);
+        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath, this.instanceProperties);
+        MAPF_Instance mapf_instance = instanceBuilderBgu.getNextExistingInstance();
 
         Assert.assertNotNull(mapf_instance);
 
@@ -121,32 +122,32 @@ public class InstanceBuilder_BGUTest {
 
         // 0,5,2,9,7
         expectedAgents.add( new Agent(0,
-                            new Coordinate_2D(9,7),
-                            new Coordinate_2D(5,2)));
+                new Coordinate_2D(9,7),
+                new Coordinate_2D(5,2)));
         // 1,1,7,10,6
         expectedAgents.add( new Agent(1,
-                            new Coordinate_2D(10,6),
-                            new Coordinate_2D(1,7)));
+                new Coordinate_2D(10,6),
+                new Coordinate_2D(1,7)));
         // 2,12,10,3,1
         expectedAgents.add( new Agent(2,
-                            new Coordinate_2D(3,1),
-                            new Coordinate_2D(12,10)));
+                new Coordinate_2D(3,1),
+                new Coordinate_2D(12,10)));
         // 3,4,11,13,8
         expectedAgents.add( new Agent(3,
-                            new Coordinate_2D(13,8),
-                            new Coordinate_2D(4,11)));
+                new Coordinate_2D(13,8),
+                new Coordinate_2D(4,11)));
         // 4,13,6,10,1
         expectedAgents.add( new Agent(4,
-                            new Coordinate_2D(10,1),
-                            new Coordinate_2D(13,6)));
+                new Coordinate_2D(10,1),
+                new Coordinate_2D(13,6)));
         // 5,1,1,15,10
         expectedAgents.add( new Agent(5,
-                            new Coordinate_2D(15,10),
-                            new Coordinate_2D(1,1)));
+                new Coordinate_2D(15,10),
+                new Coordinate_2D(1,1)));
         // 6,7,7,7,11
         expectedAgents.add( new Agent(6,
-                            new Coordinate_2D(7,11),
-                            new Coordinate_2D(7,7)));
+                new Coordinate_2D(7,11),
+                new Coordinate_2D(7,7)));
     }
 
 
@@ -199,4 +200,4 @@ public class InstanceBuilder_BGUTest {
 //    }
 
 
-    }
+}

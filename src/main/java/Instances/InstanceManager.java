@@ -46,14 +46,19 @@ public class InstanceManager {
         String[] splitedPath = currentPath.path.split(regexSeparator); // Done - check if the "/" is correct
         String instanceName = splitedPath[splitedPath.length-1];
 
-        return this.instanceBuilder.getInstance(instanceName, currentPath, this.instanceProperties);
+        // todo - add queue, method getInstance
+        // If not empty, getNext. else prepare
+
+        this.instanceBuilder.prepareInstances(instanceName, currentPath, this.instanceProperties);
+        return this.instanceBuilder.getNextExistingInstance();
 
     }
 
     public MAPF_Instance getNextInstance(){
         /* Returns null in case of an error */
 
-        MAPF_Instance nextInstance = null;
+        // Tries to get the next Existing Instance
+        MAPF_Instance nextInstance = this.instanceBuilder.getNextExistingInstance();
         while(nextInstance == null){
 
             if(this.instancesPaths_stack.empty()){
@@ -62,10 +67,6 @@ public class InstanceManager {
             }
 
             InstancePath currentPath = this.instancesPaths_stack.pop();
-
-//            if(currentPath == null) {
-//                break;
-//            }
 
 
             nextInstance = getSpecificInstance(currentPath);
