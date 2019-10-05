@@ -103,7 +103,11 @@ public class SingleAgentAStar_Solver implements I_Solver {
     /*  = A* algorithm =  */
 
     protected Solution solveAStar() {
-        addToOpen(generateRootState());
+        AStarState rootState = generateRootState();
+        // root can't be generated (first move is rejected by constraints
+        if (rootState == null){ return null;}
+
+        addToOpen(rootState);
         while (!openList.isEmpty() ){
             if(checkTimeout()) {return null;}
             //dequeu
@@ -147,7 +151,11 @@ public class SingleAgentAStar_Solver implements I_Solver {
         return state.move.currLocation.getCoordinate().equals(agent.target);
     }
 
+    /**
+     * @return a root state based on the last move in the existing plan, or null if it is rejected by constraints.
+     */
     private AStarState generateRootState() {
+        if(constraints.rejects(existingPlan.moveAt(existingPlan.getEndTime()))) {return null;}
         return new AStarState(existingPlan.moveAt(existingPlan.getEndTime()),null, /*g=number of moves*/existingPlan.size());
     }
 
@@ -201,6 +209,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
         public int getG() {
             return g;
         }
+
+        /*  = other methods =  */
 
         public float getF(){
             return g + h;

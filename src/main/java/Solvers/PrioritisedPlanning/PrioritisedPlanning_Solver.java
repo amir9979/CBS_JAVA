@@ -14,6 +14,7 @@ import java.util.*;
  * An implementation of the Prioritised Planning algorithm for Multi Agent Path Finding.
  * It solves {@link MAPF_Instance MAPF problems} very quickly, but does not guarantee optimality, and will very likely
  * return a sub-optimal {@link Solution}.
+ * Agents disappear at goal!
  */
 public class PrioritisedPlanning_Solver implements I_Solver {
 
@@ -23,7 +24,6 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * An array of {@link Agent}s to plan for, ordered by priority (descending).
      */
     private List<Agent> agents;
-    private MAPF_Instance instance;
 
     /*  =  = Fields related to the run =  */
 
@@ -87,7 +87,6 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.totalLowLevelStatesExpanded = 0;
 
         this.agents = new ArrayList<>(instance.agents);
-        this.instance = instance;
 
         this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
         this.constraints = runParameters.constraints == null ? new ArrayList<>()
@@ -131,7 +130,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * @param initialConstraints
      */
     protected Solution solvePrioritisedPlanning(List<? extends Agent> agents, MAPF_Instance instance, List<Constraint> initialConstraints) {
-        List<SingleAgentPlan> agentPlans = new ArrayList<>(agents.size());
+        Solution solution = new Solution();
 
         //solve for each agent while avoiding the plans of previous agents
         for (int i = 0; i < agents.size(); i++) {
@@ -140,17 +139,21 @@ public class PrioritisedPlanning_Solver implements I_Solver {
             //solve the subproblem for one agent
             SingleAgentPlan planForAgent = solveSubproblem(agents.get(i), instance, initialConstraints);
 
-            if(planForAgent != null) { //agent is solvabe (solution was found)
-                //save the plan for this agent
-                agentPlans.add(planForAgent);
-
-                //add constraints to prevent the next agents from conflicting with the new plan
-                initialConstraints.addAll(allConstraintsForPlan(planForAgent));
+            // if an agent is unsolvable, then we can't return a valid solution for the instance (at least for this order of planning). return null.
+            if(planForAgent == null) {
+                solution = null;
+                instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 0);
+                break;
             }
+            //save the plan for this agent
+            solution.putPlan(planForAgent);
+
+            //add constraints to prevent the next agents from conflicting with the new plan
+            initialConstraints.addAll(allConstraintsForPlan(planForAgent));
         }
 
         endTime = System.currentTimeMillis();
-        return new Solution(agentPlans);
+        return solution;
     }
 
     protected boolean checkTimeout() {
@@ -260,7 +263,6 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     protected void releaseMemory() {
         this.constraints = null;
         this.agents = null;
-        this.instance = null;
         this.instanceReport = null;
     }
 }

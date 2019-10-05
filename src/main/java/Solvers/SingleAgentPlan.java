@@ -1,6 +1,7 @@
 package Solvers;
 
 import Instances.Agents.Agent;
+import Solvers.ConstraintsAndConflicts.A_Conflict;
 import Solvers.ConstraintsAndConflicts.SwappingConflict;
 import Solvers.ConstraintsAndConflicts.VertexConflict;
 
@@ -130,7 +131,7 @@ public class SingleAgentPlan implements Iterable<Move> {
     public Move moveAt(int time){
         if(moves.isEmpty()) return null;
         int requestedIndex = time - getFirstMoveTime();
-        return requestedIndex > moves.size() || requestedIndex < 0 ? null : moves.get(requestedIndex);
+        return requestedIndex >= moves.size() || requestedIndex < 0 ? null : moves.get(requestedIndex);
     }
 
     /**
@@ -177,7 +178,7 @@ public class SingleAgentPlan implements Iterable<Move> {
                 boolean vertexConflict = otherMoveAtTime.currLocation.equals(localMove.currLocation);
                 boolean swappingConflict = otherMoveAtTime.prevLocation.equals(localMove.currLocation)
                         && localMove.prevLocation.equals(otherMoveAtTime.currLocation);
-                if(vertexConflict || swappingConflict){return true;}
+                if(A_Conflict.haveConflicts(localMove, otherMoveAtTime)){return true;}
             }
         }
         return false;

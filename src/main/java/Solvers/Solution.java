@@ -50,21 +50,11 @@ public class Solution implements Iterable<SingleAgentPlan>{
      * @return true if the solution is valid (contains no vertex or swapping conflicts).
      */
     public boolean isValidSolution(){
-        // todo improve by using a Set of Moves.
-//        Set<Move> previousMoves = new HashSet<>();
-//        for (SingleAgentPlan plan :
-//                agentPlans.values()) {
-//            for (Move move :
-//                    plan) {
-//                Move reverseMove = new Move(move.agent, move.timeNow, move.currLocation, move.prevLocation);
-//                if()
-//            }
-//        }
         for (SingleAgentPlan plan :
                 agentPlans.values()) {
             for (SingleAgentPlan otherPlan :
                     agentPlans.values()) {
-                if(! (plan == otherPlan) ){ //don't compare with self
+                if(! (plan == otherPlan) ){ //don't compare plan with self
                     if(plan.conflictsWith(otherPlan)) {return false;}
                 }
             }
