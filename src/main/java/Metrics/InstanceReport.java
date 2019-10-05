@@ -10,7 +10,11 @@ import java.util.*;
  * same name.
  */
 public class InstanceReport {
-    // testme
+
+    //max cell size of excel, plus room for wrapping with "" plus some safety
+    private static final int MAX_STRING_SIZE = 32767 - 12;
+    public static final String EXTENTION_STRING = " - Extended ";
+
     private Map<String, String> stringFields = new HashMap<String, String>();
     private Map<String, Integer> integerFields = new HashMap<String, Integer>();
     private Map<String, Float> floatFields = new HashMap<String, Float>();
@@ -37,13 +41,73 @@ public class InstanceReport {
     /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
      * does nothing.
-     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. @NotNull
+     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. Can't contain {@link #EXTENTION_STRING}. @NotNull
      * @param fieldValue the value to associate with the field. If intended for CSV output, can't contain ','. @NotNull
-     * @return the old value of the field, or null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type.
+     * @return the old value of the field (first part if the field was too large and split into multiple fields). Returns
+     * null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type, or
+     * it the fieldName contains {@link #EXTENTION_STRING}.
      */
     public String putStingValue(String fieldName, String fieldValue){
         if(!canPutToMap(fieldName, stringFields)) {return null;}
-        return this.stringFields.put(fieldName, fieldValue);
+        if(fieldName.contains(EXTENTION_STRING)) {return null;}
+        removeExtensions(fieldName);
+        if(fieldValue.length() > MAX_STRING_SIZE){ //split if too large, to display properly in excel
+            //todo this wasn't displaying properly so for now I just made it keep only the first part of the solution. Should fix it later. @Jonathan Morag
+//            return putStringInParts(fieldName, fieldValue);
+            return this.stringFields.put(fieldName, wrapStringCSVSafety(fieldValue.substring(0, MAX_STRING_SIZE - 9) + "..."));
+        }
+        else{
+            //wrap with " for csv compliance
+            return this.stringFields.put(fieldName, wrapStringCSVSafety(fieldValue));
+        }
+    }
+
+    /**
+     * Adds "" marks in case the string might contain ',' to make it safe for CSV.
+     * @param fieldValue - original value.
+     * @return
+     */
+    private String wrapStringCSVSafety(String fieldValue) {
+        return "\"" + fieldValue + "\"";
+    }
+
+    /**
+     * When a String field is too long, it is extended. This removes those extensions if they exist. It is necessary to
+     * do so before replacing the value of the field.
+     * @param fieldName
+     */
+    private void removeExtensions(String fieldName) {
+        int extensionIndex = 1;
+        boolean done = false;
+        while (!done){
+            String oldValue = stringFields.remove(extensionFieldName(fieldName, extensionIndex));
+            done = oldValue == null;
+            extensionIndex++;
+        }
+    }
+
+    private String putStringInParts(String fieldName, String fieldValue) {
+        int extensionIndex = 0;
+        int i = 0;
+        String result = null;
+        for (; i < fieldValue.length(); i+= MAX_STRING_SIZE ) {
+            //create substring
+            int endSubstringIndex = Math.min(i + MAX_STRING_SIZE, fieldValue.length());
+            String wrappedSubstring = wrapStringCSVSafety(fieldValue.substring(i, endSubstringIndex) );
+
+            if(extensionIndex == 0){ // not an extension yet, use original field name.
+                result = stringFields.put(fieldName, wrappedSubstring);
+            }
+            else { //is an extension
+                stringFields.put(extensionFieldName(fieldName, extensionIndex), wrappedSubstring);
+            }
+            extensionIndex++;
+        }
+        return result;
+    }
+
+    private String extensionFieldName(String originalFieldName, int extensionIndex){
+        return originalFieldName + EXTENTION_STRING + extensionIndex;
     }
 
     /**

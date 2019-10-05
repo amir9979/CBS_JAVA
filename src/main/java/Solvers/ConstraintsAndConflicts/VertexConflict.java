@@ -2,6 +2,7 @@ package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
+import Solvers.Move;
 
 /**
  * Represents a conflict between 2 {@link Agent}s, at a certain time, in a certain {@link I_MapCell location}.
@@ -22,6 +23,14 @@ public class VertexConflict extends A_Conflict {
         return new Constraint[]{
                 new Constraint(agent1,time, location),
                 new Constraint(agent2,time, location)};
+    }
+
+    /**
+     * assumes both moves have the same {@link Move#timeNow}.
+     * @return true if these moves have a vertex conflict.
+     */
+    public static boolean haveConflicts(Move move1, Move move2){
+        return move1.currLocation.equals(move2.currLocation);
     }
 
 }

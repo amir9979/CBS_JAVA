@@ -32,13 +32,17 @@ public class Coordinate_2D implements I_Coordinate {
 
     @Override
     public String toString() {
-        return "Coordinate_2D{" +
-                "x_value=" + this.x_value +
-                ", y_value=" + this.y_value +
-                '}';
+        return "(" + this.x_value + "," + this.y_value + ")";
     }
 
-    public float euclideanDistance(I_Coordinate other) {
+    /**
+     * Returns the euclidean distance to another {@link I_Coordinate coordinate}. Should return 0 iff this.equals(other)
+     * return true.  If other is null, or is not of the same runtime type as this, returns -1.
+     * @param other a {@link I_Coordinate coordinate}.
+     * @return the euclidean distance to another {@link I_Coordinate coordinate}. If other is null, or is not of the
+     * same runtime type as this, returns -1.
+     */
+    private float euclideanDistance(I_Coordinate other) {
         //if (this == other) return 0; shouldn't really happen. Even if it will, returned value will be the same.
         if (other == null || getClass() != other.getClass()) return -1;
         Coordinate_2D that = (Coordinate_2D) other;
@@ -47,10 +51,22 @@ public class Coordinate_2D implements I_Coordinate {
                     (this.x_value-that.x_value)*(this.x_value-that.x_value)    );
     }
 
-    public int manhattanDistance(I_Coordinate other) {
+    /**
+     * Returns the manhattan distance to another {@link I_Coordinate coordinate}. Should return 0 iff this.equals(other)
+     * return true.  If other is null, or is not of the same runtime type as this, returns -1.
+     * @param other a {@link I_Coordinate coordinate}.
+     * @return the manhattan distance to another {@link I_Coordinate coordinate}.  If other is null, or is not of the
+     * same runtime type as this, returns -1.
+     */
+    private int manhattanDistance(I_Coordinate other) {
         //if (this == other) return 0; shouldn't really happen. Even if it will, returned value will be the same.
         if (other == null || getClass() != other.getClass()) return -1;
         Coordinate_2D that = (Coordinate_2D) other;
         return Math.abs(this.y_value-that.y_value) + Math.abs(this.x_value-that.x_value);
+    }
+
+    @Override
+    public float distance(I_Coordinate other) {
+        return euclideanDistance(other);
     }
 }
