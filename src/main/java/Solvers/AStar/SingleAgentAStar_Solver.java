@@ -30,6 +30,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private long maximumRuntime;
     private ConstraintSet constraints;
     private InstanceReport instanceReport;
+    private AStarHeuristic heuristicFunction;
     private long startTime;
     private long endTime;
     private boolean abortedOnTimeout;
@@ -72,6 +73,13 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.existingPlan = new SingleAgentPlan(this.agent);
             this.existingPlan.addMove(getFirstMove(this.agent));
             this.existingSolution.putPlan(this.existingPlan);
+        }
+        if(runParameters instanceof  RunParameters_SAAStar){
+            RunParameters_SAAStar parameters = ((RunParameters_SAAStar) runParameters);
+            this.heuristicFunction = parameters.heristicFunction;
+        }
+        else{
+            this.heuristicFunction = new defaultHeuristic();
         }
 
         this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : DEFAULT_TIMEOUT;
@@ -175,7 +183,9 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.move = move;
             this.prev = prevState;
             this.g = g;
-            this.h = getH();
+
+            // must call this last, since it needs the other fields to be initialized already.
+            this.h = calcH();
         }
 
         /*  = getters =  */
@@ -192,17 +202,12 @@ public class SingleAgentAStar_Solver implements I_Solver {
             return g;
         }
 
-        public float getH() {
-            return h;
-        }
-
         public float getF(){
             return g + h;
         }
 
-        // todo - extract heuristic to a separate (provided at runtime) class to support different heuristics.
         private float calcH() {
-            return move.currLocation.getCoordinate().distance(move.agent.target);
+            return SingleAgentAStar_Solver.this.heuristicFunction.getH(this);
         }
 
         public void expand() {
@@ -282,5 +287,13 @@ public class SingleAgentAStar_Solver implements I_Solver {
             return Objects.hash(move.currLocation.hashCode(), move.timeNow);
         }
 
+    }
+
+    private class defaultHeuristic implements AStarHeuristic{
+
+        @Override
+        public float getH(AStarState state) {
+            return state.move.currLocation.getCoordinate().distance(state.move.agent.target);
+        }
     }
 }
