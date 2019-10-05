@@ -72,6 +72,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
                     // Checks validity with instanceProperties:
                     if (! this.checkMapDimensions(dimensions, instanceProperties, reader)){
                         dimensions = null;
+                        break;
                     }
                     String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensions);
 
