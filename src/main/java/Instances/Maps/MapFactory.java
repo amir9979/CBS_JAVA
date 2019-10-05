@@ -48,7 +48,7 @@ public class MapFactory {
                     //look for NORTH neighbor
                     if(yIndex-1 >= 0 && cells[xIndex][yIndex-1] != null){neighbors.add(cells[xIndex][yIndex-1]);}
                     //look for SOUTH neighbor
-                    if(yIndex+1 < xAxis_length && cells[xIndex][yIndex+1] != null){neighbors.add(cells[xIndex][yIndex+1]);}
+                    if(yIndex+1 < yAxis_length && cells[xIndex][yIndex+1] != null){neighbors.add(cells[xIndex][yIndex+1]);}
                     // set cell neighbors
                     currentCell.setNeighbors(neighbors.toArray(new GraphMapCell[0]));
                     // add to allCells

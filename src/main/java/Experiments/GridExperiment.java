@@ -42,6 +42,7 @@ public class GridExperiment extends A_Experiment {
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
             // Todo - what to do with solution
+            System.out.println(solution);
         }
     }
 

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -177,16 +176,16 @@ class SingleAgentPlanTest {
     @Test
     void getStartTime() {
         /*  =as initiated=  */
-        assertEquals(-1, emptyPlanAgent1.getStartTime());
-        assertEquals(0, existingPlanAgent1.getStartTime());
+        assertEquals(-1, emptyPlanAgent1.getPlanStartTime());
+        assertEquals(0, existingPlanAgent1.getPlanStartTime());
         SingleAgentPlan planStartsAt3 = new SingleAgentPlan(agent1, Arrays.asList(new Move(agent1, 4, cell13, cell12)));
-        assertEquals(3, planStartsAt3.getStartTime());
+        assertEquals(3, planStartsAt3.getPlanStartTime());
 
         /*  =when modified=  */
         emptyPlanAgent1.addMove(move2agent1);
         existingPlanAgent1.addMove(move4agent1);
-        assertEquals(1, emptyPlanAgent1.getStartTime());
-        assertEquals(0, existingPlanAgent1.getStartTime());
+        assertEquals(1, emptyPlanAgent1.getPlanStartTime());
+        assertEquals(0, existingPlanAgent1.getPlanStartTime());
     }
 
     @Test
@@ -207,18 +206,42 @@ class SingleAgentPlanTest {
     @Test
     void getElapsedTime() {
         /*  =as initiated=  */
-        assertEquals(-1, emptyPlanAgent1.getTotalTime());
-        assertEquals(3, existingPlanAgent1.getTotalTime());
+        assertEquals(0, emptyPlanAgent1.size());
+        assertEquals(3, existingPlanAgent1.size());
         SingleAgentPlan planStartsAt3 = new SingleAgentPlan(agent1, Arrays.asList(new Move(agent1, 4, cell13, cell12)));
-        assertEquals(1, planStartsAt3.getTotalTime());
+        assertEquals(1, planStartsAt3.size());
 
         /*  =when modified=  */
         emptyPlanAgent1.addMove(move2agent1);
-        assertEquals(1, emptyPlanAgent1.getTotalTime());
+        assertEquals(1, emptyPlanAgent1.size());
         emptyPlanAgent1.addMove(move3agent1);
-        assertEquals(2, emptyPlanAgent1.getTotalTime());
+        assertEquals(2, emptyPlanAgent1.size());
 
         existingPlanAgent1.addMove(move4agent1);
-        assertEquals(4, existingPlanAgent1.getTotalTime());
+        assertEquals(4, existingPlanAgent1.size());
+    }
+
+    @Test
+    void testToString(){
+        System.out.println(existingPlanAgent1.toString());
+        System.out.println(existingPlanAgent2.toString());
+
+    }
+
+    @Test
+    void moveAt() {
+        assertEquals(move1agent1, existingPlanAgent1.moveAt(1));
+        assertEquals(move2agent1, existingPlanAgent1.moveAt(2));
+        existingPlanAgent1.addMove(move4agent1);
+        assertEquals(move4agent1, existingPlanAgent1.moveAt(4));
+
+        //starting not at time 1
+        move2agent1 = new Move(agent1, 2, cell13, cell14);
+        emptyPlanAgent1.addMove(move2agent1);
+        assertEquals(move2agent1, emptyPlanAgent1.moveAt(2));
+        emptyPlanAgent1.addMove(move3agent1);
+        emptyPlanAgent1.addMove(move4agent1);
+        assertEquals(move3agent1, emptyPlanAgent1.moveAt(3));
+        assertEquals(move4agent1, emptyPlanAgent1.moveAt(4));
     }
 }

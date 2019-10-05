@@ -67,11 +67,8 @@ public class Coordinate_3D implements I_Coordinate {
                 '}';
     }
 
-    public float euclideanDistance(I_Coordinate other) {
-        return 0;
-    }
-
-    public int manhattanDistance(I_Coordinate other) {
+    @Override
+    public float distance(I_Coordinate other) {
         return 0;
     }
 }
