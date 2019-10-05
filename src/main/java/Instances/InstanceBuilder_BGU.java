@@ -72,7 +72,6 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
                     // Checks validity with instanceProperties:
                     if (! this.checkMapDimensions(dimensions, instanceProperties, reader)){
                         dimensions = null;
-                        // todo - continue
                     }
                     String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensions);
 
@@ -94,7 +93,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
                     int[] numOfAgentsFromProperties = ( instanceProperties == null ? null : instanceProperties.numOfAgents);
                     int index = I_InstanceBuilder.equalsAny(agents.length, numOfAgentsFromProperties);
-                    if( index == -1 ){
+                    if( numOfAgentsFromProperties != null && index == -1 ){
                         agents = null;
                     }
 
@@ -148,9 +147,9 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return true;
         }
 
-        boolean isEquals = I_InstanceBuilder.equalsAll(dimensions,dimensionsFromProperties);
+        int index = I_InstanceBuilder.equalsAny(dimensions[0],dimensionsFromProperties);
 
-        if( isEquals ){
+        if( dimensionsFromProperties != null && index != -1 ){
             return true;
         }
 

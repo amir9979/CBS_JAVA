@@ -4,6 +4,8 @@ import IO_Package.Enum_IO;
 import IO_Package.IO_Manager;
 import IO_Package.Reader;
 import Instances.Agents.Agent;
+import Instances.Maps.Coordinate_2D;
+import Instances.Maps.Coordinate_3D;
 import Instances.Maps.Enum_MapCellType;
 import Instances.Maps.GraphMap;
 
