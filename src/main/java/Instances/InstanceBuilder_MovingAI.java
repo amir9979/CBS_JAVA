@@ -4,6 +4,8 @@ import IO_Package.Enum_IO;
 import IO_Package.IO_Manager;
 import IO_Package.Reader;
 import Instances.Agents.Agent;
+import Instances.Maps.Coordinate_2D;
+import Instances.Maps.Coordinate_3D;
 import Instances.Maps.Enum_MapCellType;
 import Instances.Maps.GraphMap;
 
@@ -21,7 +23,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     private final String INDICATOR_WIDTH = "width";
 
     private final String SEPARATOR_DIMENSIONS = " ";
-
 
     private final int defaultNumOfAgents = 10;
 
@@ -46,50 +47,65 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     @Override
     // todo - change to void!
     public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
-
         if (!(instancePath instanceof InstanceManager.Moving_AI_Path)) {
             return;
         }
-
         InstanceManager.Moving_AI_Path moving_ai_path = (InstanceManager.Moving_AI_Path) instancePath;
-
 
         MAPF_Instance mapf_instance = null;
         GraphMap graphMap = getMap(moving_ai_path, instanceProperties);
 
-
         // create agent properties
-        int[] numOfAgentsFromProperties = (instanceProperties == null ? new int[]{this.defaultNumOfAgents} : instanceProperties.numOfAgents);
+        int[] numOfAgentsFromProperties = (instanceProperties == null ? new int[]{this.defaultNumOfAgents}
+        : instanceProperties.numOfAgents);
 
-        int numOfBatches = getNumOfBatches(numOfAgentsFromProperties);
+        int numOfBatches = 5;
 
         String[][] batchesLines = getBatchesLines(moving_ai_path,numOfBatches);
-
 
         int curBatch = 0;
         int prevNumOfAgents = 0;
 
         for (int i = 0; i < numOfAgentsFromProperties.length; i++) {
-
-            curBatch = curBatch + (prevNumOfAgents / 10) + 1;
-            AgentsProperties agentsProperties = new AgentsProperties(numOfAgentsFromProperties[i], curBatch);
-            Agent[] agents = getAgents(batchesLines, agentsProperties);
-
-
-            prevNumOfAgents = numOfAgentsFromProperties[i];
+           // curBatch = curBatch + (prevNumOfAgents / 10) + 1;
+            //AgentsProperties agentsProperties = new AgentsProperties(numOfAgentsFromProperties[i], curBatch);
+            //Agent[] agents = getAgents(batchesLines, agentsProperties);
+            int numberOfAgents =numOfAgentsFromProperties[i];
+            Agent[] agents = getAgents(moving_ai_path, instanceProperties,2,numberOfAgents) ;
+            //prevNumOfAgents = numOfAgentsFromProperties[i];
 
             if (instanceName == null || graphMap == null || agents == null) {
                 continue; // Invalid parameters
             }
-
             mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
 
             this.instanceStack.push(mapf_instance);
-
         }
 
     }
 
+    private String[][] getBatchesLines(InstanceManager.Moving_AI_Path moving_ai_path, int numOfBatches) {
+        String[][] batchLines = new String [numOfBatches][10];
+
+        Reader reader = new Reader();
+        Enum_IO enum_io = reader.openFile(moving_ai_path.path);
+        if (!enum_io.equals(Enum_IO.OPENED)) {
+            return null; // couldn't open the file
+        }
+
+        /*  =Get data from reader=  */
+        String nextLine = reader.getNextLine(); // First line
+
+        for(int i=0 ; i<numOfBatches;i++){
+            for (int j=0;j<10;j++){
+                nextLine = reader.getNextLine();
+                batchLines[i][j]=nextLine;
+            }
+        }
+        reader.closeFile(); // No more data in the file
+
+        return batchLines;
+    }
 
 
     private GraphMap getMap( InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties ){
@@ -155,45 +171,105 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
     }
 
+    /***  =Build Agents=  ***/
 
-    private Agent[] getAgents( String[][] batchesAsStrings, AgentsProperties agentsProperties){
-
-        // imp - Lidor
-
-        // init values
-        int batch = ( agentsProperties == null ? 1 : agentsProperties.beginAtBatch);
-        int numOfAgents = ( agentsProperties == null ? this.defaultNumOfAgents : agentsProperties.numOfAgents);
-
-        int batchInArray = batch - 1;
-
-
-
-
-        return null;
-    }
-
-
-    private String[][] getBatchesLines(InstanceManager.Moving_AI_Path moving_ai_path, int numOfBatches) {
-        // imp - Lidor
-
-
-        String[][] batchesAsLines = new String[numOfBatches][10];
-        Reader reader = new Reader();
-        String scenarioPath = (moving_ai_path).scenarioPath;
-        Enum_IO enum_io = reader.openFile( scenarioPath );
-        if( !enum_io.equals(Enum_IO.OPENED) ){
-
-            // todo - add agents to array
-
-
-            return null; // couldn't open the file
+    private Agent buildSingleAgent(int dimensions, String line){
+        //split line of an agent
+        String[] agentLine = line.split("\t+");
+        if( agentLine == null || agentLine.length < 1){
+            return null; // invalid agent line
         }
-        return null;
+
+        //split batch number
+        int agentBatch = Integer.parseInt(agentLine[0]);
+        //split coordinate
+        String[] agentCoordinat =agentLine[2].split("\\s+");
+
+        if(dimensions == 2) {
+            /*      source values    */
+            int source_xValue = Integer.valueOf(agentCoordinat[4]); // check with Morag if first is goal
+            int source_yValue = Integer.valueOf(agentCoordinat[5]);
+            Coordinate_2D source = new Coordinate_2D(source_xValue, source_yValue);
+            /*      Target values    */
+            int target_xValue = Integer.valueOf(agentCoordinat[2]);
+            int target_yValue = Integer.valueOf(agentCoordinat[3]);
+            Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
+
+            return new Agent(agentBatch, source, target);
+        }
+
+
+        if(dimensions == 3) {
+            /*      source values    */
+            int source_xValue = Integer.valueOf(agentLine[5]);
+            int source_yValue = Integer.valueOf(agentLine[6]);
+            int source_zValue = Integer.valueOf(agentLine[7]);
+            Coordinate_3D source = new Coordinate_3D(source_xValue, source_yValue, source_zValue);
+            /*      Target values    */
+            int target_xValue = Integer.valueOf(agentLine[2]);
+            int target_yValue = Integer.valueOf(agentLine[3]);
+            int target_zValue = Integer.valueOf(agentLine[4]);
+            Coordinate_3D target = new Coordinate_3D(target_xValue, target_yValue, target_zValue);
+
+            return new Agent(agentBatch, source, target);
+        }
+
+        return null; // Bad dimensions input
     }
 
 
+    private Agent[] buildAgents(Reader reader, int dimensions,InstanceProperties instanceProperties) {
 
 
+        String nextLine = reader.getNextLine(); // expected version - iעnore
+        if (nextLine == null || !IO_Manager.isPositiveInt(nextLine)) {
+            return null; // num of agents should be a positive int
+        }
+        nextLine = reader.getNextLine();
+        if (nextLine == null || !IO_Manager.isPositiveInt(nextLine)) {
+            return null; //
+        }
+        //check how we can return num of agents
+            int numOfAgents = (instanceProperties.getNumOfAgents() == null ? this.defaultNumOfAgents : instanceProperties.numOfAgents[0]);
+            Agent[] agents = new Agent[numOfAgents];
+
+            for (int i = 0; i < agents.length; i++) {
+                nextLine = reader.getNextLine();
+
+                Agent agentToAdd = buildSingleAgent(dimensions, nextLine);
+                if (agentToAdd == null) {
+                    return null; // Bad agent line
+                }
+                agents[i] = agentToAdd;
+            }
+
+        return agents;
+    }
+
+
+        private Agent[] getAgents (InstanceManager.Moving_AI_Path moving_ai_path,InstanceProperties instanceProperties
+        ,int dimensions, int numberOfAgents ){
+
+            String[][] batchesAsStrings = getBatchesLines(moving_ai_path,3);
+            // imp - Lidor
+            int numOfBatches= batchesAsStrings.length;
+            // init values
+             //(agentsProperties == null ? 1 : agentsProperties.beginAtBatch);
+            Agent[] agents = new Agent[numberOfAgents];
+            //int batchInArray = batch - 1;
+            int nextAgentPointer=0;
+            for(int i=0 ; i<numOfBatches;i++) {
+                for (int j = 0; j < 10; j++) {
+                    Agent agentToAdd = buildSingleAgent(dimensions, batchesAsStrings[i][j]);
+                    if (agentToAdd == null) {
+                        return null; // Bad agent line
+                    }
+                    agents[nextAgentPointer] = agentToAdd;
+                    nextAgentPointer++;
+                }
+            }
+            return agents;
+        }
 
 
     @Override
@@ -203,16 +279,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         }
         return null;
     }
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public InstanceManager.InstancePath[] getInstancesPaths(String directoryPath) {
@@ -271,20 +337,10 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         curBatch = curBatch + (prevNumOfAgents / 10) + 1;
         return curBatch;
 
-
     }
 
 
-    private class AgentsProperties{
 
-        public final int numOfAgents;
-        public final int beginAtBatch;
-
-        public AgentsProperties(int numOfAgents, int beginAtBatch) {
-            this.numOfAgents = numOfAgents;
-            this.beginAtBatch = beginAtBatch;
-        }
-    }
 
 
 }

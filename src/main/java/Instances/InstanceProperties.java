@@ -28,7 +28,12 @@ public class InstanceProperties {
         return this.obstacles; // returns 0.15
     }
 
-
+    public int[] getNumOfAgents(){
+        return this.numOfAgents;
+    }
+    public int getArrayAgentsSize(){
+        return this.numOfAgents.length;
+    }
 
 
 
