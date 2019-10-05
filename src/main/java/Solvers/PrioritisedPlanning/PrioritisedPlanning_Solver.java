@@ -6,7 +6,6 @@ import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
 import Solvers.ConstraintsAndConflicts.Constraint;
-import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,7 +28,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     /*  =  = Fields related to the run =  */
 
     private long maximumRuntime;
-    private ConstraintSet constraints;
+    private List<Constraint> constraints;
     private InstanceReport instanceReport;
     private boolean commitReport;
 
@@ -87,8 +86,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.instance = instance;
 
         this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
-        this.constraints = runParameters.constraints == null ? new ConstraintSet()
-                : new ConstraintSet(runParameters.constraints);
+        this.constraints = runParameters.constraints == null ? new ArrayList<>()
+                : new ArrayList<>(runParameters.constraints);
         this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
                 : runParameters.instanceReport;
         this.commitReport = runParameters.instanceReport == null;
@@ -116,7 +115,6 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     }
 
     /*  = algorithm =  */
-
 
     /**
      * The main loop that solves the MAPF problem.
