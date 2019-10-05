@@ -77,6 +77,10 @@ public class RunParameters {
         this(null, null, existingSolution);
     }
 
+    public RunParameters(long timeout) {
+        this(timeout, null, null, null);
+    }
+
     public RunParameters() {
         this(null, null, null);
     }

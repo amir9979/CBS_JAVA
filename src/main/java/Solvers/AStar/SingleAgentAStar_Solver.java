@@ -3,6 +3,7 @@ package Solvers.AStar;
 import Instances.Agents.Agent;
 import Instances.Agents.OnlineAgent;
 import Instances.MAPF_Instance;
+import Instances.Maps.I_Coordinate;
 import Instances.Maps.I_Map;
 import Instances.Maps.I_MapCell;
 import Metrics.InstanceReport;
@@ -12,12 +13,19 @@ import Solvers.ConstraintsAndConflicts.ConstraintSet;
 import java.util.*;
 
 /**
- * An A*
+ * An A* solver that only solves single agent problems. It assumes the first {@link Agent} from {@link MAPF_Instance instances}
+ * that it is given is the agent to solve for.
+ * By default, it uses {@link Instances.Maps.I_Coordinate#distance(I_Coordinate)} as a heuristic.
  */
 public class SingleAgentAStar_Solver implements I_Solver {
-    //testme
 
-    private static final int MAX_STATES_THRESHOLD = Integer.MAX_VALUE;
+    /**
+     * Since A* should solve even very large single agent problems very quickly, set default timeout to 3 seconds.
+     * A timeout would therefore very likely mean the problem is unsolvable.
+     * Without a timeout, unsolvable problems would not resolve, since new states with higher time ({@link Move#timeNow},
+     * would continue to be generated ad infinitum. This would eventually result in a heap overflow.
+     */
+    protected static final long DEFAULT_TIMEOUT = 3 * 1000;
 
     private long maximumRuntime;
     private ConstraintSet constraints;
@@ -26,6 +34,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private long endTime;
     private boolean abortedOnTimeout;
     private Queue<AStarState> openList;
+    private Map<AStarState, AStarState> openListStates;
     private Set<AStarState> closed;
     private Agent agent;
     private I_Map map;
@@ -33,6 +42,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private Solution existingSolution;
     private int expandedNodes;
     private int generatedNodes;
+
+    /*  = interface implementation =  */
 
     @Override
     public Solution solve(MAPF_Instance instance, RunParameters parameters) {
@@ -43,6 +54,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
         return solution;
     }
 
+    /*  = set up =  */
 
     protected void init(MAPF_Instance instance, RunParameters runParameters){
         this.instanceReport = runParameters.instanceReport;
@@ -62,12 +74,14 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.existingSolution.putPlan(this.existingPlan);
         }
 
+        this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : DEFAULT_TIMEOUT;
         this.abortedOnTimeout = false;
         this.startTime = System.currentTimeMillis();
         this.endTime = 0;
-        this.openList = new PriorityQueue<AStarState>(Comparator.comparing(AStarState::getF));
+        this.openList = new PriorityQueue<>(Comparator.comparing(AStarState::getF));
+        this.openListStates = new HashMap<>();
         this.expandedNodes = 0;
-        this.closed = new HashSet<AStarState>();
+        this.closed = new HashSet<>();
         this.generatedNodes = 0;
     }
 
@@ -75,30 +89,50 @@ public class SingleAgentAStar_Solver implements I_Solver {
         //first time is the time of the agent, or 1.
         int moveTime = this.agent instanceof OnlineAgent ? ((OnlineAgent)this.agent).arrivalTime + 1 : 1;
         // first move is always to stay at current location (thus the minimal solution length is 1).
-        Move firstMove = new Move(this.agent, moveTime, this.map.getMapCell(this.agent.source), this.map.getMapCell(this.agent.source));
-        return firstMove;
+        return new Move(this.agent, moveTime, this.map.getMapCell(this.agent.source), this.map.getMapCell(this.agent.source));
     }
 
-    protected Solution solveAStar() {
-        this.openList.add(generateRootState());
-        while (!openList.isEmpty() && openList.size() < MAX_STATES_THRESHOLD){
-            //dequeu
-            AStarState currentState = openList.remove();
-            if(!closed.contains(currentState)){ // if you implement having no duplicates in open, then this is unnecessary
-                if (isGoalState(currentState)){
-                    currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
-                    return this.existingSolution;
-                }
-                else{ //expand
-                    closed.add(currentState);
-                    this.expandedNodes++;
-                    currentState.expand(); //doesn't generate closed or duplicate states
-//                openList.addAll(currentState.generateChildStates());
-                }
+    /*  = A* algorithm =  */
 
+    protected Solution solveAStar() {
+        addToOpen(generateRootState());
+        while (!openList.isEmpty() ){
+            if(checkTimeout()) {return null;}
+            //dequeu
+            AStarState currentState = dequeueFromOpen();
+
+            if (isGoalState(currentState)){
+                currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
+                return this.existingSolution;
+            }
+            else{ //expand
+                closed.add(currentState);
+                this.expandedNodes++;
+                currentState.expand(); //doesn't generate closed or duplicate states
             }
         }
         return null; //no goal state found (problem unsolvable)
+    }
+
+    /*  = auxiliary methods =  */
+
+    private boolean addToOpen(AStarState child) {
+        openListStates.put(child, child);
+        return openList.add(child);
+    }
+
+    private AStarState dequeueFromOpen() {
+        AStarState state = openList.remove();
+        openListStates.remove(state);
+        return state;
+    }
+
+    protected boolean checkTimeout() {
+        if(System.currentTimeMillis()-startTime > maximumRuntime){
+            this.abortedOnTimeout = true;
+            return true;
+        }
+        return false;
     }
 
     private boolean isGoalState(AStarState state) {
@@ -108,6 +142,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private AStarState generateRootState() {
         return new AStarState(existingPlan.moveAt(existingPlan.getEndTime()),null, /*g=number of moves*/existingPlan.size());
     }
+
+    /*  = wind down =  */
 
     protected void writeMetricsToReport(Solution solution) {
         if(instanceReport != null){
@@ -127,8 +163,10 @@ public class SingleAgentAStar_Solver implements I_Solver {
         this.existingPlan = null;
     }
 
-    private class AStarState{
-        public Move move;
+    /*  = inner classes =  */
+
+    public class AStarState{
+        private Move move;
         private AStarState prev;
         private int g;
         private float h;
@@ -140,8 +178,30 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.h = getH();
         }
 
+        /*  = getters =  */
+
+        public Move getMove() {
+            return move;
+        }
+
+        public AStarState getPrev() {
+            return prev;
+        }
+
+        public int getG() {
+            return g;
+        }
+
+        public float getH() {
+            return h;
+        }
+
+        public float getF(){
+            return g + h;
+        }
+
         // todo - extract heuristic to a separate (provided at runtime) class to support different heuristics.
-        private float getH() {
+        private float calcH() {
             return move.currLocation.getCoordinate().distance(move.agent.target);
         }
 
@@ -161,23 +221,23 @@ public class SingleAgentAStar_Solver implements I_Solver {
                         // for non consistent heuristics - if the new one has a lower f, remove the old one from closed
                         // and add the new one to open
                     }
-                    // todo - commented for now because too expensive. need to reduce runtime of getFromOpen(). if implemented, remove check of !closed.contains(currentState) in solveAStar()
-//                    else if(null != (existingState = getFromOpen(child)) ){ //an equal state is waiting in open
-//                        //keep the one with min G
-//                        removeMaxGAndAddMinG(child, existingState); //O(LOG(n))
-//                    }
+                    else if(null != (existingState = getFromOpen(child)) ){ //an equal state is waiting in open
+                        //keep the one with min G
+                        keepTheStateWithMinG(child, existingState); //O(LOGn)
+                    }
                     else{ // it's a new state
-                        openList.add(child);
+                        addToOpen(child);
                     }
                 }
             }
         }
 
-        private void removeMaxGAndAddMinG(AStarState newState, AStarState existingState) {
+        private void keepTheStateWithMinG(AStarState newState, AStarState existingState) {
             boolean shouldSwap = newState.g < existingState.g;
             if(shouldSwap){
                 openList.remove(existingState);
-                openList.add(newState);
+                // no need to remove from openListStates because going to put a new value there anyway.
+                addToOpen(newState);
             }
         }
 
@@ -186,10 +246,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
          * looks for a {@link AStarState} equal to state, in {@link #openList}. If found, returns the found state, else returns null.
          */
         private AStarState getFromOpen(AStarState state) {
-            for(AStarState existingState : openList){
-                if(state.equals(existingState)) return existingState;
-            }
-            return null;
+            return openListStates.get(state);
         }
 
         public SingleAgentPlan backTracePlan() {
@@ -223,10 +280,6 @@ public class SingleAgentAStar_Solver implements I_Solver {
         @Override
         public int hashCode() {
             return Objects.hash(move.currLocation.hashCode(), move.timeNow);
-        }
-
-        public float getF(){
-            return g + h;
         }
 
     }
