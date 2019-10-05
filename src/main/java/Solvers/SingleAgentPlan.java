@@ -44,6 +44,7 @@ public class SingleAgentPlan implements Iterable<Move> {
     }
 
     private static boolean isValidNextMoveForAgent(List<Move> currentMoves, Move newMove, Agent agent){
+        if (newMove == null){return false;}
         return agent.equals(newMove.agent) &&
                 ( currentMoves.size() == 0 ||
                         newMove.timeNow - currentMoves.get(currentMoves.size()-1).timeNow == 1 );
@@ -89,6 +90,7 @@ public class SingleAgentPlan implements Iterable<Move> {
      * @param newMoves a sequence of moves to append to the current plan.
      */
     void addMoves(List<Move> newMoves){
+        if(newMoves == null){throw new IllegalArgumentException();}
         List<Move> tmpMoves = new ArrayList<>(this.moves);
         tmpMoves.addAll(newMoves);
         if(isValidMoveSequenceForAgent(tmpMoves, agent)){
