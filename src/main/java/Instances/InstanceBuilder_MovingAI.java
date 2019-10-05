@@ -240,7 +240,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     public static void main(String[] args) {
         InstanceBuilder_MovingAI instanceBuilder_movingAI = new InstanceBuilder_MovingAI();
 
-        InstanceManager.InstancePath[] instancePaths = instanceBuilder_movingAI.getInstancesPaths("D:\\CBS_JAVA\\src\\test\\resources\\Instances\\MovingAI");
+        InstanceManager.InstancePath[] instancePaths = instanceBuilder_movingAI.getInstancesPaths(IO_Manager.buildPath(new String[]{IO_Manager.testResources_Directory,"Instances\\MovingAI"}));
         InstanceManager.Moving_AI_Path moving_ai_path = (InstanceManager.Moving_AI_Path) instancePaths[0];
 
         InstanceProperties properties = new InstanceProperties(new int[]{512,512},null, new int[]{5,10},"-");
