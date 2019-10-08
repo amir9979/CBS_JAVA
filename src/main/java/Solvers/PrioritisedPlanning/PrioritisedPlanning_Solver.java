@@ -65,6 +65,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     public Solution solve(MAPF_Instance instance, RunParameters parameters) {
         init(instance, parameters);
         Solution solution = solvePrioritisedPlanning(this.agents, instance, constraints);
+        // todo - solution is null
         writeMetricsToReport(solution);
         releaseMemory();
         return solution;

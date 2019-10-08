@@ -17,7 +17,7 @@ public class Main {
 
         simpleRun();
 
-        moragRequestedRun();
+        //moragRequestedRun();
 
 
 

@@ -4,7 +4,9 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Solvers.AStar.AStar_Solver;
+import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.I_Solver;
+import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
 
 import java.util.ArrayList;
 
@@ -13,7 +15,7 @@ public class SimpleRunManager extends A_RunManager {
 
     @Override
     void setSolvers() {
-        this.solvers.add(new AStar_Solver());
+        this.solvers.add(new PrioritisedPlanning_Solver(new SingleAgentAStar_Solver()));
     }
 
     @Override
