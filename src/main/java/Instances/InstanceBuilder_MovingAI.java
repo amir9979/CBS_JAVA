@@ -4,10 +4,7 @@ import IO_Package.Enum_IO;
 import IO_Package.IO_Manager;
 import IO_Package.Reader;
 import Instances.Agents.Agent;
-import Instances.Maps.Coordinate_2D;
-import Instances.Maps.Coordinate_3D;
-import Instances.Maps.Enum_MapCellType;
-import Instances.Maps.GraphMap;
+import Instances.Maps.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +20,14 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     private final String INDICATOR_WIDTH = "width";
 
     private final String SEPARATOR_DIMENSIONS = " ";
+    private final String SEPARATOR_MAP = "";
 
 
+    /*  =Default Values=    */
+    private final int defaultNumOfDimensions = 2;
+    private final Integer defaultObstaclePercentage = -1;
     private final int defaultNumOfAgents = 10;
+    private final int defaultNumOfBatches = 5;
 
     private final Stack<MAPF_Instance> instanceStack = new Stack<>();
 
@@ -45,6 +47,11 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
 
+
+
+
+
+
     @Override
     // todo - change to void!
     public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
@@ -58,27 +65,20 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
         MAPF_Instance mapf_instance = null;
         GraphMap graphMap = getMap(moving_ai_path, instanceProperties);
+        if( graphMap == null ){
+            return;
+        }
 
 
         // create agent properties
         int[] numOfAgentsFromProperties = (instanceProperties == null ? new int[]{this.defaultNumOfAgents} : instanceProperties.numOfAgents);
 
-        int numOfBatches = getNumOfBatches(numOfAgentsFromProperties);
 
-        String[][] batchesLines = getBatchesLines(moving_ai_path,numOfBatches);
-
-
-        int curBatch = 0;
-        int prevNumOfAgents = 0;
+        // Blocking - add implementation of 'getAgents'
 
         for (int i = 0; i < numOfAgentsFromProperties.length; i++) {
 
-            curBatch = curBatch + (prevNumOfAgents / 10) + 1;
-            AgentsProperties agentsProperties = new AgentsProperties(numOfAgentsFromProperties[i], curBatch);
-            Agent[] agents = getAgents(batchesLines, agentsProperties);
-
-
-            prevNumOfAgents = numOfAgentsFromProperties[i];
+            Agent[] agents = null;
 
             if (instanceName == null || graphMap == null || agents == null) {
                 continue; // Invalid parameters
@@ -105,8 +105,8 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
         /*  =Init values=  */
         GraphMap graphMap = null;
-        int[] dimensionsFromProperties = ( instanceProperties == null ? null : instanceProperties.boardSize);
-        int[] dimensions = new int[2]; // todo - works only with 2d as of now
+        MapDimensions dimensionsFromProperties = ( instanceProperties == null || instanceProperties.mapSize == null ? new MapDimensions() : instanceProperties.mapSize);
+        MapDimensions dimensionsFromFile = new MapDimensions(); // todo - works only with 2d as of now
 
 
 
@@ -120,30 +120,34 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
             if(nextLine.startsWith(this.INDICATOR_HEIGHT)){
                 String[] splitedLineHeight = nextLine.split(this.SEPARATOR_DIMENSIONS);
                 if( IO_Manager.isPositiveInt(splitedLineHeight[1])){
-                    dimensions[0] = Integer.parseInt(splitedLineHeight[1]);
-                    if( dimensionsFromProperties != null && dimensions[0] != dimensionsFromProperties[0]){
+                    dimensionsFromFile.yAxis_length = Integer.parseInt(splitedLineHeight[1]);
+                    dimensionsFromFile.numOfDimensions++;
+                    if( dimensionsFromProperties.yAxis_length > 0
+                            && dimensionsFromFile.yAxis_length != dimensionsFromProperties.yAxis_length ){
                         reader.closeFile();
-                        return null;
+                        return null; // Bad yAxis length
                     }
                 }
 
             }else if ( nextLine.startsWith(this.INDICATOR_WIDTH) ){
                 String[] splitedLineWidth = nextLine.split(this.SEPARATOR_DIMENSIONS);
                 if( IO_Manager.isPositiveInt(splitedLineWidth[1])){
-                    dimensions[1] = Integer.parseInt(splitedLineWidth[1]);
-                    if( dimensionsFromProperties != null && dimensions[1] != dimensionsFromProperties[1]){
+                    dimensionsFromFile.xAxis_length = Integer.parseInt(splitedLineWidth[1]);
+                    dimensionsFromFile.numOfDimensions++;
+                    if( dimensionsFromProperties.xAxis_length > 0
+                            && dimensionsFromFile.xAxis_length != dimensionsFromProperties.xAxis_length ){
                         reader.closeFile();
-                        return null;
+                        return null; // Bad xAxis length
                     }
                 }
 
             }else if( nextLine.startsWith(this.INDICATOR_MAP) ){
-                String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensions);
+                String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensionsFromFile);
 
                 // If instanceProperties is not null check the obstacle percentage
-                Integer obstaclePercentage = ( instanceProperties == null ? -1 : instanceProperties.getObstaclePercentage());
+                Integer obstaclePercentage = ( instanceProperties == null ? this.defaultObstaclePercentage : instanceProperties.getObstaclePercentage());
                 // build map
-                graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, dimensions.length, cellTypeHashMap, obstaclePercentage);
+                graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, dimensionsFromFile, this.cellTypeHashMap, obstaclePercentage);
 
                 break;
             }
@@ -157,41 +161,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
     }
 
-
-    private Agent[] getAgents( String[][] batchesAsStrings, AgentsProperties agentsProperties){
-
-        // imp - Lidor
-
-        // init values
-        int batch = ( agentsProperties == null ? 1 : agentsProperties.beginAtBatch);
-        int numOfAgents = ( agentsProperties == null ? this.defaultNumOfAgents : agentsProperties.numOfAgents);
-
-        int batchInArray = batch - 1;
-
-
-
-
-        return null;
-    }
-
-
-    private String[][] getBatchesLines(InstanceManager.Moving_AI_Path moving_ai_path, int numOfBatches) {
-        // imp - Lidor
-
-
-        String[][] batchesAsLines = new String[numOfBatches][10];
-        Reader reader = new Reader();
-        String scenarioPath = (moving_ai_path).scenarioPath;
-        Enum_IO enum_io = reader.openFile( scenarioPath );
-        if( !enum_io.equals(Enum_IO.OPENED) ){
-
-            // todo - add agents to array
-
-
-            return null; // couldn't open the file
-        }
-        return null;
-    }
 
 
 
@@ -239,53 +208,26 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
 
-    public static void main(String[] args) {
-        InstanceBuilder_MovingAI instanceBuilder_movingAI = new InstanceBuilder_MovingAI();
-
-        InstanceManager.InstancePath[] instancePaths = instanceBuilder_movingAI.getInstancesPaths(IO_Manager.buildPath(new String[]{IO_Manager.testResources_Directory,"Instances\\MovingAI"}));
-        InstanceManager.Moving_AI_Path moving_ai_path = (InstanceManager.Moving_AI_Path) instancePaths[0];
-
-        InstanceProperties properties = new InstanceProperties(new int[]{512,512},null, new int[]{5,10},"-");
-        instanceBuilder_movingAI.prepareInstances("Default name", new InstanceManager.Moving_AI_Path(moving_ai_path.path,moving_ai_path.scenarioPath),properties);
-
-        MAPF_Instance nextInstance = instanceBuilder_movingAI.getNextExistingInstance();
-        while (nextInstance != null){
-            System.out.println("Got another instance (testing only)");
-            nextInstance = instanceBuilder_movingAI.getNextExistingInstance();
-        }
-    }
-
-
 
 
     private int getNumOfBatches(int[] values){
-        if( values == null ){
-            return 5; // default num of batches
+        if( values == null || values.length == 0){
+            return this.defaultNumOfBatches; // default num of batches
         }
         int curBatch = 0;
-        int prevNumOfAgents = 0;
 
-        for (int i = 0; i < values.length; i++) {
-            curBatch = curBatch + (prevNumOfAgents / 10) + 1;
-            prevNumOfAgents = values[i];
+        for (int i = 1; i < values.length + 1; i++) {
+            // Examples:
+            // values[i-1] = 15 -> division = 1.5 -> ( 1.5 > 1 ) addition = 1
+            // values[i-1] = 20 -> division = 2.0 -> ( 2.0 !> 2 )addition = 0
+            double division = values[i-1] / 10.0;
+            int addition = (division > (int)division ? 1 : 0);
+            curBatch = curBatch + (int)division + addition;
         }
 
-        curBatch = curBatch + (prevNumOfAgents / 10) + 1;
         return curBatch;
 
 
-    }
-
-
-    private class AgentsProperties{
-
-        public final int numOfAgents;
-        public final int beginAtBatch;
-
-        public AgentsProperties(int numOfAgents, int beginAtBatch) {
-            this.numOfAgents = numOfAgents;
-            this.beginAtBatch = beginAtBatch;
-        }
     }
 
 

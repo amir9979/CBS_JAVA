@@ -19,6 +19,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     private final String SEPARATOR_AGENTS = ",";
     private final String INDICATOR_MAP = "Grid:";
     private final String SEPARATOR_DIMENSIONS = ",";
+    private final String SEPARATOR_MAP = "";
 
 
     private final Stack<MAPF_Instance> instanceStack = new Stack<>();
@@ -29,7 +30,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     private final char EMPTY = '.';
     private final char WALL = '@';
 
-    private HashMap<Character,Enum_MapCellType> cellTypeHashMap = new HashMap<Character, Enum_MapCellType>(){{
+    private HashMap<Character,Enum_MapCellType> cellTypeHashMap = new HashMap<>(){{
         put(EMPTY,Enum_MapCellType.EMPTY);
         put(WALL,Enum_MapCellType.WALL);
     }};
@@ -37,10 +38,19 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
 
+    /*  =Default Values=    */
+    private final int defaultNumOfDimensions = 2;
+    private final Integer defaultObstaclePercentage = -1;
+    private final int[] defaultDimensions = new int[0];
+    private final int[] defaultNumOfAgents = new int[0];
+
+
+
+
 
     private MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
 
-
+        // Try to open file
         Reader reader=new Reader();
         Enum_IO enum_io =reader.openFile(instancePath.path);
         if( !enum_io.equals(Enum_IO.OPENED) ){
@@ -50,10 +60,9 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
         /*  =Init values=  */
         MAPF_Instance mapf_instance = null;
-        int[] dimensionsFromProperties = ( instanceProperties == null ? null : instanceProperties.boardSize);
         GraphMap graphMap = null;
         Agent[] agents = null;
-        int[] dimensions = null;
+        MapDimensions mapDimensionsFromFile = null;
 
 
         /*  =Get data from reader=  */
@@ -66,39 +75,39 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
                 case INDICATOR_MAP:
                     String dimensionsAsString = reader.getNextLine();
-                    dimensions = getDimensions(dimensionsAsString);
-
-
-                    // Checks validity with instanceProperties:
-                    if (! this.checkMapDimensions(dimensions, instanceProperties, reader)){
-                        dimensions = null;
+                    mapDimensionsFromFile = getMapDimensions(dimensionsAsString);
+                    // Checks validity of dimensions:
+                    if ( mapDimensionsFromFile == null || ! this.checkMapDimensions(mapDimensionsFromFile, instanceProperties, reader)){
                         break;
                     }
-                    String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensions);
+
+
+
+                    String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, mapDimensionsFromFile);
 
                     // If instanceProperties is not null check the obstacle percentage
-                    Integer obstaclePercentage = ( instanceProperties == null ? -1 : instanceProperties.getObstaclePercentage());
+                    Integer obstaclePercentage = ( instanceProperties == null ? this.defaultObstaclePercentage : instanceProperties.getObstaclePercentage());
                     // build map
-                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, dimensions.length, cellTypeHashMap, obstaclePercentage);
+                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, mapDimensionsFromFile, this.cellTypeHashMap, obstaclePercentage);
 
                     // done - missing check validity of num of obstacles in graphMap
-                    break;
+                    break; // end case
 
                 case INDICATOR_AGENTS:
-                    int dimensionsLength = (dimensions == null ? 0 : dimensions.length );
-                    agents = buildAgents(reader, dimensionsLength);
+                    agents = buildAgents(reader, this.defaultNumOfDimensions); // currently supports only 2D
 
-                    if (agents == null ){
-                        break;
+                    if (agents == null || instanceProperties == null){
+                        break; // No need to check the num of agents
                     }
 
-                    int[] numOfAgentsFromProperties = ( instanceProperties == null ? null : instanceProperties.numOfAgents);
-                    int index = I_InstanceBuilder.equalsAny(agents.length, numOfAgentsFromProperties);
-                    if( numOfAgentsFromProperties != null && index == -1 ){
+
+                    int index = I_InstanceBuilder.equalsAny(agents.length, instanceProperties.numOfAgents);
+                    // index equals -1 if agents.length doesn't match any of the values in numOfAgents
+                    if( instanceProperties.numOfAgents.length > 0 && index == -1 ){
                         agents = null;
                     }
 
-                    break;
+                    break; // end case
 
 
             } // switch end
@@ -139,21 +148,32 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
     /***  =Validity check=  ***/
-    private boolean checkMapDimensions(int[] dimensions, InstanceProperties instanceProperties, Reader reader){
 
-        int[] dimensionsFromProperties = null;
-        if( instanceProperties != null ){
-            dimensionsFromProperties = instanceProperties.boardSize;
-        }else {
-            return true;
+    /***
+     *
+     * @param mapDimensionsFromFile - Board size from file
+     * @param instanceProperties - Board size from properties
+     * @param reader  - closes the reader for invalid values
+     * @return boolean - if dimensions are valid.
+     */
+    private boolean checkMapDimensions(MapDimensions mapDimensionsFromFile, InstanceProperties instanceProperties, Reader reader){
+
+        if( mapDimensionsFromFile == null || mapDimensionsFromFile.numOfDimensions < 1){
+            reader.closeFile();
+            return false; // Bad dimensions values
         }
 
-        int index = I_InstanceBuilder.equalsAny(dimensions[0],dimensionsFromProperties);
-
-        if( dimensionsFromProperties != null && index != -1 ){
-            return true;
+        if( instanceProperties == null || instanceProperties.mapSize.numOfDimensions == 0) {
+            return true; // Missing properties values
         }
 
+
+        // Equals to all the values in the array
+        if( mapDimensionsFromFile.equals(instanceProperties.mapSize)){
+            return true; // Valid Board size
+        }
+
+        // Invalid values, close reader
         reader.closeFile();
         return false;
 
@@ -167,7 +187,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
         String[] agentLine = line.split(this.SEPARATOR_AGENTS);
 
-        if( agentLine == null || agentLine.length < 1){
+        if( agentLine.length < 1){
             return null; // invalid agent line
         }
 
@@ -235,7 +255,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     /***  =Build Map and Dimensions=  ***/
 
-    private int[] getDimensions(String dimensionsAsString) {
+    private MapDimensions getMapDimensions(String dimensionsAsString) {
 
         int[] dimensions = null;
         if(dimensionsAsString.contains(SEPARATOR_DIMENSIONS)) {
@@ -254,7 +274,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return null; // Missing expected separator
         }
 
-        return dimensions; // Example: {16,16}
+        return new MapDimensions(dimensions);
     }
 
 

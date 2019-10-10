@@ -25,7 +25,7 @@ public class MoragRequested_RunManager extends A_RunManager {
 
 
         /*  =   Set Instance Manager   =  */
-        InstanceManager instanceManagerMissingProperties = new InstanceManager(path, new InstanceBuilder_BGU(), null);
+        InstanceManager instanceManagerMissingProperties = new InstanceManager(path, new InstanceBuilder_BGU(), new InstanceProperties());
 
         /*  =   Add new experiment   =  */
         int unknownValue = Integer.MAX_VALUE;
