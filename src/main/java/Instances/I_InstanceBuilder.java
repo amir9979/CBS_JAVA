@@ -1,9 +1,181 @@
 package Instances;
+import IO_Package.Reader;
+import Instances.Maps.Enum_MapCellType;
+import Instances.Maps.GraphMap;
+import Instances.Maps.MapDimensions;
+import Instances.Maps.MapFactory;
+import java.util.HashMap;
 
+/*  An Interface for parsing instance files   */
 public interface I_InstanceBuilder {
 
-    MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties);
+    /*  Builds Instances and saves it in a data structure, ready for future use */
+    void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties);
 
+    /*  Saves all paths in a data structure, ready for iterative use    */
     InstanceManager.InstancePath[] getInstancesPaths(String directoryPath);
 
+    /*  Returns the next existing instance from the prepareInstances structure  */
+    MAPF_Instance getNextExistingInstance();
+
+
+
+    /*  =Static methods=    */
+
+    /*  ==Build maps==  */
+
+    static String[] buildMapAsStringArray(Reader reader, MapDimensions mapDimensions){
+
+        int yAxis_length = mapDimensions.yAxis_length; // Indicates num of lines
+        String[] mapAsStringArray = new String[yAxis_length];
+        for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+
+            String nextLine = reader.getNextLine();
+            if ( nextLine != null ){
+                mapAsStringArray[yIndex] = nextLine;
+            }else {
+                return null; // unexpected num of lines
+            }
+        }
+        return mapAsStringArray;
+    }
+
+
+    /***
+     * Builds a {@link GraphMap} from String array
+     * @param mapAsStrings - Map from file, rows are yAxis
+     * @param mapSeparator - Regex value to split map values. by default is "".
+     * @param mapDimensions - A {@link MapDimensions}, must be valid.
+     * @param cellTypeHashMap - HashMap for converting Character to {@link Enum_MapCellType}
+     * @param obstaclePercentage - Value is an Integer indicates obstacle percentage.
+     * @return A GraphMap
+     */
+    static GraphMap buildGraphMap(String[] mapAsStrings, String mapSeparator, MapDimensions mapDimensions, HashMap<Character,Enum_MapCellType> cellTypeHashMap, Integer obstaclePercentage) {
+
+        switch ( mapDimensions.numOfDimensions ){
+            case 2:
+                int xAxis_length = mapDimensions.xAxis_length;
+                int yAxis_length = mapDimensions.yAxis_length;
+                if( mapAsStrings.length != yAxis_length ){
+                    return null; // invalid value
+                }
+
+                Character[][] mapAsCharacters_2d = new Character[xAxis_length][yAxis_length];
+                for (int yAxis_value = 0; yAxis_value < mapAsStrings.length; yAxis_value++) {
+                    String[] yAxisLine = mapAsStrings[yAxis_value].split(mapSeparator);
+                    if( yAxisLine.length != xAxis_length ){
+                        return null; // invalid xAxis_length
+                    }
+                    for (int xAxis_value = 0; xAxis_value < yAxisLine.length ; xAxis_value++) {
+                        mapAsCharacters_2d[xAxis_value][yAxis_value] = yAxisLine[xAxis_value].charAt(0);
+                    }
+
+                }
+
+                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, obstaclePercentage);
+                if( mapAsCellType_2D == null){
+                    return null; // Error while building the map
+                }
+                return MapFactory.newSimple4Connected2D_GraphMap(mapAsCellType_2D);
+
+            case 3:
+                Character[][][] mapAsCharacters_3d = new Character[][][]{};
+                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsCharacters_3d, cellTypeHashMap,obstaclePercentage);
+                return null; // niceToHave - change to newSimple 4Connected 3D_GraphMap if exists in MapFactory
+        }
+
+
+        return null; // If something went wrong ( should return in switch-case )
+    }
+
+
+    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, Integer obstaclePercentage) {
+        // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
+
+        int xAxis_length = mapAsCharacters.length;
+        int yAxis_length = mapAsCharacters[0].length;
+
+        // used to check obstacle percentage
+        int numOfObstacles = 0;
+        int numOfNonObstacles = 0;
+
+
+        Enum_MapCellType[][] cellTypeMap = new Enum_MapCellType[xAxis_length][yAxis_length];
+
+        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
+            for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+
+                // done - convert using this.cellTypeHashMap
+                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsCharacters[xIndex][yIndex]);
+
+                if ( cellType.equals(Enum_MapCellType.WALL)){
+                    numOfObstacles++; // add one wall to counter
+                }else{
+                    numOfNonObstacles++; // add one to non obstacle counter
+                }
+                cellTypeMap[xIndex][yIndex] = cellType;
+            }
+        }
+
+        // If obstacle percentage is not null,
+        // check that it matches the value from properties
+        // Formulation: floor( obstaclesPercentage * BoardSize) = numOfObstacles
+        if ( obstaclePercentage != -1 && numOfObstacles != (obstaclePercentage *(numOfNonObstacles + numOfObstacles))){
+            // done - check with Dor that this is correct
+            return null; // Invalid obstacle rate
+        }
+
+        return cellTypeMap;
+    }
+
+    static Enum_MapCellType[][][] build_3D_cellTypeMap(Character[][][] mapAsCharacters, HashMap<Character,Enum_MapCellType> cellTypeHashMap, Integer obstaclePercentage) {
+        // niceToHave - no need to implement for now
+        return null;
+    }
+
+
+
+
+    /*  =Utils= */
+
+
+    static boolean equalsAll(int[] arr1, int[] arr2){
+        if( arr1 == null || arr2 == null){
+            return false;
+        }
+
+        if( arr1.length != arr2.length ){
+            return false;
+        }
+
+
+        for (int i = 0; i < arr1.length; i++) {
+            if( arr1[i] != arr2[i] ){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+    static int equalsAny(int lookFor, int[] values){
+
+        if( values == null ){
+            return -1;
+        }
+
+        for (int i = 0; i < values.length ; i++) {
+            if( lookFor == values[i] ){
+                return i;
+            }
+        }
+
+        return -1;
+
+    }
+
 }
+
+

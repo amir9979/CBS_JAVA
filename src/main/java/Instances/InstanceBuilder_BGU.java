@@ -7,24 +7,30 @@ import Instances.Agents.Agent;
 import Instances.Maps.*;
 
 import java.util.HashMap;
+import java.util.Stack;
 
 public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
-    // Blocking - check properties ( continue if properties = null )
+    // testme - check properties ( continue if properties = null )
 
 
     private final String INDICATOR_AGENTS = "Agents:";
-    protected final String SEPARATOR_AGENTS = ",";
+    private final String SEPARATOR_AGENTS = ",";
     private final String INDICATOR_MAP = "Grid:";
     private final String SEPARATOR_DIMENSIONS = ",";
+    private final String SEPARATOR_MAP = "";
+
+
+    private final Stack<MAPF_Instance> instanceStack = new Stack<>();
+
 
 
     /*      =Cell Types=   */
     private final char EMPTY = '.';
     private final char WALL = '@';
 
-    private HashMap<Character,Enum_MapCellType> cellTypeHashMap = new HashMap<Character, Enum_MapCellType>(){{
+    private HashMap<Character,Enum_MapCellType> cellTypeHashMap = new HashMap<>(){{
         put(EMPTY,Enum_MapCellType.EMPTY);
         put(WALL,Enum_MapCellType.WALL);
     }};
@@ -32,36 +38,36 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
 
-    public MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
+    /*  =Default Values=    */
+    private final int defaultNumOfDimensions = 2;
+    private final Integer defaultObstaclePercentage = -1;
+    private final int[] defaultDimensions = new int[0];
+    private final int[] defaultNumOfAgents = new int[0];
 
 
+
+
+
+    private MAPF_Instance getInstance(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
+
+        // Try to open file
         Reader reader=new Reader();
         Enum_IO enum_io =reader.openFile(instancePath.path);
         if( !enum_io.equals(Enum_IO.OPENED) ){
             return null; // couldn't open the file
         }
 
+
         /*  =Init values=  */
         MAPF_Instance mapf_instance = null;
-        int[] dimensionsFromProperties = instanceProperties.boardSize;
         GraphMap graphMap = null;
         Agent[] agents = null;
+        MapDimensions mapDimensionsFromFile = null;
 
-
-        int instance_id;
-        String nextLine = reader.getNextLine(); // first line
-        if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)){
-//            reader.closeFile();
-//            return null; // first line isn't an index indicator
-            instance_id = 0;
-        }
-        else {
-            instance_id = Integer.parseInt(nextLine); // get instance id,
-            nextLine = reader.getNextLine(); // Second line
-        }
 
         /*  =Get data from reader=  */
 
+        String nextLine = reader.getNextLine(); // First line
 
         while ( nextLine != null ){
 
@@ -69,37 +75,39 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
                 case INDICATOR_MAP:
                     String dimensionsAsString = reader.getNextLine();
-                    int[] dimensions = getDimensions(dimensionsAsString);
-
-                    // Checks validity with instanceProperties:
-                    // numOfDimensions = dimensions from instanceProperties
-                    if (dimensions == null || dimensions.length != dimensionsFromProperties.length){
-                        reader.closeFile();
-                        return null; // unexpected dimensions line
+                    mapDimensionsFromFile = getMapDimensions(dimensionsAsString);
+                    // Checks validity of dimensions:
+                    if ( mapDimensionsFromFile == null || ! this.checkMapDimensions(mapDimensionsFromFile, instanceProperties, reader)){
+                        break;
                     }
 
-                    for (int i = 0; i < dimensionsFromProperties.length; i++) {
-                        if( dimensions[i] != dimensionsFromProperties[i]){
-                            reader.closeFile();
-                            return null; // unexpected dimensions line
-                        }
-                    }
-                    String[] mapAsStrings = this.buildMapAsStringArray(reader, dimensions);
 
+
+                    String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, mapDimensionsFromFile);
+
+                    // If instanceProperties is not null check the obstacle percentage
+                    Integer obstaclePercentage = ( instanceProperties == null ? this.defaultObstaclePercentage : instanceProperties.getObstaclePercentage());
                     // build map
-                    graphMap = buildGraphMap(mapAsStrings, dimensionsFromProperties.length, instanceProperties.obstacleRate);
+                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, mapDimensionsFromFile, this.cellTypeHashMap, obstaclePercentage);
 
-                    // todo - missing check validity of num of obstacles in graphMap
-                    break;
+                    // done - missing check validity of num of obstacles in graphMap
+                    break; // end case
 
                 case INDICATOR_AGENTS:
-                    agents = buildAgents(reader, dimensionsFromProperties.length);
+                    agents = buildAgents(reader, this.defaultNumOfDimensions); // currently supports only 2D
 
-                    // Checks validity with instanceProperties
-                    if (agents == null || agents.length != instanceProperties.numOfAgents){
-                        agents = null; // different than instanceProperties
+                    if (agents == null || instanceProperties == null){
+                        break; // No need to check the num of agents
                     }
-                    break;
+
+
+                    int index = I_InstanceBuilder.equalsAny(agents.length, instanceProperties.numOfAgents);
+                    // index equals -1 if agents.length doesn't match any of the values in numOfAgents
+                    if( instanceProperties.numOfAgents.length > 0 && index == -1 ){
+                        agents = null;
+                    }
+
+                    break; // end case
 
 
             } // switch end
@@ -113,34 +121,81 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return null; // Invalid parameters
         }
 
-        instanceName = instanceName + "-" + instance_id; // Example: "Instance-16-0-7" + "-" + "0"
         mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
         return mapf_instance;
 
     }
 
+    @Override
+    public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties){
+        MAPF_Instance mapf_instance = this.getInstance(instanceName, instancePath, instanceProperties);
+        if ( mapf_instance != null ){
+            this.instanceStack.push(mapf_instance);
+        }
+    }
+
+
+
+    @Override
+    public MAPF_Instance getNextExistingInstance(){
+        if( ! this.instanceStack.empty() ){
+            return this.instanceStack.pop();
+        }
+        return null;
+    }
+
+
+
+
+    /***  =Validity check=  ***/
+
+    /***
+     *
+     * @param mapDimensionsFromFile - Board size from file
+     * @param instanceProperties - Board size from properties
+     * @param reader  - closes the reader for invalid values
+     * @return boolean - if dimensions are valid.
+     */
+    private boolean checkMapDimensions(MapDimensions mapDimensionsFromFile, InstanceProperties instanceProperties, Reader reader){
+
+        if( mapDimensionsFromFile == null || mapDimensionsFromFile.numOfDimensions < 1){
+            reader.closeFile();
+            return false; // Bad dimensions values
+        }
+
+        if( instanceProperties == null || instanceProperties.mapSize.numOfDimensions == 0) {
+            return true; // Missing properties values
+        }
+
+
+        // Equals to all the values in the array
+        if( mapDimensionsFromFile.equals(instanceProperties.mapSize)){
+            return true; // Valid Board size
+        }
+
+        // Invalid values, close reader
+        reader.closeFile();
+        return false;
+
+    }
 
 
 
     /***  =Build Agents=  ***/
 
-    protected Agent buildSingleAgent(int dimensions, String line){
+    private Agent buildSingleAgent(int dimensions, String line){
 
         String[] agentLine = line.split(this.SEPARATOR_AGENTS);
 
-        if( agentLine == null || agentLine.length < 1){
+        if( agentLine.length < 1){
             return null; // invalid agent line
         }
 
-        for (int i = 0; i < agentLine.length; i++) {
-            if( ! IO_Manager.isPositiveInt(agentLine[i])){
-                return null; // dimensions should be a positive int
-            }
-        }
 
         int agentID = Integer.parseInt(agentLine[0]);
 
-        if(dimensions == 2 && agentLine.length == 5) {
+
+        if(dimensions == 2) {
             /*      source values    */
             int source_xValue = Integer.valueOf(agentLine[3]);
             int source_yValue = Integer.valueOf(agentLine[4]);
@@ -154,7 +209,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         }
 
 
-        if(dimensions == 3 && agentLine.length == 7) {
+        if(dimensions == 3) {
             /*      source values    */
             int source_xValue = Integer.valueOf(agentLine[4]);
             int source_yValue = Integer.valueOf(agentLine[5]);
@@ -173,7 +228,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     }
 
 
-    private Agent[] buildAgents(Reader reader,int dimensions) {
+    private Agent[] buildAgents(Reader reader, int dimensions) {
 
         String nextLine = reader.getNextLine(); // expected num of agents
         if( nextLine == null || ! IO_Manager.isPositiveInt(nextLine)) {
@@ -200,7 +255,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     /***  =Build Map and Dimensions=  ***/
 
-    private int[] getDimensions(String dimensionsAsString) {
+    private MapDimensions getMapDimensions(String dimensionsAsString) {
 
         int[] dimensions = null;
         if(dimensionsAsString.contains(SEPARATOR_DIMENSIONS)) {
@@ -219,81 +274,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return null; // Missing expected separator
         }
 
-        return dimensions; // Example: {16,16}
-    }
-
-
-
-
-    private String[] buildMapAsStringArray(Reader reader, int[] dimensions){
-
-        int xAxis_length = dimensions[0];
-        String[] mapAsStringArray = new String[xAxis_length];
-        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
-
-            String nextLine = reader.getNextLine();
-            if ( nextLine != null ){
-                mapAsStringArray[xIndex] = nextLine;
-            }else {
-                return null; // unexpected num of lines
-            }
-        }
-        return mapAsStringArray;
-    }
-
-
-    private GraphMap buildGraphMap(String[] mapAsStrings, int numOfDimensions, float obstacleRate) {
-
-        switch ( numOfDimensions ){
-            case 2:
-                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsStrings, obstacleRate);
-                return MapFactory.newSimple4Connected2D_GraphMap(mapAsCellType_2D);
-
-            case 3:
-                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsStrings);
-                return null; // niceToHave - change to newSimple 4Connected 3D_GraphMap if exists in MapFactory
-        }
-
-
-        return null; // If something went wrong ( should return in switch-case )
-    }
-
-
-    private Enum_MapCellType[][] build_2D_cellTypeMap(String[] mapAsStrings ,float obstacleRate) {
-        // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
-
-        int xAxis_length = mapAsStrings.length;
-        int yAxis_length = mapAsStrings[0].length();
-        int numOfWalls = 0; // used to check obstacle rate
-
-
-        Enum_MapCellType[][] cellTypeMap = new Enum_MapCellType[xAxis_length][yAxis_length];
-
-        for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
-            for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
-
-                // done - convert using this.cellTypeHashMap
-                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsStrings[xIndex].charAt(yIndex));
-
-                if ( cellType.equals(Enum_MapCellType.WALL)){
-                    numOfWalls++; // add one wall to counter
-                }
-                cellTypeMap[xIndex][yIndex] = cellType;
-            }
-        }
-
-
-//        if ( numOfWalls/(xAxis_length*yAxis_length) != obstacleRate){
-//            // todo - check with Dor that this is correct
-//            return null; // Invalid obstacle rate
-//        }
-
-        return cellTypeMap;
-    }
-
-    private Enum_MapCellType[][][] build_3D_cellTypeMap(String[] mapAsStrings) {
-        // niceToHave - no need to implement for now
-        return null;
+        return new MapDimensions(dimensions);
     }
 
 

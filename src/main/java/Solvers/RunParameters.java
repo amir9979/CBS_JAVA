@@ -2,6 +2,7 @@ package Solvers;
 
 import Metrics.InstanceReport;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class RunParameters {
      * A {@link I_Solver solver} that uses this field should start its solution process with these constraints, but may
      * later add or remove constraints, depending on the algorithm being used. @Nullable
      */
-    public final List<Constraint> constraints;
+    public final ConstraintSet constraints;
 
     /**
      * An {@link InstanceReport} where to {@link I_Solver} will write metrics generated from the run.
@@ -45,20 +46,21 @@ public class RunParameters {
 
     /*  =Constructors=  */
 
-    public RunParameters(long timeout, List<Constraint> constraints, InstanceReport instanceReport, Solution existingSolution) {
+    public RunParameters(long timeout, ConstraintSet constraints, InstanceReport instanceReport, Solution existingSolution) {
         this.timeout = timeout;
         this.constraints = constraints;
         this.instanceReport = instanceReport;
         this.existingSolution = existingSolution;
     }
 
-    public RunParameters(List<Constraint> constraints, InstanceReport instanceReport, Solution existingSolution) {
+    public RunParameters(ConstraintSet constraints, InstanceReport instanceReport, Solution existingSolution) {
         this(defaultTimeout, constraints, instanceReport, existingSolution);
     }
 
-    public RunParameters(List<Constraint> constraints, InstanceReport instanceReport) {
+    public RunParameters(ConstraintSet constraints, InstanceReport instanceReport) {
         this(constraints, instanceReport, null);
     }
+
 
     public RunParameters(InstanceReport instanceReport, Solution existingSolution) {
         this(null, instanceReport, existingSolution);
@@ -69,7 +71,7 @@ public class RunParameters {
         this(null, instanceReport, null);
     }
 
-    public RunParameters(List<Constraint> constraints) {
+    public RunParameters(ConstraintSet constraints) {
         this(constraints, null, null);
     }
 

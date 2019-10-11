@@ -2,10 +2,7 @@ package Instances;
 
 import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
-import Instances.Maps.Coordinate_2D;
-import Instances.Maps.Enum_MapCellType;
-import Instances.Maps.GraphMap;
-import Instances.Maps.MapFactory;
+import Instances.Maps.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,29 +14,18 @@ import java.util.List;
 public class InstanceBuilder_BGUTest {
 
     // testme
+    // todo - add test with obstacles
 
-    private InstanceBuilder_BGU instanceBuilderBgu;
+    private InstanceBuilder_BGU instanceBuilderBgu = new InstanceBuilder_BGU();
     private InstanceManager.InstancePath instancePath;
     private InstanceProperties instanceProperties = new InstanceProperties(
-                                                        new int[]{16,16},0,7,"-"
+                                                        new MapDimensions(new int[]{16,16}),(float)0,new int[]{7,10,15}
                                                     );
-
-    private final String path = IO_Manager.buildPath(
-                                                        new String[]{   IO_Manager.testResources_Directory,
-                                                                        "Instances\\Instance-16-0-7-0"}
-                                                     );
-
-//
-//    private final String path = IO_Manager.buildPath(
-//            new String[]{   IO_Manager.testResources_Directory,
-//                    "Instances\\Instance-8-15-5-17 - hard one - cost 29 and some corridors"}
-//    );
 
 
 
     @Before
     public void Before() throws Exception {
-        this.instanceBuilderBgu = new InstanceBuilder_BGU();
         this.instancePath = null; // init in the beginning of every test
 
     }
@@ -50,10 +36,14 @@ public class InstanceBuilder_BGUTest {
 
 
     @Test
-    public void getInstance_valid_values() {
+    public void prepareInstances_test() {
 
 
         /*************      =Valid Values=     *************/
+        String path = IO_Manager.buildPath(
+                                            new String[]{   IO_Manager.testResources_Directory,
+                                            "Instances\\Instance-16-0-7-0"}
+        );
 
 
         this.instancePath = new InstanceManager.InstancePath(path);
@@ -80,7 +70,7 @@ public class InstanceBuilder_BGUTest {
             }
         }
 
-        GraphMap expectedMap = MapFactory.newSimple4Connected2D_GraphMap(expectedCellTypeMap);
+        // GraphMap expectedMap = MapFactory.newSimple4Connected2D_GraphMap(expectedCellTypeMap);
 
 
 
@@ -89,7 +79,8 @@ public class InstanceBuilder_BGUTest {
 
 
         String instanceName = "Instance-16-0-7"; // Name from the InstanceManager
-        MAPF_Instance mapf_instance = instanceBuilderBgu.getInstance(instanceName, this.instancePath, this.instanceProperties);
+        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath, this.instanceProperties);
+        MAPF_Instance mapf_instance = instanceBuilderBgu.getNextExistingInstance();
 
         Assert.assertNotNull(mapf_instance);
 
@@ -100,6 +91,14 @@ public class InstanceBuilder_BGUTest {
         for (int i = 0; i < actualAgents.size(); i++) {
             Assert.assertEquals(expectedAgents.get(i) , actualAgents.get(i));
         }
+
+
+
+        // Blocking - add map test
+
+        /*  =Check Map=  */
+
+
 
 
 
@@ -151,52 +150,4 @@ public class InstanceBuilder_BGUTest {
 
 
 
-//
-//
-//    /*****      =Test Map=      *****/
-//
-//
-//    @Test
-//    public void buildMapAsStringArray() {
-//        // imp - test
-//    }
-//
-//
-//
-//    @Test
-//    public void buildGraphMap() {
-//        // imp - test
-//    }
-//
-//
-//
-//    @Test
-//    public void build_2D_cellTypeMap(){
-//        // imp - test
-//    }
-//
-//
-//
-//    @Test
-//    public void getDimensions() {
-//        // imp - test
-//    }
-//
-//
-//
-//    /*****      =Test Agents=      *****/
-//
-//
-//    @Test
-//    public void buildSingleAgent(){
-//        // imp - test
-//    }
-//
-//
-//    @Test
-//    public void buildAgents() {
-//        // imp - test
-//    }
-
-
-    }
+}

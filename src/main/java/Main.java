@@ -23,6 +23,16 @@ public class Main {
             e.printStackTrace();
         }
 
+        simpleRun();
+
+        //moragRequestedRun();
+
+
+
+    }
+
+    public static void simpleRun(){
+
         SimpleRunManager simpleRunManager = new SimpleRunManager();
         simpleRunManager.addOnlinePrioritisedPlanningSolver();
 
@@ -32,6 +42,18 @@ public class Main {
         simpleRunManager.addOnlineExperiment3();
 
         simpleRunManager.runAllExperiments();
+    }
+
+
+    public static void moragRequestedRun(){
+
+
+        MoragRequested_RunManager moragRequested_runManager = new MoragRequested_RunManager();
+        moragRequested_runManager.setSolvers();
+        moragRequested_runManager.setExperiments();
+
+        moragRequested_runManager.runAllExperiments();
+
 
         try {
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
@@ -40,6 +62,18 @@ public class Main {
             e.printStackTrace();
         }
 
+        /* Get Instance by absolute path */
+
+        String path = IO_Manager.buildPath(
+                new String[]{   IO_Manager.testResources_Directory,
+                        "Instances\\\\Instance-8-15-5-17 - hard one - cost 29 and some corridors"}
+        );
+        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
+
+        InstanceManager manager = new InstanceManager(new InstanceBuilder_BGU());
+
+
+        MAPF_Instance instance = moragRequested_runManager.getInstanceWithAbsolutePath(manager, instancePath);
     }
 
 }

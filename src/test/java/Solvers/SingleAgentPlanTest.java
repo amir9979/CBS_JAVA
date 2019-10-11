@@ -206,7 +206,7 @@ class SingleAgentPlanTest {
     @Test
     void getElapsedTime() {
         /*  =as initiated=  */
-        assertEquals(-1, emptyPlanAgent1.size());
+        assertEquals(0, emptyPlanAgent1.size());
         assertEquals(3, existingPlanAgent1.size());
         SingleAgentPlan planStartsAt3 = new SingleAgentPlan(agent1, Arrays.asList(new Move(agent1, 4, cell13, cell12)));
         assertEquals(1, planStartsAt3.size());

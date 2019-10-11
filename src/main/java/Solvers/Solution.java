@@ -113,6 +113,4 @@ public class Solution implements Iterable<SingleAgentPlan>{
     public Spliterator<SingleAgentPlan> spliterator() {
         return agentPlans.values().spliterator();
     }
-
-    //nicetohave validations?
 }

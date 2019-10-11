@@ -9,6 +9,7 @@ package Instances.Maps;
  */
 public enum Enum_MapCellType {
     EMPTY,
+    TREE,
     WALL,
     PRIVATE_GARAGE
 }

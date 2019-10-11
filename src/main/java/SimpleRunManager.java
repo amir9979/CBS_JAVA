@@ -4,18 +4,25 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.OnlineInstanceBuilder_BGU;
+import Instances.Maps.MapDimensions;
 import Solvers.AStar.AStar_Solver;
 import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.PrioritisedPlanning.OnlinePP_Solver;
 import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
+import Solvers.AStar.SingleAgentAStar_Solver;
+import Solvers.I_Solver;
+import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
+
+import java.util.ArrayList;
 
 public class SimpleRunManager extends A_RunManager {
 
-    InstanceProperties properties = new InstanceProperties(new int[]{512,512},0,50,"-");
+    InstanceProperties properties = new InstanceProperties(new MapDimensions(512,512),0f,new int[]{50});
 
     @Override
     void setSolvers() {
         this.solvers.add(new SingleAgentAStar_Solver());
+        this.solvers.add(new PrioritisedPlanning_Solver(new SingleAgentAStar_Solver()));
     }
 
     void addPrioritisedPlanningSolver(){
@@ -32,7 +39,6 @@ public class SimpleRunManager extends A_RunManager {
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
                                                             "Instances"});
-        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
 
 
         /*  =   Set Properties   =  */
