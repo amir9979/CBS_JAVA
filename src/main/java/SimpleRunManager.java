@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class SimpleRunManager extends A_RunManager {
 
-    InstanceProperties properties = new InstanceProperties(new MapDimensions(512,512),0f,new int[]{50});
+    InstanceProperties properties = new InstanceProperties(new MapDimensions(512,512),-1f,new int[]{50});
 
     @Override
     void setSolvers() {
@@ -48,7 +48,7 @@ public class SimpleRunManager extends A_RunManager {
         InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
 
         /*  =   Add new experiment   =  */
-        this.experiments.add(new GridExperiment(instanceManager,numOfInstances, "no name"));
+        this.experiments.add(new GridExperiment(instanceManager,numOfInstances));
 
     }
 
@@ -67,7 +67,7 @@ public class SimpleRunManager extends A_RunManager {
                 new OnlineInstanceBuilder_BGU(), properties);
 
         /*  =   Add new experiment   =  */
-        this.experiments.add(new GridExperiment(instanceManager, numOfInstances, "1 agent every timestep"));
+        this.experiments.add(new GridExperiment(instanceManager, "1 agent every timestep", numOfInstances));
     }
 
     void addOnlineExperiment2(){
@@ -86,7 +86,7 @@ public class SimpleRunManager extends A_RunManager {
                 new OnlineInstanceBuilder_BGU(), properties);
 
         /*  =   Add new experiment   =  */
-        this.experiments.add(new GridExperiment(instanceManager, numOfInstances, "20percent agent arrival rate"));
+        this.experiments.add(new GridExperiment(instanceManager, "20percent agent arrival rate", numOfInstances));
     }
 
     void addOnlineExperiment3(){
@@ -104,6 +104,6 @@ public class SimpleRunManager extends A_RunManager {
                 new OnlineInstanceBuilder_BGU(), properties);
 
         /*  =   Add new experiment   =  */
-        this.experiments.add(new GridExperiment(instanceManager, numOfInstances, "80percent agent arrival rate"));
+        this.experiments.add(new GridExperiment(instanceManager, "80percent agent arrival rate", numOfInstances));
     }
 }

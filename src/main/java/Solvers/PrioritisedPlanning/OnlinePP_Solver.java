@@ -7,6 +7,7 @@ import Instances.Maps.PrivateGarage;
 import Metrics.InstanceReport;
 import Solvers.*;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
 import java.io.IOException;
 import java.util.*;
@@ -49,7 +50,7 @@ public class OnlinePP_Solver extends PrioritisedPlanning_Solver {
 
 
     @Override
-    protected Solution solvePrioritisedPlanning(List<? extends Agent> agents, MAPF_Instance instance, List<Constraint> initialConstraints) {
+    protected Solution solvePrioritisedPlanning(List<? extends Agent> agents, MAPF_Instance instance, ConstraintSet initialConstraints) {
         Map<Integer, Solution> solutionsAtTimes = new HashMap<>();
         Map<Integer, List<OnlineAgent>> agentsForTimes = groupAgentsByTime(agents);
         for (int timestepWithNewAgents :
@@ -67,7 +68,7 @@ public class OnlinePP_Solver extends PrioritisedPlanning_Solver {
     }
 
     @Override
-    protected RunParameters getSubproblemParameters(MAPF_Instance subproblem, InstanceReport subproblemReport, List<Constraint> constraints) {
+    protected RunParameters getSubproblemParameters(MAPF_Instance subproblem, InstanceReport subproblemReport, ConstraintSet constraints) {
         RunParameters parameters = super.getSubproblemParameters(subproblem, subproblemReport, constraints);
         Solution oneAgentSolution = new Solution();
 
@@ -84,8 +85,8 @@ public class OnlinePP_Solver extends PrioritisedPlanning_Solver {
         return parameters;
     }
 
-    private void trimOutdatedConstraints(List<Constraint> initialConstraints, int minTime) {
-        initialConstraints.removeIf(constraint -> constraint.time < minTime);
+    private void trimOutdatedConstraints(ConstraintSet initialConstraints, int minTime) {
+        initialConstraints.trimToTimeRange(minTime, Integer.MAX_VALUE);
     }
 
     private Map<Integer, List<OnlineAgent>> groupAgentsByTime(List<? extends Agent> agents){
@@ -131,7 +132,7 @@ public class OnlinePP_Solver extends PrioritisedPlanning_Solver {
         boolean commit = commitReport;
         commitReport = false;
         super.writeMetricsToReport(solution);
-        instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.readableToString());
+        instanceReport.putStringValue(InstanceReport.StandardFields.solution, solution.readableToString());
         commitReport = commit;
         if(commitReport){
             try {

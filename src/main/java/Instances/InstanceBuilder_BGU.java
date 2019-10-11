@@ -16,7 +16,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
     private final String INDICATOR_AGENTS = "Agents:";
-    private final String SEPARATOR_AGENTS = ",";
+    protected final String SEPARATOR_AGENTS = ",";
     private final String INDICATOR_MAP = "Grid:";
     private final String SEPARATOR_DIMENSIONS = ",";
     private final String SEPARATOR_MAP = "";
@@ -183,7 +183,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     /***  =Build Agents=  ***/
 
-    private Agent buildSingleAgent(int dimensions, String line){
+    protected Agent buildSingleAgent(int dimensions, String line){
 
         String[] agentLine = line.split(this.SEPARATOR_AGENTS);
 

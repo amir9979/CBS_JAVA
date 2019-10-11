@@ -10,6 +10,7 @@ public class OnlineInstanceBuilder_BGU extends InstanceBuilder_BGU {
 
     // override agent building to add arrival times
 
+
     @Override
     protected Agent buildSingleAgent(int dimensions, String line){
 

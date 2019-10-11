@@ -11,10 +11,12 @@ import Solvers.Solution;
 
 public class GridExperiment extends A_Experiment {
 
-    public static final String EXPERIMENT_NAME = "Grid Experiment";
     public final Integer numOfInstances;
 
-
+    public GridExperiment(InstanceManager instanceManager, String experimentName, int numOfInstances) {
+        super(instanceManager, experimentName);
+        this.numOfInstances = numOfInstances;
+    }
 
     public GridExperiment(InstanceManager instanceManager, int numOfInstances) {
         super(instanceManager);
@@ -34,7 +36,7 @@ public class GridExperiment extends A_Experiment {
 
             InstanceReport instanceReport = S_Metrics.newInstanceReport();
 
-            instanceReport.putStringValue(InstanceReport.StandardFields.experimentName, EXPERIMENT_NAME);
+            instanceReport.putStringValue(InstanceReport.StandardFields.experimentName, super.experimentName);
             instanceReport.putStringValue(InstanceReport.StandardFields.instanceName,instance.name);
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
