@@ -1,6 +1,5 @@
 package Solvers.ConstraintsAndConflicts;
 
-import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
 import Solvers.Move;
 
@@ -8,18 +7,15 @@ import java.util.*;
 
 /**
  * A set of {@link Constraint}s.
- * Doesn't actually store the {@link Constraint} objects, instead replacing them with a different representation. Note
- * that this implementation overrides the logic of {@link Constraint#rejects} and {@link Constraint#accepts(Move)}, meaning
- * any change to them will not be reflected in this class.
- * As a side effect of this implementation, it essentially eliminates all swapping constraints that are made redundant
- * by some vertex constraint.
+ * Adding and removing constraints is O(1). Checking if the set {@link #rejects(Move)} or {@link #accepts(Move)} is O(n)
+ * in the worst case. However, there will usually be very few unique constraints for every pair of [time,location], with
+ * many unique pairs of [time,location]. Therefore, it is on average O(1).
  */
-public class ConstraintSet {
+public class ConstraintSet{
 
     /**
      * Basically a dictionary from [time,location] to agents who can't go there at that time, and locations from which
      * they can't go there at that time.
-     * As a side effect, it essentially eliminates all swapping constraints that are made redundant by some vertex constraint.
      */
     private Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
     private Set<Constraint> originalConstraints = new HashSet<>();
@@ -53,19 +49,15 @@ public class ConstraintSet {
      * @return true if this caused the set to change.
      */
     public boolean add(Constraint constraint){
-        boolean changed = false;
-        ConstraintWrapper dummy = new ConstraintWrapper(constraint);
+        // using this instead of ConstraintWrapper(Constraint) because this doesn't create an unnecessary Set<Constraint>s
+        // in every dummy we create.
+        ConstraintWrapper dummy = new ConstraintWrapper(constraint.location, constraint.time);
 
         if(!this.constraints.containsKey(dummy)){
             this.constraints.put(dummy, dummy);
-            changed = true;
         }
-        changed |= this.constraints.get(dummy).add(constraint.agent);
-        changed |= this.constraints.get(dummy).add(constraint.prevLocation);
 
-        this.originalConstraints.add(constraint);
-
-        return  changed;
+        return this.constraints.get(dummy).add(constraint);
     }
 
     /**
@@ -82,8 +74,41 @@ public class ConstraintSet {
         return changed;
     }
 
+    /**
+     *
+     * @param constraint
+     * @return true if this caused the set to change.
+     */
+    public boolean remove(Constraint constraint){
+        // using this instead of ConstraintWrapper(Constraint) because this doesn't create an unnecessary Set<Constraint>s
+        // in every dummy we create.
+        ConstraintWrapper dummy = new ConstraintWrapper(constraint.location, constraint.time);
+
+        if(!this.constraints.containsKey(dummy)){
+            return false;
+        }
+        else{
+            return this.constraints.get(dummy).remove(constraint);
+        }
+    }
+
+    /**
+     *
+     * @param constraints
+     * @return true if this caused the set to change.
+     */
+    public boolean removeAll(Collection<? extends Constraint> constraints) {
+        boolean changed = false;
+        for (Constraint cons :
+                constraints) {
+            changed |= this.remove(cons);
+        }
+        return changed;
+    }
+
     public void clear() {
         this.constraints.clear();
+        this.originalConstraints.clear();
     }
 
     /**
@@ -97,25 +122,23 @@ public class ConstraintSet {
 
     /**
      * Returns true iff any of the {@link Constraint}s that were {@link #add(Constraint) added} to this set conflict with
-     * the given {@link Move}. Doesn't use {@link Constraint#rejects(Move)}, instead overriding its logic locally.
+     * the given {@link Move}.
      * @param move a {@link Move} to check if it is rejected or not.
      * @return true iff any of the {@link Constraint}s that were {@link #add(Constraint) added} to this set
      *          conflict with the given {@link Move}.
      */
     public boolean rejects(Move move){
-        ConstraintWrapper dummy = new ConstraintWrapper(null /*it's null to save one object creation each time this method is called*/,
-                move.currLocation, move.timeNow, null /*it's null to save one object creation each time this method is called*/);
-
-        return constraints.containsKey(dummy) // there is a constraint on this time and location
-                && constraints.get(dummy).contains(move.agent) // it applies to the agent that is making this move
-                // it is a vertex constraint, or there is a swapping constraint with the correct prevLocation:
-                && constraints.get(dummy).contains(move.prevLocation);
+        ConstraintWrapper dummy = new ConstraintWrapper(move.currLocation, move.timeNow);
+        if(!constraints.containsKey(dummy)) {return false;}
+        else {
+            return constraints.get(dummy).rejects(move);
+        }
     }
 
     /**
      * Returns true iff any of the {@link Constraint}s that were {@link #add(Constraint) added} to this set conflict with
-     * the given {@link Move}. Doesn't use {@link Constraint#rejects(Move)}, instead overriding its logic locally.
-     * @param moves a {@link Collection} of {@link Move}s to check if the are ejected or not..
+     * the given {@link Move}.
+     * @param moves a {@link Collection} of {@link Move}s to check if the are ejected or not.
      * @return true iff all of the given {@link Move}s conflict with any of the {@link Constraint}s that were
      *          {@link #add(Constraint) added} to this set.
      */
@@ -142,6 +165,11 @@ public class ConstraintSet {
         return result;
     }
 
+    /**
+     * Returns a list of the constraints in this set. It is not a view of this set. Changes to the list will not affect
+     * this set.
+     * @return a list of the constraints in this set.
+     */
     public List<Constraint> getOriginalConstraints() {
         return new ArrayList<>(originalConstraints);
     }
@@ -159,44 +187,25 @@ public class ConstraintSet {
     /**
      * replaces the constraint with a simple wrapper that is quick to find in a set.
      */
-    private class ConstraintWrapper{
-        private Set<Agent> agents;
-        private Set<I_MapCell> prevLocations;
+    private static class ConstraintWrapper{
         private I_MapCell location;
         private int time;
+        private Set<Constraint> relevantConstraints;
 
-        public ConstraintWrapper(Agent agent, I_MapCell location, int time, I_MapCell prevLocation) {
-            //null means "any agent"
-            if (agent == null) {
-                this.agents = null;
-            }
-            else{
-                this.agents = new HashSet<>();
-                this.agents.add(agent);
-            }
-
-            //null means vertex constraint (or "any previous location")
-            if (prevLocation == null) {
-                this.prevLocations = null;
-            }
-            else{
-                this.prevLocations = new HashSet<>();
-                this.prevLocations.add(prevLocation);
-            }
-
+        public ConstraintWrapper(I_MapCell location, int time) {
             this.location = location;
             this.time = time;
         }
 
         public ConstraintWrapper(Constraint constraint) {
-            this(constraint.agent, constraint.location, constraint.time, constraint.prevLocation);
+            this(constraint.location, constraint.time);
+            this.add(constraint);
         }
 
         public ConstraintWrapper(ConstraintWrapper toCopy){
-            this.agents = new HashSet<>(toCopy.agents);
-            this.prevLocations = new HashSet<>(toCopy.prevLocations);
             this.location = toCopy.location;
             this.time = toCopy.time;
+            this.relevantConstraints = toCopy.relevantConstraints;
         }
 
         @Override
@@ -218,46 +227,44 @@ public class ConstraintSet {
             return result;
         }
 
-        public boolean contains (Agent agent){
-            if(this.agents == null) return true;
-            else return this.agents.contains(agent);
-        }
-
-        public boolean contains(I_MapCell prevLocation) {
-            if(this.prevLocations == null) return true;
-            else return this.prevLocations.contains(prevLocation);
-        }
-
         /**
          *
-         * @param agent
+         * @param constraint
          * @return true if this caused a change in the wrapper.
          */
-        public boolean add(Agent agent){
-            if (this.agents == null) {return false;} //already set to "all agents"
-            else if (agent == null) { //set agents to "all"
-                this.agents = null;
-                return true;
+        public boolean remove(Constraint constraint){
+            if(constraint == null || this.relevantConstraints == null || !this.relevantConstraints.contains(constraint)){
+                return false;
             }
-            else { // else add agent
-                return this.agents.add(agent);
+            else{
+                return this.relevantConstraints.remove(constraint);
             }
         }
 
         /**
          *
-         * @param prevLocation
+         * @param constraint a {@link Constraint} with the same time and location as this wrapper.
          * @return true if this caused a change in the wrapper.
          */
-        public boolean add(I_MapCell prevLocation) {
-            if (this.prevLocations == null) {return false;} //there is already a vertex constraint for this time.
-            else if (prevLocation == null) { //this is a vertex constraint, so replace existing swapping constraints with a single vertex constraint
-                this.prevLocations = null;
-                return true;
+        public boolean add(Constraint constraint){
+            if(constraint.time != this.time || constraint.location != this.location){return false;}
+            if (this.relevantConstraints == null) {
+                this.relevantConstraints = new HashSet<>();
             }
-            else { // else add another swapping constraint
-                return this.prevLocations.add(prevLocation);
-            }
+            return this.relevantConstraints.add(constraint);
         }
+
+        public boolean rejects(Move move){
+            for (Constraint constraint : this.relevantConstraints){
+                if(constraint.rejects(move)) return true;
+            }
+            return false;
+        }
+
+        public boolean accepts(Move move){
+            return !this.rejects(move);
+        }
+
+
     }
 }

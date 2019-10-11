@@ -13,11 +13,13 @@ class ConstraintSetTest {
 
     private ConstraintSet setOfBadConstraints;
     private ConstraintSet setOfGoodConstraints;
+    private ConstraintSet setWithDifferentAgentsAndPrevlocationsForSameTimeAndLocation;
 
     @BeforeEach
     void setUp() {
         setOfBadConstraints = new ConstraintSet();
         setOfGoodConstraints = new ConstraintSet();
+        setWithDifferentAgentsAndPrevlocationsForSameTimeAndLocation = new ConstraintSet();
     }
 
     private final Enum_MapCellType e = Enum_MapCellType.EMPTY;
@@ -50,7 +52,6 @@ class ConstraintSetTest {
         Constraint constraintHoldsSameAgent = new Constraint(agent2, 1, map1.getMapCell(coor14));
         Constraint constraintHoldsAllAgents = new Constraint(null, 1, map1.getMapCell(coor14));
         setOfGoodConstraints.add(constraintHoldsSameAgent);
-        setOfGoodConstraints.add(constraintHoldsAllAgents);
 
         Constraint constraintDoesntHoldDifferentAgent = new Constraint(agent1, 1, map1.getMapCell(coor14));
         Constraint constraintDoesntHoldDifferentTime = new Constraint(agent2, 2, map1.getMapCell(coor14));
@@ -61,18 +62,25 @@ class ConstraintSetTest {
         setOfBadConstraints.add(constraintDoesntHoldDifferentlocation);
         setOfBadConstraints.add(constraintDoesntHoldPrevlocation);
 
+        setWithDifferentAgentsAndPrevlocationsForSameTimeAndLocation.add(
+                new Constraint(agent1, 1, map1.getMapCell(coor13), map1.getMapCell(coor14))
+        );
+        setWithDifferentAgentsAndPrevlocationsForSameTimeAndLocation.add(
+                new Constraint(agent2, 1, map1.getMapCell(coor24), map1.getMapCell(coor14))
+        );
+
         /*  =should accept=  */
         /*  =  =because constraint doesn't hold=  */
         assertTrue(setOfBadConstraints.accepts(moveConflicts));
-        assertTrue(setOfBadConstraints.accepts(moveConflicts));
-        assertTrue(setOfBadConstraints.accepts(moveConflicts));
-        assertTrue(setOfBadConstraints.accepts(moveConflicts));
         /*  =  =because move doesn't violate the constraint=  */
-        assertTrue(setOfGoodConstraints.accepts(moveDoesntConflict));
         assertTrue(setOfGoodConstraints.accepts(moveDoesntConflict));
 
         /*  =should reject (return false)=  */
+        /*  =  =because there is a relevant constraint for this agent=  */
         assertFalse(setOfGoodConstraints.accepts(moveConflicts));
+        /*  =  =because there is a relevant constraint for all agents=  */
+        setOfBadConstraints.clear();
+        setOfGoodConstraints.add(constraintHoldsAllAgents);
         assertFalse(setOfGoodConstraints.accepts(moveConflicts));
 
     }
@@ -96,7 +104,6 @@ class ConstraintSetTest {
         Constraint constraintHoldsSameAgent = new Constraint(agent2, 1, map1.getMapCell(coor14), map1.getMapCell(coor13));
         Constraint constraintHoldsAllAgents = new Constraint(null, 1, map1.getMapCell(coor14), map1.getMapCell(coor13));
         setOfGoodConstraints.add(constraintHoldsSameAgent);
-        setOfGoodConstraints.add(constraintHoldsAllAgents);
 
         Constraint constraintDoesntHoldDifferentPrevlocation = new Constraint(agent2, 1, map1.getMapCell(coor12), map1.getMapCell(coor13));
         setOfBadConstraints.add(constraintDoesntHoldDifferentPrevlocation);
@@ -106,10 +113,20 @@ class ConstraintSetTest {
         assertTrue(setOfBadConstraints.accepts(moveConflicts));
         /*  =  =because move doesn't violate the constraint=  */
         assertTrue(setOfGoodConstraints.accepts(moveDoesntConflictOnMoveConstraint));
-        assertTrue(setOfGoodConstraints.accepts(moveDoesntConflictOnMoveConstraint));
+        /*  =  =because the prevLocation constraint is for a different agent=  */
+        assertTrue(setWithDifferentAgentsAndPrevlocationsForSameTimeAndLocation.accepts(
+                new Move(agent1, 1, map1.getMapCell(coor24), map1.getMapCell(coor14))
+        ));
+        assertTrue(setWithDifferentAgentsAndPrevlocationsForSameTimeAndLocation.accepts(
+                new Move(agent2, 1, map1.getMapCell(coor13), map1.getMapCell(coor14))
+        ));
 
         /*  =should reject (return false)=  */
+        /*  =  =because there is a relevant constraint for this agent=  */
         assertFalse(setOfGoodConstraints.accepts(moveConflicts));
+        /*  =  =because there is a relevant constraint for all agents=  */
+        setOfBadConstraints.clear();
+        setOfGoodConstraints.add(constraintHoldsAllAgents);
         assertFalse(setOfGoodConstraints.accepts(moveConflicts));
 
     }
