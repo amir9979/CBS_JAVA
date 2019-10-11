@@ -58,8 +58,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
     protected void init(MAPF_Instance instance, RunParameters runParameters){
         this.instanceReport = runParameters.instanceReport;
-        this.constraints = runParameters.constraints == null ? new ConstraintSet()
-                : new ConstraintSet(runParameters.constraints);
+        this.constraints = runParameters.constraints == null ? new ConstraintSet(): runParameters.constraints;
         this.agent = instance.agents.get(0);
         this.map = instance.map;
         if(runParameters.existingSolution != null && runParameters.existingSolution.getPlanFor(this.agent) != null){

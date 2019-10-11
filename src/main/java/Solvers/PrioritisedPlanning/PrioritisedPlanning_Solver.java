@@ -6,6 +6,7 @@ import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,7 +29,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     /*  =  = Fields related to the run =  */
 
     private long maximumRuntime;
-    private List<Constraint> constraints;
+    private ConstraintSet constraints;
     protected InstanceReport instanceReport;
     protected boolean commitReport;
 
@@ -65,7 +66,6 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     public Solution solve(MAPF_Instance instance, RunParameters parameters) {
         init(instance, parameters);
         Solution solution = solvePrioritisedPlanning(this.agents, instance, constraints);
-        // todo - solution is null
         writeMetricsToReport(solution);
         releaseMemory();
         return solution;
@@ -90,8 +90,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.agents = new ArrayList<>(instance.agents);
 
         this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
-        this.constraints = runParameters.constraints == null ? new ArrayList<>()
-                : new ArrayList<>(runParameters.constraints);
+        this.constraints = runParameters.constraints == null ? new ConstraintSet(): runParameters.constraints;
         this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
                 : runParameters.instanceReport;
         this.commitReport = runParameters.instanceReport == null;
@@ -130,7 +129,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * @param instance
      * @param initialConstraints
      */
-    protected Solution solvePrioritisedPlanning(List<? extends Agent> agents, MAPF_Instance instance, List<Constraint> initialConstraints) {
+    protected Solution solvePrioritisedPlanning(List<? extends Agent> agents, MAPF_Instance instance, ConstraintSet initialConstraints) {
         Solution solution = new Solution();
 
         //solve for each agent while avoiding the plans of previous agents
@@ -165,7 +164,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         return false;
     }
 
-    protected SingleAgentPlan solveSubproblem(Agent currentAgent, MAPF_Instance fullInstance, List<Constraint> constraints) {
+    protected SingleAgentPlan solveSubproblem(Agent currentAgent, MAPF_Instance fullInstance, ConstraintSet constraints) {
         //create a sub-problem
         MAPF_Instance subproblem = fullInstance.getSubproblemFor(currentAgent);
         InstanceReport subproblemReport = initSubproblemReport(fullInstance);
@@ -197,8 +196,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         S_Metrics.removeReport(subproblemReport);
     }
 
-    protected RunParameters getSubproblemParameters(MAPF_Instance subproblem, InstanceReport subproblemReport, List<Constraint> constraints) {
-        return new RunParameters(new ArrayList<>(constraints), subproblemReport);
+    protected RunParameters getSubproblemParameters(MAPF_Instance subproblem, InstanceReport subproblemReport, ConstraintSet constraints) {
+        return new RunParameters(-1, new ConstraintSet(constraints), subproblemReport, null);
     }
 
     private List<Constraint> vertexConstraintsForPlan(SingleAgentPlan planForAgent) {
@@ -244,7 +243,13 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         instanceReport.putIntegerValue(InstanceReport.StandardFields.timeout, abortedForTimeout ? 1 : 0);
         instanceReport.putStingValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
         instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
-        instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
+        if(solution != null){
+            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
+            instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 1);
+        }
+        else{
+            instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 0);
+        }
         instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.totalLowLevelStatesGenerated);
         instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.totalLowLevelStatesExpanded);
         if(commitReport){

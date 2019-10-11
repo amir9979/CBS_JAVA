@@ -50,7 +50,7 @@ public class ConstraintSet{
      */
     public boolean add(Constraint constraint){
         // using this instead of ConstraintWrapper(Constraint) because this doesn't create an unnecessary Set<Constraint>s
-        // in every dummy we create.
+        // for every dummy we create.
         ConstraintWrapper dummy = new ConstraintWrapper(constraint.location, constraint.time);
 
         if(!this.constraints.containsKey(dummy)){
@@ -81,7 +81,7 @@ public class ConstraintSet{
      */
     public boolean remove(Constraint constraint){
         // using this instead of ConstraintWrapper(Constraint) because this doesn't create an unnecessary Set<Constraint>s
-        // in every dummy we create.
+        // for every dummy we create.
         ConstraintWrapper dummy = new ConstraintWrapper(constraint.location, constraint.time);
 
         if(!this.constraints.containsKey(dummy)){

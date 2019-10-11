@@ -9,6 +9,7 @@ import Instances.MAPF_Instance;
 import Instances.Maps.*;
 import Solvers.*;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -156,7 +157,7 @@ class SingleAgentAStar_SolverTest {
 
         //constraint
         Constraint vertexConstraint = new Constraint(null, 2, null, cell32);
-        List<Constraint> constraints = new ArrayList<>();
+        ConstraintSet constraints = new ConstraintSet();
         constraints.add(vertexConstraint);
         RunParameters parameters = new RunParameters(constraints);
 
@@ -186,7 +187,7 @@ class SingleAgentAStar_SolverTest {
         Constraint swappingConstraint1 = new Constraint(null, 2, cell33, cell32);
         Constraint swappingConstraint2 = new Constraint(null, 3, cell33, cell32);
         Constraint swappingConstraint3 = new Constraint(null, 4, cell33, cell32);
-        List<Constraint> constraints = new ArrayList<>();
+        ConstraintSet constraints = new ConstraintSet();
         constraints.add(swappingConstraint1);
         constraints.add(swappingConstraint2);
         constraints.add(swappingConstraint3);
@@ -249,7 +250,6 @@ class SingleAgentAStar_SolverTest {
     @Test
     void unsolvableShouldTimeout(){
         MAPF_Instance testInstance = instanceUnsolvable;
-        Agent agent = testInstance.agents.get(0);
 
         // three second timeout
         RunParameters runParameters = new RunParameters(1000*3);
