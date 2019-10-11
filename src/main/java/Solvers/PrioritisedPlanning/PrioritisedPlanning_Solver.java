@@ -183,8 +183,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     private static InstanceReport initSubproblemReport(MAPF_Instance instance) {
         InstanceReport subproblemReport = S_Metrics.newInstanceReport();
-        subproblemReport.putStingValue("Parent Instance", instance.name);
-        subproblemReport.putStingValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
+        subproblemReport.putStringValue("Parent Instance", instance.name);
+        subproblemReport.putStringValue("Parent Solver", PrioritisedPlanning_Solver.class.getSimpleName());
         return subproblemReport;
     }
 
@@ -241,10 +241,10 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     protected void writeMetricsToReport(Solution solution) {
         instanceReport.putIntegerValue(InstanceReport.StandardFields.timeout, abortedForTimeout ? 1 : 0);
-        instanceReport.putStingValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
+        instanceReport.putStringValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
         instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
         if(solution != null){
-            instanceReport.putStingValue(InstanceReport.StandardFields.solution, solution.toString());
+            instanceReport.putStringValue(InstanceReport.StandardFields.solution, solution.toString());
             instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 1);
         }
         else{

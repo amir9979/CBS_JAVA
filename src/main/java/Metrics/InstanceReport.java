@@ -47,7 +47,7 @@ public class InstanceReport {
      * null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type, or
      * it the fieldName contains {@link #EXTENTION_STRING}.
      */
-    public String putStingValue(String fieldName, String fieldValue){
+    public String putStringValue(String fieldName, String fieldValue){
         if(!canPutToMap(fieldName, stringFields)) {return null;}
         if(fieldName.contains(EXTENTION_STRING)) {return null;}
         removeExtensions(fieldName);
