@@ -3,6 +3,7 @@ package Instances;
 import Instances.Agents.Agent;
 import Instances.Maps.I_Map;
 
+import java.util.Objects;
 import java.util.Stack;
 
 public class InstanceManager {
@@ -101,6 +102,15 @@ public class InstanceManager {
         public Moving_AI_Path(String mapPath, String scenarioPath) {
             super(mapPath);
             this.scenarioPath = scenarioPath;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Moving_AI_Path)) return false;
+            Moving_AI_Path that = (Moving_AI_Path) o;
+            return Objects.equals(scenarioPath, that.scenarioPath) &&
+                    Objects.equals(this.path, that.path);
         }
 
     }

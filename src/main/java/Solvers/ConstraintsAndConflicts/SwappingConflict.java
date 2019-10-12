@@ -2,6 +2,7 @@ package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
+import Solvers.Move;
 
 /**
  * Represents a conflict between 2 {@link Agent}s which are swapping their {@link I_MapCell locations} at a certain time.
@@ -40,4 +41,12 @@ public class SwappingConflict extends A_Conflict{
                 new Constraint(agent2, time, location, agent2_destination)};
     }
 
+    /**
+     * assumes both moves have the same {@link Move#timeNow}.
+     * @return true if these moves have a swapping conflict.
+     */
+    public static boolean haveConflicts(Move move1, Move move2){
+        return move1.prevLocation.equals(move2.currLocation)
+                && move2.prevLocation.equals(move1.currLocation);
+    }
 }

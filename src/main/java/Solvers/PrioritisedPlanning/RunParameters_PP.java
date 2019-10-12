@@ -3,7 +3,9 @@ package Solvers.PrioritisedPlanning;
 import Instances.Agents.Agent;
 import Metrics.InstanceReport;
 import Solvers.ConstraintsAndConflicts.Constraint;
+import Solvers.ConstraintsAndConflicts.ConstraintSet;
 import Solvers.RunParameters;
+import Solvers.Solution;
 
 import java.util.List;
 
@@ -22,12 +24,12 @@ public class RunParameters_PP extends RunParameters {
      */
     public final Agent[] preferredPriorityOrder;
 
-    public RunParameters_PP(long timeout, List<Constraint> constraints, InstanceReport instanceReport, Agent[] preferredPriorityOrder) {
-        super(timeout, constraints, instanceReport);
+    public RunParameters_PP(long timeout, ConstraintSet constraints, InstanceReport instanceReport, Solution existingSolution, Agent[] preferredPriorityOrder) {
+        super(timeout, constraints, instanceReport, existingSolution);
         this.preferredPriorityOrder = preferredPriorityOrder;
     }
 
-    public RunParameters_PP(List<Constraint> constraints, InstanceReport instanceReport, Agent[] preferredPriorityOrder) {
+    public RunParameters_PP(ConstraintSet constraints, InstanceReport instanceReport, Agent[] preferredPriorityOrder) {
         super(constraints, instanceReport);
         this.preferredPriorityOrder = preferredPriorityOrder;
     }

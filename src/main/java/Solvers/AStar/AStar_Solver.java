@@ -49,7 +49,7 @@ public class AStar_Solver implements I_Solver {
         //imp - set local fields in preparation for a run
     }
 
-    protected Solution solveAStar() {
+    protected Solution  solveAStar() {
         return null; //imp
     }
 

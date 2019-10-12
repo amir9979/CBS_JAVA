@@ -6,7 +6,8 @@ import java.util.List;
  * A single cell in a {@link GraphMap}. Represents a unique location in the graph.
  * Immutable beyond first initialization (First with a constructor, and then with {@link #setNeighbors(GraphMapCell[])}.
  * Equals and HashCode are not overridden, because the implementation of {@link GraphMap} and this class does not allow
- * duplicate instances of the same {@link GraphMapCell}.
+ * duplicate instances of the same {@link GraphMapCell}. If an extending class wished to override these, it would be
+ * best to use all fields, not just the {@link #coordinate}.
  */
 public class GraphMapCell implements I_MapCell{
 
@@ -52,10 +53,10 @@ public class GraphMapCell implements I_MapCell{
     }
 
     /**
-     * Returns an array (copy) that contains references to this cell's neighbors.
+     * Returns an UnmodifiableList of this cell's neighbors.
      * The amount of neighbors varies by map and connectivity.
-     * Runs in O({@link #neighbors}.length).
-     * @return an array (copy) that contains references to this cell's neighbors.
+     * Runs in O(1).
+     * @return an UnmodifiableList of this cell's neighbors.
      */
     @Override
     public List<I_MapCell> getNeighbors() {

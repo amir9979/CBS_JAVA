@@ -22,6 +22,9 @@ import java.util.*;
  * output streams.
  */
 public class S_Metrics {
+
+    private static final char CSV_DELIMITER = ',';
+
     ////      MEMBERS      ////
     /**
      * Optional. Defines a header. Useful for formats such as CSV.
@@ -215,9 +218,10 @@ public class S_Metrics {
      */
     private static String headerToStringCSV(String[] headerArray, char delimiter){
         StringBuilder headerLine = new StringBuilder();
-        for(String field : headerArray){
+        for(int i = 0 ; i < headerArray.length ; i++){
+            String field = headerArray[i];
             headerLine.append(field);
-            headerLine.append(delimiter);
+            if(i != headerArray.length - 1) {headerLine.append(delimiter);} //no delimiter after the last field
         }
         headerLine.append('\n');
         return headerLine.toString();
@@ -228,7 +232,7 @@ public class S_Metrics {
      * @return a string representation of the given header, in a format compatible with CSV.
      */
     public static String headerArrayToStringCSV(String[] headerArray){
-        return headerToStringCSV(headerArray, ',');
+        return headerToStringCSV(headerArray, S_Metrics.CSV_DELIMITER);
     }
 
     /**
@@ -241,11 +245,12 @@ public class S_Metrics {
     private static String instanceReportToStringCSV(InstanceReport instanceReport, char delimiter, String[] headerArray){
         StringBuilder reportLine = new StringBuilder();
 
-        for(String field : headerArray){
+        for(int i = 0; i< headerArray.length ; i++){
+            String field = headerArray[i];
             if(instanceReport.hasField(field)){
                 reportLine.append(instanceReport.getValue(field));
             }
-            reportLine.append(delimiter);
+            if(i != headerArray.length - 1 ) {reportLine.append(delimiter);} //no delimiter after the last one
         }
         reportLine.append('\n');
         return reportLine.toString();
@@ -258,7 +263,7 @@ public class S_Metrics {
      * @return a string representation of the information in an instanceReport, in a format compatible with CSV.
      */
     public static String instanceReportToStringCSV(InstanceReport instanceReport){
-        return  instanceReportToStringCSV(instanceReport, ',', S_Metrics.header);
+        return  instanceReportToStringCSV(instanceReport, S_Metrics.CSV_DELIMITER, S_Metrics.header);
     }
 
     //      human readable      //
@@ -426,7 +431,7 @@ public class S_Metrics {
     public static void exportCSV(OutputStream outputStream, String[] headerArray) throws IOException {
         outputHeaderToStream(outputStream, headerArray, S_Metrics::headerArrayToStringCSV);
         outputAllInstanceReportsToStream(outputStream,
-                instanceReport -> S_Metrics.instanceReportToStringCSV(instanceReport, ',', headerArray));
+                instanceReport -> S_Metrics.instanceReportToStringCSV(instanceReport, S_Metrics.CSV_DELIMITER, headerArray));
         outputStream.flush();
     }
 

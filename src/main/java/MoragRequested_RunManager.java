@@ -2,6 +2,8 @@ import Experiments.GridExperiment;
 import IO_Package.IO_Manager;
 import Instances.*;
 import Solvers.AStar.AStar_Solver;
+import Solvers.AStar.SingleAgentAStar_Solver;
+import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
 import Solvers.Solution;
 
 public class MoragRequested_RunManager extends A_RunManager {
@@ -9,7 +11,7 @@ public class MoragRequested_RunManager extends A_RunManager {
 
     @Override
     void setSolvers() {
-        this.solvers.add(new AStar_Solver());
+        this.solvers.add(new PrioritisedPlanning_Solver(new SingleAgentAStar_Solver()));
 
     }
 
@@ -23,7 +25,7 @@ public class MoragRequested_RunManager extends A_RunManager {
 
 
         /*  =   Set Instance Manager   =  */
-        InstanceManager instanceManagerMissingProperties = new InstanceManager(path, new InstanceBuilder_BGU(), null);
+        InstanceManager instanceManagerMissingProperties = new InstanceManager(path, new InstanceBuilder_BGU(), new InstanceProperties());
 
         /*  =   Add new experiment   =  */
         int unknownValue = Integer.MAX_VALUE;

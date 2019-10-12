@@ -2,6 +2,7 @@ package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
+import Solvers.Move;
 
 public abstract class A_Conflict {
     public final Agent agent1;
@@ -41,5 +42,18 @@ public abstract class A_Conflict {
 //    public static A_Conflict[] allConflicts(SingleAgentPlan plan1, SingleAgentPlan plan2){
 //        return null; //imp
 //    }
+
+    /**
+     * Checks that both moves have the same time.
+     * @param move1 @NotNull
+     * @param move2 @NotNull
+     * @return true if these moves have a vertex conflict or a swapping conflict.
+     */
+    public static boolean haveConflicts(Move move1, Move move2){
+        if(move1 == null || move2 == null){throw new IllegalArgumentException("can't compare null moves");}
+
+        return move1.timeNow == move2.timeNow
+                && (SwappingConflict.haveConflicts(move1, move2) || VertexConflict.haveConflicts(move1, move2));
+    }
 
 }

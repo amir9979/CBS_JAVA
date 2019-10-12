@@ -2,10 +2,7 @@ package Instances;
 
 import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
-import Instances.Maps.Coordinate_2D;
-import Instances.Maps.Enum_MapCellType;
-import Instances.Maps.GraphMap;
-import Instances.Maps.MapFactory;
+import Instances.Maps.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,30 +14,19 @@ import java.util.List;
 public class InstanceBuilder_BGUTest {
 
     // testme
+    // todo - add test with obstacles
 
-    private InstanceBuilder_BGU instanceBuilderBgu;
-    private InstanceManager.InstancePath instancePath;
+    private InstanceBuilder_BGU instanceBuilderBgu = new InstanceBuilder_BGU();
+    private InstanceManager.InstancePath instancePath_Instance_16_0_7;
     private InstanceProperties instanceProperties = new InstanceProperties(
-            new int[]{16,16},(float)0,new int[]{7,10,15},"-"
-    );
-
-    private final String path = IO_Manager.buildPath(
-            new String[]{   IO_Manager.testResources_Directory,
-                    "Instances\\Instance-16-0-7-0"}
-    );
-
-//
-//    private final String path = IO_Manager.buildPath(
-//            new String[]{   IO_Manager.testResources_Directory,
-//                    "Instances\\Instance-8-15-5-17 - hard one - cost 29 and some corridors"}
-//    );
+                                                        new MapDimensions(new int[]{16,16}),(float)0,new int[]{7,10,15}
+                                                    );
 
 
 
     @Before
     public void Before() throws Exception {
-        this.instanceBuilderBgu = new InstanceBuilder_BGU();
-        this.instancePath = null; // init in the beginning of every test
+        this.instancePath_Instance_16_0_7 = null; // init in the beginning of every test
 
     }
 
@@ -50,18 +36,22 @@ public class InstanceBuilder_BGUTest {
 
 
     @Test
-    public void getInstance_valid_values() {
+    public void prepareInstances_Instance_16_0_7() {
 
 
         /*************      =Valid Values=     *************/
+        String path_16_0_7 = IO_Manager.buildPath(
+                                            new String[]{   IO_Manager.testResources_Directory,
+                                            "Instances\\Instance-16-0-7-0"}
+        );
 
 
-        this.instancePath = new InstanceManager.InstancePath(path);
+        this.instancePath_Instance_16_0_7 = new InstanceManager.InstancePath(path_16_0_7);
 
 
         /*****  =Expected values=   *****/
         List<Agent> expectedAgents = new ArrayList<Agent>(7);
-        addAgents(expectedAgents);
+        addAgents_Instance_16_0_7(expectedAgents);
 
 
 
@@ -80,7 +70,7 @@ public class InstanceBuilder_BGUTest {
             }
         }
 
-        GraphMap expectedMap = MapFactory.newSimple4Connected2D_GraphMap(expectedCellTypeMap);
+        // GraphMap expectedMap = MapFactory.newSimple4Connected2D_GraphMap(expectedCellTypeMap);
 
 
 
@@ -89,7 +79,7 @@ public class InstanceBuilder_BGUTest {
 
 
         String instanceName = "Instance-16-0-7"; // Name from the InstanceManager
-        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath, this.instanceProperties);
+        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath_Instance_16_0_7, this.instanceProperties);
         MAPF_Instance mapf_instance = instanceBuilderBgu.getNextExistingInstance();
 
         Assert.assertNotNull(mapf_instance);
@@ -104,6 +94,14 @@ public class InstanceBuilder_BGUTest {
 
 
 
+        // Blocking - add map test
+
+        /*  =Check Map=  */
+
+
+
+
+
 
 
 
@@ -112,7 +110,7 @@ public class InstanceBuilder_BGUTest {
     }
 
 
-    private void addAgents(List<Agent> expectedAgents){
+    private void addAgents_Instance_16_0_7(List<Agent> expectedAgents){
 
         /*
         Agents from file: instance-16-0-7-0
@@ -122,82 +120,34 @@ public class InstanceBuilder_BGUTest {
 
         // 0,5,2,9,7
         expectedAgents.add( new Agent(0,
-                new Coordinate_2D(9,7),
-                new Coordinate_2D(5,2)));
+                            new Coordinate_2D(9,7),
+                            new Coordinate_2D(5,2)));
         // 1,1,7,10,6
         expectedAgents.add( new Agent(1,
-                new Coordinate_2D(10,6),
-                new Coordinate_2D(1,7)));
+                            new Coordinate_2D(10,6),
+                            new Coordinate_2D(1,7)));
         // 2,12,10,3,1
         expectedAgents.add( new Agent(2,
-                new Coordinate_2D(3,1),
-                new Coordinate_2D(12,10)));
+                            new Coordinate_2D(3,1),
+                            new Coordinate_2D(12,10)));
         // 3,4,11,13,8
         expectedAgents.add( new Agent(3,
-                new Coordinate_2D(13,8),
-                new Coordinate_2D(4,11)));
+                            new Coordinate_2D(13,8),
+                            new Coordinate_2D(4,11)));
         // 4,13,6,10,1
         expectedAgents.add( new Agent(4,
-                new Coordinate_2D(10,1),
-                new Coordinate_2D(13,6)));
+                            new Coordinate_2D(10,1),
+                            new Coordinate_2D(13,6)));
         // 5,1,1,15,10
         expectedAgents.add( new Agent(5,
-                new Coordinate_2D(15,10),
-                new Coordinate_2D(1,1)));
+                            new Coordinate_2D(15,10),
+                            new Coordinate_2D(1,1)));
         // 6,7,7,7,11
         expectedAgents.add( new Agent(6,
-                new Coordinate_2D(7,11),
-                new Coordinate_2D(7,7)));
+                            new Coordinate_2D(7,11),
+                            new Coordinate_2D(7,7)));
     }
 
-
-
-//
-//
-//    /*****      =Test Map=      *****/
-//
-//
-//    @Test
-//    public void buildMapAsStringArray() {
-//        // imp - test
-//    }
-//
-//
-//
-//    @Test
-//    public void buildGraphMap() {
-//        // imp - test
-//    }
-//
-//
-//
-//    @Test
-//    public void build_2D_cellTypeMap(){
-//        // imp - test
-//    }
-//
-//
-//
-//    @Test
-//    public void getDimensions() {
-//        // imp - test
-//    }
-//
-//
-//
-//    /*****      =Test Agents=      *****/
-//
-//
-//    @Test
-//    public void buildSingleAgent(){
-//        // imp - test
-//    }
-//
-//
-//    @Test
-//    public void buildAgents() {
-//        // imp - test
-//    }
 
 
 }
