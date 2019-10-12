@@ -54,24 +54,8 @@ public interface I_InstanceBuilder {
 
         switch ( mapDimensions.numOfDimensions ){
             case 2:
-                int xAxis_length = mapDimensions.xAxis_length;
-                int yAxis_length = mapDimensions.yAxis_length;
-                if( mapAsStrings.length != yAxis_length ){
-                    return null; // invalid value
-                }
 
-                Character[][] mapAsCharacters_2d = new Character[xAxis_length][yAxis_length];
-                for (int yAxis_value = 0; yAxis_value < mapAsStrings.length; yAxis_value++) {
-                    String[] yAxisLine = mapAsStrings[yAxis_value].split(mapSeparator);
-                    if( yAxisLine.length != xAxis_length ){
-                        return null; // invalid xAxis_length
-                    }
-                    for (int xAxis_value = 0; xAxis_value < yAxisLine.length ; xAxis_value++) {
-                        mapAsCharacters_2d[xAxis_value][yAxis_value] = yAxisLine[xAxis_value].charAt(0);
-                    }
-
-                }
-
+                Character[][] mapAsCharacters_2d = build2D_CharacterMap(mapAsStrings,mapDimensions,mapSeparator);
                 Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, obstaclePercentage);
                 if( mapAsCellType_2D == null){
                     return null; // Error while building the map
@@ -86,6 +70,30 @@ public interface I_InstanceBuilder {
 
 
         return null; // If something went wrong ( should return in switch-case )
+    }
+
+
+    static Character[][] build2D_CharacterMap(String[] mapAsStrings, MapDimensions mapDimensions, String mapSeparator){
+
+        int xAxis_length = mapDimensions.xAxis_length;
+        int yAxis_length = mapDimensions.yAxis_length;
+        if( mapAsStrings.length != yAxis_length ){
+            return null; // invalid value
+        }
+
+        Character[][] mapAsCharacters_2d = new Character[xAxis_length][yAxis_length];
+        for (int yAxis_oldValue = 0; yAxis_oldValue < mapAsStrings.length; yAxis_oldValue++) {
+            String[] yAxisLine = mapAsStrings[yAxis_oldValue].split(mapSeparator);
+            if( yAxisLine.length != xAxis_length ){
+                return null; // invalid xAxis_length
+            }
+            for (int yAxis_newValue = 0; yAxis_newValue < yAxisLine.length ; yAxis_newValue++) {
+                mapAsCharacters_2d[yAxis_oldValue][yAxis_newValue] = yAxisLine[yAxis_newValue].charAt(0);
+            }
+
+        }
+
+        return mapAsCharacters_2d;
     }
 
 

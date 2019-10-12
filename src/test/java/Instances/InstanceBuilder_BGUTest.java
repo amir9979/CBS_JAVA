@@ -17,7 +17,7 @@ public class InstanceBuilder_BGUTest {
     // todo - add test with obstacles
 
     private InstanceBuilder_BGU instanceBuilderBgu = new InstanceBuilder_BGU();
-    private InstanceManager.InstancePath instancePath;
+    private InstanceManager.InstancePath instancePath_Instance_16_0_7;
     private InstanceProperties instanceProperties = new InstanceProperties(
                                                         new MapDimensions(new int[]{16,16}),(float)0,new int[]{7,10,15}
                                                     );
@@ -26,7 +26,7 @@ public class InstanceBuilder_BGUTest {
 
     @Before
     public void Before() throws Exception {
-        this.instancePath = null; // init in the beginning of every test
+        this.instancePath_Instance_16_0_7 = null; // init in the beginning of every test
 
     }
 
@@ -36,22 +36,22 @@ public class InstanceBuilder_BGUTest {
 
 
     @Test
-    public void prepareInstances_test() {
+    public void prepareInstances_Instance_16_0_7() {
 
 
         /*************      =Valid Values=     *************/
-        String path = IO_Manager.buildPath(
+        String path_16_0_7 = IO_Manager.buildPath(
                                             new String[]{   IO_Manager.testResources_Directory,
                                             "Instances\\Instance-16-0-7-0"}
         );
 
 
-        this.instancePath = new InstanceManager.InstancePath(path);
+        this.instancePath_Instance_16_0_7 = new InstanceManager.InstancePath(path_16_0_7);
 
 
         /*****  =Expected values=   *****/
         List<Agent> expectedAgents = new ArrayList<Agent>(7);
-        addAgents(expectedAgents);
+        addAgents_Instance_16_0_7(expectedAgents);
 
 
 
@@ -79,7 +79,7 @@ public class InstanceBuilder_BGUTest {
 
 
         String instanceName = "Instance-16-0-7"; // Name from the InstanceManager
-        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath, this.instanceProperties);
+        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath_Instance_16_0_7, this.instanceProperties);
         MAPF_Instance mapf_instance = instanceBuilderBgu.getNextExistingInstance();
 
         Assert.assertNotNull(mapf_instance);
@@ -110,7 +110,7 @@ public class InstanceBuilder_BGUTest {
     }
 
 
-    private void addAgents(List<Agent> expectedAgents){
+    private void addAgents_Instance_16_0_7(List<Agent> expectedAgents){
 
         /*
         Agents from file: instance-16-0-7-0
