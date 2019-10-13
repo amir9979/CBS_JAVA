@@ -5,6 +5,7 @@ import Instances.MAPF_Instance;
 import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
+import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.ConstraintsAndConflicts.Constraint;
 import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
@@ -56,8 +57,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      *                      {@link Agent}s are to be avoided.
      */
     public PrioritisedPlanning_Solver(I_Solver lowLevelSolver) {
-        if(lowLevelSolver == null){throw new IllegalArgumentException();}
-        this.lowLevelSolver = lowLevelSolver;
+        this.lowLevelSolver = Objects.requireNonNullElseGet(lowLevelSolver, SingleAgentAStar_Solver::new);
     }
 
     /*  = Interface Implementation =  */

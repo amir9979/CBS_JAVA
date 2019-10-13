@@ -4,12 +4,8 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.Maps.MapDimensions;
-import Solvers.AStar.AStar_Solver;
 import Solvers.AStar.SingleAgentAStar_Solver;
-import Solvers.I_Solver;
 import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
-
-import java.util.ArrayList;
 
 public class SimpleRunManager extends A_RunManager {
 
