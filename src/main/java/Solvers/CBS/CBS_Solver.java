@@ -2,6 +2,8 @@ package Solvers.CBS;
 
 import Instances.MAPF_Instance;
 import Solvers.AStar.SingleAgentAStar_Solver;
+import Solvers.ConstraintsAndConflicts.A_Conflict;
+import Solvers.ConstraintsAndConflicts.I_ConflictAvoidanceTable;
 import Solvers.I_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
@@ -65,7 +67,12 @@ public class CBS_Solver implements I_Solver {
 
     /*  = internal classes =  */
 
+    /**
+     * A data type for representing a single node in the CBS search tree.
+     */
     private class CBS_Node{
+        public I_ConflictAvoidanceTable conflictAvoidanceTable;
+        public A_Conflict selectedConflict;
         //imp
     }
 }
