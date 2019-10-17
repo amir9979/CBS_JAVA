@@ -25,6 +25,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
      * would continue to be generated ad infinitum. This would eventually result in a heap overflow.
      */
     protected static final long DEFAULT_TIMEOUT = 3 * 1000;
+    private static final Comparator<AStarState> stateFComparator = Comparator.comparing(AStarState::getF);
+    private static final Comparator<AStarState> stateGComparator = Comparator.comparing(AStarState::getG);
 
     private long maximumRuntime;
     private ConstraintSet constraints;
@@ -33,8 +35,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private long startTime;
     private long endTime;
     private boolean abortedOnTimeout;
-    private Queue<AStarState> openList;
-    private Map<AStarState, AStarState> openListStates;
+    private I_OpenList<AStarState> openList;
     private Set<AStarState> closed;
     private Agent agent;
     private I_Map map;
@@ -84,8 +85,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
         this.abortedOnTimeout = false;
         this.startTime = System.currentTimeMillis();
         this.endTime = 0;
-        this.openList = new PriorityQueue<>(Comparator.comparing(AStarState::getF));
-        this.openListStates = new HashMap<>();
+        this.openList = new OpenList<>(stateFComparator);
         this.expandedNodes = 0;
         this.closed = new HashSet<>();
         this.generatedNodes = 0;
@@ -107,11 +107,11 @@ public class SingleAgentAStar_Solver implements I_Solver {
         // root can't be generated (first move is rejected by constraints
         if (rootState == null){ return null;}
 
-        addToOpen(rootState);
+        openList.add(rootState);
         while (!openList.isEmpty() ){
             if(checkTimeout()) {return null;}
             //dequeu
-            AStarState currentState = dequeueFromOpen();
+            AStarState currentState = openList.poll();
 
             if (isGoalState(currentState)){
                 currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
@@ -127,17 +127,6 @@ public class SingleAgentAStar_Solver implements I_Solver {
     }
 
     /*  = auxiliary methods =  */
-
-    private boolean addToOpen(AStarState child) {
-        openListStates.put(child, child);
-        return openList.add(child);
-    }
-
-    private AStarState dequeueFromOpen() {
-        AStarState state = openList.remove();
-        openListStates.remove(state);
-        return state;
-    }
 
     protected boolean checkTimeout() {
         if(System.currentTimeMillis()-startTime > maximumRuntime){
@@ -181,7 +170,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
     /*  = inner classes =  */
 
-    public class AStarState{
+    public class AStarState implements Comparable<AStarState>{
+
         private Move move;
         private AStarState prev;
         private int g;
@@ -236,32 +226,23 @@ public class SingleAgentAStar_Solver implements I_Solver {
                         // for non consistent heuristics - if the new one has a lower f, remove the old one from closed
                         // and add the new one to open
                     }
-                    else if(null != (existingState = getFromOpen(child)) ){ //an equal state is waiting in open
+                    else if(null != (existingState = openList.get(child)) ){ //an equal state is waiting in open
                         //keep the one with min G
                         keepTheStateWithMinG(child, existingState); //O(LOGn)
                     }
                     else{ // it's a new state
-                        addToOpen(child);
+                        openList.add(child);
                     }
                 }
             }
         }
 
         private void keepTheStateWithMinG(AStarState newState, AStarState existingState) {
-            boolean shouldSwap = newState.g < existingState.g;
-            if(shouldSwap){
-                openList.remove(existingState);
-                // no need to remove from openListStates because going to put a new value there anyway.
-                addToOpen(newState);
-            }
-        }
-
-
-        /**
-         * looks for a {@link AStarState} equal to state, in {@link #openList}. If found, returns the found state, else returns null.
-         */
-        private AStarState getFromOpen(AStarState state) {
-            return openListStates.get(state);
+            openList.keepOne(existingState, newState, stateGComparator);
+//            boolean shouldSwap = newState.g < existingState.g;
+//            if(shouldSwap){
+//                openList.replace(existingState, newState);
+//            }
         }
 
         public SingleAgentPlan backTracePlan() {
@@ -297,6 +278,10 @@ public class SingleAgentAStar_Solver implements I_Solver {
             return Objects.hash(move.currLocation.hashCode(), move.timeNow);
         }
 
+        @Override
+        public int compareTo(AStarState o) {
+            return stateFComparator.compare(this, o);
+        }
     }
 
     private class defaultHeuristic implements AStarHeuristic{
