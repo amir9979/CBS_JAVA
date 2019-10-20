@@ -175,9 +175,6 @@ public class SingleAgentPlan implements Iterable<Move> {
                 this.moves) {
             Move otherMoveAtTime = other.moveAt(localMove.timeNow);
             if(otherMoveAtTime != null){
-                boolean vertexConflict = otherMoveAtTime.currLocation.equals(localMove.currLocation);
-                boolean swappingConflict = otherMoveAtTime.prevLocation.equals(localMove.currLocation)
-                        && localMove.prevLocation.equals(otherMoveAtTime.currLocation);
                 if(A_Conflict.haveConflicts(localMove, otherMoveAtTime)){return true;}
             }
         }
