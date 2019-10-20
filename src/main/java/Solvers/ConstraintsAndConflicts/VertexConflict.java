@@ -15,6 +15,11 @@ public class VertexConflict extends A_Conflict {
         super(agent1, agent2, time, location);
     }
 
+
+    public VertexConflict(Agent agent1, Agent agent2, ConflictAvoidanceTable.TimeLocation timeLocation){
+        super(agent1,agent2,timeLocation.time,timeLocation.location);
+    }
+
     /**
      * returns an array of {@link Constraint}, each of which could prevent this conflict.
      * @return an array of {@link Constraint}, each of which could prevent this conflict.
@@ -32,5 +37,8 @@ public class VertexConflict extends A_Conflict {
     public static boolean haveConflicts(Move move1, Move move2){
         return move1.currLocation.equals(move2.currLocation);
     }
+
+
+
 
 }
