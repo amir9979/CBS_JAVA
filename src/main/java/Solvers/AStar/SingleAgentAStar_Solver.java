@@ -262,8 +262,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
         /**
          * equality is determined by location (current), and time.
-         * @param o
-         * @return
+         * @param o {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
         public boolean equals(Object o) {

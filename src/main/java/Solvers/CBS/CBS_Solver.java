@@ -69,6 +69,7 @@ public class CBS_Solver implements I_Solver {
 
     /**
      * A data type for representing a single node in the CBS search tree.
+     * Try to keep most logic in {@link CBS_Solver}, avoiding methods in this class.
      */
     private class CBS_Node{
         public I_ConflictAvoidanceTable conflictAvoidanceTable;
