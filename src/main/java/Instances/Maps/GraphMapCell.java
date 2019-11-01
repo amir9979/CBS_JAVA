@@ -18,7 +18,7 @@ public class GraphMapCell implements I_MapCell{
     public List<I_MapCell>  neighbors;
     public final I_Coordinate coordinate;
 
-    GraphMapCell(Enum_MapCellType cellType, I_Coordinate coordinate) {
+    public GraphMapCell(Enum_MapCellType cellType, I_Coordinate coordinate) {
         this.cellType = cellType;
         this.coordinate = coordinate;
         this.neighbors = null;

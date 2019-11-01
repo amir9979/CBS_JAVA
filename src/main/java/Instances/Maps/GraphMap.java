@@ -20,7 +20,7 @@ public class GraphMap implements I_Map {
      * Initialization is done through {@link MapFactory}.
      * @param allGraphCells a {@link HashMap} containing all cells in the graph.
      */
-    GraphMap(HashMap<I_Coordinate, GraphMapCell> allGraphCells) {
+    public GraphMap(HashMap<I_Coordinate, GraphMapCell> allGraphCells) {
         this.allGraphCells = allGraphCells;
     }
 
