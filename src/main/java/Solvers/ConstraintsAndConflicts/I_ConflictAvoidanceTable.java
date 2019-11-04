@@ -20,4 +20,9 @@ public interface I_ConflictAvoidanceTable {
      */
     A_Conflict selectConflict();
 
+    /**
+     * @return a deep copy of this class.
+     */
+    I_ConflictAvoidanceTable copy();
+
 }

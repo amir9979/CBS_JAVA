@@ -58,6 +58,10 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         this.conflictSelectionStrategy = other.conflictSelectionStrategy;
     }
 
+    @Override
+    public I_ConflictAvoidanceTable copy() {
+        return new ConflictAvoidanceTable(this);
+    }
 
     /***
      * This method adds a new plan for SingleAgentPlan.
