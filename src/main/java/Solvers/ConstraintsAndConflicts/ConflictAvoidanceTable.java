@@ -18,6 +18,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     public final HashMap<Agent,SingleAgentPlan> agent_plan;
     public final ConflictSelectionStrategy conflictSelectionStrategy;
     public final HashMap<I_MapCell,HashSet<AgentAtGoal>> goal_agentTime;
+    public final Comparator<A_Conflict> comparator = Comparator.comparing((A_Conflict conflict) -> conflict.time);
 
 
     public ConflictAvoidanceTable(ConflictSelectionStrategy conflictSelectionStrategy) {
@@ -25,7 +26,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
          If we want to make this more generic, we should scrap ConflictSelectionStrategy and instead make this field
          an instance of some new class, thus combining storage and selection of conflicts. @Jonathan Morag 28/10/2019
          */
-        this.allConflicts = new TreeSet<>(Comparator.comparing((A_Conflict conflict) -> conflict.time));
+        this.allConflicts = new TreeSet<>(this.comparator);
         this.agent_Conflicts = new HashMap<>();
         this.timeLocation_Agents = new HashMap<>();
         this.agent_plan = new HashMap<>();
@@ -36,7 +37,8 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
     // Copy constructor
     public ConflictAvoidanceTable(ConflictAvoidanceTable other){
-        this.allConflicts = new TreeSet<>(other.allConflicts); //also copies comparator
+        this.allConflicts = new TreeSet<>(this.comparator);
+        this.allConflicts.addAll(other.allConflicts);
         this.agent_Conflicts = new HashMap<>();
         for (Map.Entry<Agent,HashSet<A_Conflict>> agentConflictsFromOther: other.agent_Conflicts.entrySet()){
             this.agent_Conflicts.put(agentConflictsFromOther.getKey(), new HashSet<>(agentConflictsFromOther.getValue()));
