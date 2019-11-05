@@ -17,21 +17,22 @@ public class DistanceTableAStarHeuristic implements AStarHeuristic {
 
     private Map<Agent, Map<I_MapCell, Integer>> distanceDictionaries;
 
+    public Map<Agent, Map<I_MapCell, Integer>> getDistanceDictionaries() {
+        return distanceDictionaries;
+    }
+
     public DistanceTableAStarHeuristic(List<? extends Agent> agents, I_Map map) {
         // imp - build a dictionary from agent to distance table (also a dictionary)
         distanceDictionaries = new HashMap<>();
         for(int i = 0; i<agents.size(); i++) {
-            System.out.println("agent: "+ agents.get(i).iD);
-            System.out.println();
-            Map<I_MapCell,Integer> mapForAgent=new HashMap<>();
+            //System.out.println("agent:   "+ i);
+            Map<I_MapCell,Integer> mapForAgent=new HashMap<>(); //this map will entered to distanceDictionaries for every agent
             distanceDictionaries.put(agents.get(i),mapForAgent);
             LinkedList<I_MapCell> queue = new LinkedList<>();
             I_Coordinate i_coordinate= agents.get(i).target;
-            GraphMapCell graphMapCell=  ((GraphMap)map).getMapCell(i_coordinate);
-            distanceDictionaries.get(agents.get(i)).put(graphMapCell,0);
-            //System.out.println(graphMapCell.coordinate);
-            //System.out.println(distanceDictionaries.get(agents.get(i)));
-            List<I_MapCell> neighbors = graphMapCell.neighbors;
+            I_MapCell mapCell=  map.getMapCell(i_coordinate);
+            distanceDictionaries.get(agents.get(i)).put(mapCell,0); //distance of a graphMapCell from him self
+            List<I_MapCell> neighbors = mapCell.getNeighbors(); //all the neighbors of a graphMapCell
             for (int j = 0; j < neighbors.size(); j++) {
                 queue.add(neighbors.get(j));
             }
@@ -40,21 +41,19 @@ public class DistanceTableAStarHeuristic implements AStarHeuristic {
 
             while (!(queue.isEmpty())) {
                 I_MapCell i_mapCell = queue.remove(0);
-                if(!(distanceDictionaries.get(agents.get(i)).containsKey(i_mapCell))){
+                if(!(distanceDictionaries.get(agents.get(i)).containsKey(i_mapCell))){ //if a graphMapCell didn't got a distance yet
                     distanceDictionaries.get(agents.get(i)).put(i_mapCell,distance);
-                    //System.out.println(i_mapCell.getCoordinate());
-                    //System.out.println(distance);
-                    List<I_MapCell> neighborsCell = i_mapCell.getNeighbors();
+                    //.out.println(i_mapCell.getCoordinate()+"     distance="+ distance);
+                    List<I_MapCell> neighborsCell = i_mapCell.getNeighbors(); //add all the neighbors of the current graphMapCell to  the queue
                     queue.addAll(neighborsCell);
                 }
                 count--;
-                if(count==0) { //full level is finish
+                if(count==0) { //full level/round of neighbors is finish
                     distance++;
                     count=queue.size(); //start new level with distance plus one
                 }
             }
         }
-        //System.out.println(distanceDictionaries.get(agents.get(0)));
     }
 
     @Override
@@ -72,16 +71,16 @@ public class DistanceTableAStarHeuristic implements AStarHeuristic {
                 { e, e, e, e},
                 { e, w, w, e},
         };
-        I_Coordinate[][] array=new I_Coordinate[3][4];
+        GraphMap graphMap= MapFactory.newSimple4Connected2D_GraphMap(map_2D_H);
+        Coordinate_2D[][] array=new Coordinate_2D[3][4];
         for(int i=0;i<array.length;i++){
             for(int j=0;j<array[0].length;j++){
-                GraphMapCell graphMapCell=new GraphMapCell(map_2D_H[i][j],array[i][j]); ///change to public
+                //array[i][j]=new Coordinate_2D(i,j);
+                GraphMapCell graphMapCell= graphMap.getMapCell(new Coordinate_2D(i,j)); ///change to public
                 hashMap.put(array[i][j],graphMapCell);
             }
         }
 
-        GraphMap graphMap=new GraphMap(hashMap); ///change to public
-        graphMap= MapFactory.newSimple4Connected2D_GraphMap(map_2D_H);
 
         Coordinate_2D coordinate_2D_1=new Coordinate_2D(0,0);
         Coordinate_2D coordinate_2D_2=new Coordinate_2D(0,3);
