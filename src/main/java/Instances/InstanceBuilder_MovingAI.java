@@ -6,21 +6,23 @@ import IO_Package.Reader;
 import Instances.Agents.Agent;
 import Instances.Maps.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Stack;
+import java.util.*;
 
 public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
+    public static final String FILE_TYPE_MAP = ".map";
+    public static final String FILE_TYPE_SCENARIO = ".scen";
+
+    // Indicators
     private final String INDICATOR_MAP = "map";
-    private final String FILE_TYPE_MAP = ".map";
-    private final String FILE_TYPE_SCENARIO = ".scen";
     private final String INDICATOR_HEIGHT = "height";
     private final String INDICATOR_WIDTH = "width";
 
+    // Separators
     private final String SEPARATOR_DIMENSIONS = " ";
     private final String SEPARATOR_MAP = "";
+    private final String SEPARATOR_SCENARIO = "\t";
 
 
     /*  =Default Values=    */
@@ -28,8 +30,20 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     private final Integer defaultObstaclePercentage = -1;
     private final int defaultNumOfAgents = 10;
     private final int defaultNumOfBatches = 5;
+    private final int defaultNumOfAgentsInSingleBatch = 10;
 
-    private final Stack<MAPF_Instance> instanceStack = new Stack<>();
+    /*  =Default Index Values=    */
+    // Line example: "1	maps/rooms/8room_000.map	512	512	500	366	497	371	6.24264"
+    //    Start: ( 500 , 366 )
+    //    Goal: ( 497 , 371 )
+    private final int INDEX_AGENT_SOURCE_XVALUE = 4;
+    private final int INDEX_AGENT_SOURCE_YVALUE = 5;
+    private final int INDEX_AGENT_TARGET_XVALUE = 6;
+    private final int INDEX_AGENT_TARGET_YVALUE = 7;
+
+
+
+    private final ArrayList<MAPF_Instance> instanceList = new ArrayList<>();
 
 
 
@@ -75,10 +89,12 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
         // Blocking - add implementation of 'getAgents'
+        int numOfBatches = this.getNumOfBatches(numOfAgentsFromProperties);
+        ArrayList<String> agentLinesQueue = getAgentLines(moving_ai_path, numOfBatches * this.defaultNumOfAgentsInSingleBatch); //
 
         for (int i = 0; i < numOfAgentsFromProperties.length; i++) {
 
-            Agent[] agents = null;
+            Agent[] agents = getAgents(agentLinesQueue,numOfAgentsFromProperties[i]);
 
             if (instanceName == null || graphMap == null || agents == null) {
                 continue; // Invalid parameters
@@ -86,12 +102,83 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
             mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
 
-            this.instanceStack.push(mapf_instance);
+            this.instanceList.add(mapf_instance);
 
         }
 
     }
 
+    // Returns an array of agents using the line queue
+    private Agent[] getAgents(ArrayList<String> agentLinesList, int numOfAgents) {
+
+        if( agentLinesList == null ){
+            return null;
+        }
+
+        Agent[] arrayOfAgents = new Agent[numOfAgents];
+        int numOfAgentsByBatches = this.getNumOfBatches(new int[]{numOfAgents});
+
+        // Iterate over all the agents in numOfAgentsByBatches
+        for (int id = 0; !agentLinesList.isEmpty() && id < numOfAgentsByBatches * this.defaultNumOfAgentsInSingleBatch; id++) {
+
+            /* Straight from the API :
+                The remove() and poll() methods differ only in their behavior when the queue is empty,
+                the remove() method throws an exception, while the poll() method returns null   */
+
+            if( id < numOfAgents ){
+                Agent agentToAdd = buildSingleAgent(id ,agentLinesList.remove(0));
+                arrayOfAgents[id] =  agentToAdd; // Wanted agent to add
+            }else {
+                agentLinesList.remove(0);
+            }
+        }
+
+        return arrayOfAgents;
+    }
+
+    private Agent buildSingleAgent(int id, String agentLine) {
+
+        // imp - build agent from string
+        String[] splitLine = agentLine.split(this.SEPARATOR_SCENARIO);
+        // Init coordinates
+        int source_xValue = Integer.parseInt(splitLine[this.INDEX_AGENT_SOURCE_XVALUE]);
+        int source_yValue = Integer.parseInt(splitLine[this.INDEX_AGENT_SOURCE_YVALUE]);
+        Coordinate_2D source = new Coordinate_2D(source_xValue, source_yValue);
+        int target_xValue = Integer.parseInt(splitLine[this.INDEX_AGENT_TARGET_XVALUE]);
+        int target_yValue = Integer.parseInt(splitLine[this.INDEX_AGENT_TARGET_YVALUE]);
+        Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
+
+
+        Agent agentFromLine = new Agent(id, source, target);
+
+        return agentFromLine;
+    }
+
+
+    // Returns agentLines from scenario file as a queue
+    private ArrayList<String> getAgentLines(InstanceManager.Moving_AI_Path moving_ai_path, int numOfNeededAgents) {
+
+        // Open scenario file
+        Reader reader = new Reader();
+        Enum_IO enum_io = reader.openFile(moving_ai_path.scenarioPath);
+        if( !enum_io.equals(Enum_IO.OPENED) ){
+            return null; // couldn't open the file
+        }
+
+
+        /*  =Get data from reader=  */
+        String nextLine = reader.getNextLine(); // First line
+
+        ArrayList<String> agentsLines = new ArrayList<>(); // Init queue of agents lines
+
+        // Add lines as the num of needed agents
+        for (int i = 0; nextLine != null && i < numOfNeededAgents ; i++) {
+            nextLine = reader.getNextLine(); // next line
+            agentsLines.add(nextLine);
+        }
+
+        return agentsLines;
+    }
 
 
     private GraphMap getMap( InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties ){
@@ -111,9 +198,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
         /*  =Get data from reader=  */
-
         String nextLine = reader.getNextLine(); // First line
-
 
         while ( nextLine != null ){
 
@@ -169,16 +254,11 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
     @Override
     public MAPF_Instance getNextExistingInstance(){
-        if( ! this.instanceStack.empty() ){
-            return this.instanceStack.pop();
+        if( ! this.instanceList.isEmpty() ){
+            return this.instanceList.remove(0);
         }
         return null;
     }
-
-
-
-
-
 
 
 
@@ -208,8 +288,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
 
-
-
     private int getNumOfBatches(int[] values){
         if( values == null || values.length == 0){
             return this.defaultNumOfBatches; // default num of batches
@@ -226,7 +304,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         }
 
         return curBatch;
-
 
     }
 
