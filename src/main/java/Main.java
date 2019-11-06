@@ -1,7 +1,9 @@
 import IO_Package.IO_Manager;
 import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
+import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
+import Instances.Maps.MapDimensions;
 
 public class Main {
 
@@ -14,50 +16,39 @@ public class Main {
 
 
     public static void main(String[] args) {
-
-        simpleRun();
-
-        //moragRequestedRun();
-
-
-
+        runManagerExample();
     }
 
 
 
-
-    public static void simpleRun(){
-
-        SimpleRunManager simpleRunManager = new SimpleRunManager();
-        simpleRunManager.setSolvers();
-        simpleRunManager.setExperiments();
-        simpleRunManager.runAllExperiments();
+    public static void runManagerExample(){
+        runManagerSimpleExample runManagerSimpleExample = new runManagerSimpleExample();
+        runManagerSimpleExample.runAllExperiments();
     }
 
 
-    public static void moragRequestedRun(){
+    public static void runInstanceExample(){
 
-
-        MoragRequested_RunManager moragRequested_runManager = new MoragRequested_RunManager();
-        moragRequested_runManager.setSolvers();
-        moragRequested_runManager.setExperiments();
-
-        moragRequested_runManager.runAllExperiments();
-
-
-
-        /* Get Instance by absolute path */
-
-        String path = IO_Manager.buildPath(
-                new String[]{   IO_Manager.testResources_Directory,
+        /*  =   Set Path   =*/
+        String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
                         "Instances\\\\Instance-8-15-5-17 - hard one - cost 29 and some corridors"}
         );
         InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
 
-        InstanceManager manager = new InstanceManager(new InstanceBuilder_BGU());
+
+        /*  =   Set Properties   =  */
+        InstanceProperties properties = new InstanceProperties(new MapDimensions(16,16), (float)0, new int[]{7});
 
 
-        MAPF_Instance instance = moragRequested_runManager.getInstanceWithAbsolutePath(manager, instancePath);
+        /*  =   Set Instance Manager   =  */
+        InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
+
+        MAPF_Instance instance = runManagerSimpleExample.getInstanceFromPath(instanceManager, instancePath);
+
+        // Solve
+
     }
+
+
 
 }

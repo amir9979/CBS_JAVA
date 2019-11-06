@@ -5,26 +5,35 @@ import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.Maps.MapDimensions;
 import Solvers.AStar.AStar_Solver;
-import Solvers.AStar.SingleAgentAStar_Solver;
-import Solvers.I_Solver;
-import Solvers.PrioritisedPlanning.PrioritisedPlanning_Solver;
 
-import java.util.ArrayList;
 
-public class SimpleRunManager extends A_RunManager {
+public class runManagerSimpleExample extends A_RunManager {
 
+
+
+    /*  = Set Solvers =  */
 
     @Override
     void setSolvers() {
-        this.solvers.add(new PrioritisedPlanning_Solver(new SingleAgentAStar_Solver()));
+        this.solvers.add(new AStar_Solver());
     }
+
+
+
+
+    /*  = Set Experiments =  */
 
     @Override
     void setExperiments() {
+        addExperiment_16_7();
+    }
 
+
+
+    private void addExperiment_16_7(){
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
-                                                            "Instances"});
+                "Instances"});
 
 
         /*  =   Set Properties   =  */
@@ -35,7 +44,11 @@ public class SimpleRunManager extends A_RunManager {
         InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
 
         /*  =   Add new experiment   =  */
-        this.experiments.add(new GridExperiment(instanceManager,numOfInstances));
-
+        GridExperiment gridExperiment = new GridExperiment(instanceManager,numOfInstances);
+        this.experiments.add(gridExperiment);
     }
+
+
+
+
 }
