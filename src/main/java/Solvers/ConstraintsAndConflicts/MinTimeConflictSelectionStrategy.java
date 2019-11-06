@@ -24,11 +24,15 @@ public class MinTimeConflictSelectionStrategy implements ConflictAvoidanceTable.
         }
 
         Iterator<A_Conflict> iter = conflicts.iterator();
-        A_Conflict minTimeConflict = iter.next();
-        while(iter.hasNext()){
-            A_Conflict candidate = iter.next();
-            if(minTimeConflict.time > candidate.time) {minTimeConflict = candidate;}
+        if(!iter.hasNext()){return null;} //might be empty (no conflicts)
+        else{
+            // find minimum
+            A_Conflict minTimeConflict = iter.next();
+            while(iter.hasNext()){
+                A_Conflict candidate = iter.next();
+                if(minTimeConflict.time > candidate.time) {minTimeConflict = candidate;}
+            }
+            return minTimeConflict;
         }
-        return minTimeConflict;
     }
 }

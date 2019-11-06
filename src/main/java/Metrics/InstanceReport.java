@@ -26,16 +26,21 @@ public class InstanceReport {
      */
     public static class StandardFields{
         public final static String experimentName = "Experiment Name";
-        public final static String instanceName = "Instance Name";
-        public final static String instanceID = "Instance ID";
+        public final static String mapName = "Map Name";
+        public final static String numAgents = "Num Agents";
+        public final static String expandedNodesLowLevel = "Expanded Nodes (Low Level)";
         public final static String expandedNodes = "Expanded Nodes";
+        public final static String generatedNodesLowLevel = "Generated Nodes(Low Level)";
         public final static String generatedNodes = "Generated Nodes";
         public final static String startTime = "Start Time";
         public final static String endTime = "End Time";
         public final static String elapsedTimeMS = "Elapsed Time (ms)";
-        public final static String solved = "Solved";
-        public final static String solution = "Solution";
+        public final static String TotalLowLevelTimeMS = "Total Low Level Time (ms)";
         public final static String timeout = "Timeout";
+        public final static String solved = "Solved";
+        public final static String solutionCost = "Solution Cost";
+        public final static String solutioncostFunction = "Cost Function";
+        public final static String solution = "Solution";
     }
 
     /**

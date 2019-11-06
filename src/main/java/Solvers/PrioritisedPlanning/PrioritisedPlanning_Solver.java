@@ -21,7 +21,7 @@ import java.util.*;
 public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = Fields =  */
-    /*  =  = Fields related to the instance =  */
+    /*  =  = Fields related to the MAPF instance =  */
     /**
      * An array of {@link Agent}s to plan for, ordered by priority (descending).
      */
@@ -40,7 +40,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     private int totalLowLevelStatesGenerated;
     private int totalLowLevelStatesExpanded;
 
-    /*  =  = Fields related to the class =  */
+    /*  =  = Fields related to the class instance =  */
 
     /**
      * A {@link I_Solver solver}, to be used for solving sub-problems where only one agent is to be planned for, and the
@@ -93,6 +93,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.constraints = runParameters.constraints == null ? new ConstraintSet(): runParameters.constraints;
         this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
                 : runParameters.instanceReport;
+        // if we were given a report, we should leave it be. If we created our report locally, then it is unreachable
+        // outside the class, and should therefore be committed.
         this.commitReport = runParameters.instanceReport == null;
 
         if(runParameters instanceof RunParameters_PP){
@@ -189,10 +191,11 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     }
 
     private void digestSubproblemReport(InstanceReport subproblemReport) {
-        Integer statesGenerated = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodes);
+        Integer statesGenerated = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel);
         this.totalLowLevelStatesGenerated += statesGenerated==null ? 0 : statesGenerated;
-        Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.expandedNodes);
+        Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel);
         this.totalLowLevelStatesExpanded += statesExpanded==null ? 0 : statesExpanded;
+        //we consolidate the subproblem report into the main report, and remove the subproblem report.
         S_Metrics.removeReport(subproblemReport);
     }
 
@@ -250,8 +253,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         else{
             instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 0);
         }
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.totalLowLevelStatesGenerated);
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.totalLowLevelStatesExpanded);
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel, this.totalLowLevelStatesGenerated);
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel, this.totalLowLevelStatesExpanded);
         if(commitReport){
             try {
                 instanceReport.commit();

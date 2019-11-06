@@ -75,7 +75,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
         }
         if(runParameters instanceof  RunParameters_SAAStar){
             RunParameters_SAAStar parameters = ((RunParameters_SAAStar) runParameters);
-            this.heuristicFunction = parameters.heristicFunction;
+            this.heuristicFunction = parameters.heuristicFunction;
         }
         else{
             this.heuristicFunction = new defaultHeuristic();
@@ -152,8 +152,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
 
     protected void writeMetricsToReport(Solution solution) {
         if(instanceReport != null){
-            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.expandedNodes);
-            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.generatedNodes);
+            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel, this.expandedNodes);
+            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel, this.generatedNodes);
         }
     }
 

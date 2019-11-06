@@ -21,7 +21,7 @@ public class Solution implements Iterable<SingleAgentPlan>{
         this.agentPlans = new HashMap<>(agentPlans);
     }
 
-    public Solution(Collection<? extends SingleAgentPlan> plans) {
+    public Solution(Iterable<? extends SingleAgentPlan> plans) {
         if(plans instanceof Solution){
             Solution sol = ((Solution)plans);
             this.agentPlans = new HashMap<>(sol.agentPlans);

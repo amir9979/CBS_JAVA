@@ -19,6 +19,9 @@ public abstract class A_Conflict {
         this.location = location;
     }
 
+    /**
+     * @return an array of constraints, each of which could prevent this conflict
+     */
     public abstract Constraint[] getPreventingConstraints();
 
 //    public static boolean hasConflicts(Solution solution) {
