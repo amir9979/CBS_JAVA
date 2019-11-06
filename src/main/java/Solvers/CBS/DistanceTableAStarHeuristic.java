@@ -5,7 +5,6 @@ import Instances.Maps.*;
 import Solvers.AStar.AStarHeuristic;
 import Solvers.AStar.SingleAgentAStar_Solver;
 
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -23,32 +22,44 @@ public class DistanceTableAStarHeuristic implements AStarHeuristic {
 
     public DistanceTableAStarHeuristic(List<? extends Agent> agents, I_Map map) {
 
-        distanceDictionaries = new HashMap<>();
-        for(int i = 0; i<agents.size(); i++) {
-            Map<I_MapCell,Integer> mapForAgent=new HashMap<>(); //this map will entered to distanceDictionaries for every agent
-            distanceDictionaries.put(agents.get(i),mapForAgent);
+        this.distanceDictionaries = new HashMap<>();
+        for (int i = 0; i < agents.size(); i++) {
+
+            //this map will entered to distanceDictionaries for every agent
+            Map<I_MapCell, Integer> mapForAgent = new HashMap<>();
+            this.distanceDictionaries.put(agents.get(i), mapForAgent);
             LinkedList<I_MapCell> queue = new LinkedList<>();
-            I_Coordinate i_coordinate= agents.get(i).target;
-            I_MapCell mapCell=  map.getMapCell(i_coordinate);
-            distanceDictionaries.get(agents.get(i)).put(mapCell,0); //distance of a graphMapCell from him self
-            List<I_MapCell> neighbors = mapCell.getNeighbors(); //all the neighbors of a graphMapCell
+            I_Coordinate i_coordinate = agents.get(i).target;
+            I_MapCell mapCell = map.getMapCell(i_coordinate);
+
+            //distance of a graphMapCell from itself
+            this.distanceDictionaries.get(agents.get(i)).put(mapCell, 0);
+
+            //all the neighbors of a graphMapCell
+            List<I_MapCell> neighbors = mapCell.getNeighbors();
             for (int j = 0; j < neighbors.size(); j++) {
                 queue.add(neighbors.get(j));
             }
+
             int distance = 1;
             int count = queue.size();
 
             while (!(queue.isEmpty())) {
                 I_MapCell i_mapCell = queue.remove(0);
-                if(!(distanceDictionaries.get(agents.get(i)).containsKey(i_mapCell))){ //if a graphMapCell didn't got a distance yet
-                    distanceDictionaries.get(agents.get(i)).put(i_mapCell,distance);
-                    List<I_MapCell> neighborsCell = i_mapCell.getNeighbors(); //add all the neighbors of the current graphMapCell to  the queue
+
+                //if a graphMapCell didn't got a distance yet
+                if (!(this.distanceDictionaries.get(agents.get(i)).containsKey(i_mapCell))) {
+                    this.distanceDictionaries.get(agents.get(i)).put(i_mapCell, distance);
+
+                    //add all the neighbors of the current graphMapCell to  the queue
+                    List<I_MapCell> neighborsCell = i_mapCell.getNeighbors();
                     queue.addAll(neighborsCell);
                 }
+
                 count--;
-                if(count==0) { //full level/round of neighbors is finish
+                if (count == 0) { //full level/round of neighbors is finish
                     distance++;
-                    count=queue.size(); //start new level with distance plus one
+                    count = queue.size(); //start new level with distance plus one
                 }
             }
         }
@@ -56,7 +67,7 @@ public class DistanceTableAStarHeuristic implements AStarHeuristic {
 
     @Override
     public float getH(SingleAgentAStar_Solver.AStarState state) {
-        Map<I_MapCell, Integer> relevantDictionary = distanceDictionaries.get(state.getMove().agent);
+        Map<I_MapCell, Integer> relevantDictionary = this.distanceDictionaries.get(state.getMove().agent);
         return relevantDictionary.get(state.getMove().currLocation);
     }
 

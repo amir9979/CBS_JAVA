@@ -51,7 +51,6 @@ public class CBS_Solver implements I_Solver {
     /*  = algorithm =  */
 
     private Solution solveCBS(MAPF_Instance instance, ConstraintSet initialConstraints) {
-        CBS_Node rootNode = new CBS_Node();
         return null; //imp
     }
 
