@@ -199,6 +199,7 @@ public class ConflictAvoidanceTableTest {
 
 
 
+
         /*      = Test Select conflict =     */
         A_Conflict actualConflict_time1 = copiedTable.selectConflict();
         Assert.assertEquals(expectedConflict_time1,actualConflict_time1);
