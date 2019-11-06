@@ -1,11 +1,8 @@
-package Solvers.CBS;
+package Solvers.AStar;
 
 import Instances.Agents.Agent;
 import Instances.Maps.*;
-import Solvers.AStar.AStarHeuristic;
-import Solvers.AStar.SingleAgentAStar_Solver;
 
-import java.time.Instant;
 import java.util.*;
 
 /**

@@ -1,13 +1,10 @@
-package Solvers.CBS;
+package Solvers.AStar;
 
 import Instances.Agents.Agent;
 import Instances.Maps.*;
+import Solvers.AStar.DistanceTableAStarHeuristic;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class DistanceTableAStarHeuristicTest {
 

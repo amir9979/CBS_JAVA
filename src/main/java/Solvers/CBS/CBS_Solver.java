@@ -5,6 +5,7 @@ import Instances.MAPF_Instance;
 import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
+import Solvers.AStar.DistanceTableAStarHeuristic;
 import Solvers.AStar.RunParameters_SAAStar;
 import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.ConstraintsAndConflicts.*;
