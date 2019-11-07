@@ -16,7 +16,7 @@ import java.util.*;
  * that it is given is the agent to solve for.
  * By default, it uses {@link Instances.Maps.I_Coordinate#distance(I_Coordinate)} as a heuristic.
  */
-public class SingleAgentAStar_Solver implements I_Solver {
+public class SingleAgentAStar_Solver extends A_Solver {
 
     /**
      * Since A* should solve even very large single agent problems very quickly, set default timeout to 3 seconds.
@@ -28,13 +28,8 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private static final Comparator<AStarState> stateFComparator = Comparator.comparing(AStarState::getF);
     private static final Comparator<AStarState> stateGComparator = Comparator.comparing(AStarState::getG);
 
-    private long maximumRuntime;
     private ConstraintSet constraints;
-    private InstanceReport instanceReport;
     private AStarHeuristic heuristicFunction;
-    private long startTime;
-    private long endTime;
-    private boolean abortedOnTimeout;
     private I_OpenList<AStarState> openList;
     private Set<AStarState> closed;
     private Agent agent;
@@ -44,21 +39,15 @@ public class SingleAgentAStar_Solver implements I_Solver {
     private int expandedNodes;
     private int generatedNodes;
 
-    /*  = interface implementation =  */
-
-    @Override
-    public Solution solve(MAPF_Instance instance, RunParameters parameters) {
-        init(instance, parameters);
-        Solution solution = solveAStar();
-        writeMetricsToReport(solution);
-        releaseMemory();
-        return solution;
+    public SingleAgentAStar_Solver() {
+        super.DEFAULT_TIMEOUT = SingleAgentAStar_Solver.DEFAULT_TIMEOUT;
     }
 
     /*  = set up =  */
 
     protected void init(MAPF_Instance instance, RunParameters runParameters){
-        this.instanceReport = runParameters.instanceReport;
+        super.init(instance, runParameters);
+
         this.constraints = runParameters.constraints == null ? new ConstraintSet(): runParameters.constraints;
         this.agent = instance.agents.get(0);
         this.map = instance.map;
@@ -70,7 +59,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
             //make a new solution and plan and initialize it with a default first move
             this.existingSolution = new Solution();
             this.existingPlan = new SingleAgentPlan(this.agent);
-            this.existingPlan.addMove(getFirstMove(this.agent));
+            this.existingPlan.addMove(getFirstMove());
             this.existingSolution.putPlan(this.existingPlan);
         }
         if(runParameters instanceof  RunParameters_SAAStar){
@@ -81,17 +70,13 @@ public class SingleAgentAStar_Solver implements I_Solver {
             this.heuristicFunction = new defaultHeuristic();
         }
 
-        this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : DEFAULT_TIMEOUT;
-        this.abortedOnTimeout = false;
-        this.startTime = System.currentTimeMillis();
-        this.endTime = 0;
         this.openList = new OpenList<>(stateFComparator);
         this.expandedNodes = 0;
         this.closed = new HashSet<>();
         this.generatedNodes = 0;
     }
 
-    private Move getFirstMove(Agent agent) {
+    private Move getFirstMove() {
         //first time is the time of the agent, or 1.
         int moveTime =
 //                this.agent instanceof OnlineAgent ? ((OnlineAgent)this.agent).arrivalTime + 1 :
@@ -101,6 +86,11 @@ public class SingleAgentAStar_Solver implements I_Solver {
     }
 
     /*  = A* algorithm =  */
+
+    @Override
+    protected Solution runAlgorithm(MAPF_Instance instance, RunParameters parameters) {
+        return solveAStar();
+    }
 
     protected Solution solveAStar() {
         AStarState rootState = generateRootState();
@@ -127,16 +117,6 @@ public class SingleAgentAStar_Solver implements I_Solver {
         return null; //no goal state found (problem unsolvable)
     }
 
-    /*  = auxiliary methods =  */
-
-    protected boolean checkTimeout() {
-        if(System.currentTimeMillis()-startTime > maximumRuntime){
-            this.abortedOnTimeout = true;
-            return true;
-        }
-        return false;
-    }
-
     private boolean isGoalState(AStarState state) {
         return state.move.currLocation.getCoordinate().equals(agent.target);
     }
@@ -152,13 +132,17 @@ public class SingleAgentAStar_Solver implements I_Solver {
     /*  = wind down =  */
 
     protected void writeMetricsToReport(Solution solution) {
+        // skips super's writeMetricsToReport(Solution solution).
+        super.endTime = System.currentTimeMillis();
         if(instanceReport != null){
-            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel, this.expandedNodes);
-            this.instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel, this.generatedNodes);
+            super.instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel, this.expandedNodes);
+            super.instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel, this.generatedNodes);
+            super.instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(super.endTime-super.startTime));
         }
     }
 
     protected void releaseMemory() {
+        super.releaseMemory();
         this.constraints = null;
         this.instanceReport = null;
         this.openList = null;

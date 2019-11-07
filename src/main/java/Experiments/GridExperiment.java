@@ -37,7 +37,7 @@ public class GridExperiment extends A_Experiment {
             InstanceReport instanceReport = S_Metrics.newInstanceReport();
 
             instanceReport.putStringValue(InstanceReport.StandardFields.experimentName, super.experimentName);
-            instanceReport.putStringValue(InstanceReport.StandardFields.instanceName,instance.name);
+            instanceReport.putStringValue(InstanceReport.StandardFields.mapName, instance.name);
 
             Solution solution = solver.solve(instance,new RunParameters(instanceReport));
             // Todo - what to do with solution

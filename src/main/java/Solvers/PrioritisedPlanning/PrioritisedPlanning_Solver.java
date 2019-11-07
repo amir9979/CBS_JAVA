@@ -18,7 +18,7 @@ import java.util.*;
  * return a sub-optimal {@link Solution}.
  * Agents disappear at goal!
  */
-public class PrioritisedPlanning_Solver implements I_Solver {
+public class PrioritisedPlanning_Solver extends A_Solver {
 
     /*  = Fields =  */
     /*  =  = Fields related to the MAPF instance =  */
@@ -29,16 +29,7 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  =  = Fields related to the run =  */
 
-    private long maximumRuntime;
     private ConstraintSet constraints;
-    protected InstanceReport instanceReport;
-    protected boolean commitReport;
-
-    private long startTime;
-    protected long endTime;
-    private boolean abortedForTimeout;
-    private int totalLowLevelStatesGenerated;
-    private int totalLowLevelStatesExpanded;
 
     /*  =  = Fields related to the class instance =  */
 
@@ -60,48 +51,26 @@ public class PrioritisedPlanning_Solver implements I_Solver {
         this.lowLevelSolver = Objects.requireNonNullElseGet(lowLevelSolver, SingleAgentAStar_Solver::new);
     }
 
-    /*  = Interface Implementation =  */
-
-    @Override
-    public Solution solve(MAPF_Instance instance, RunParameters parameters) {
-        init(instance, parameters);
-        Solution solution = solvePrioritisedPlanning(this.agents, instance, constraints);
-        writeMetricsToReport(solution);
-        releaseMemory();
-        return solution;
-    }
-
     /*  = initialization =  */
 
     /**
      * Initialises the object in preparation to solving an {@link MAPF_Instance}.
      * @param instance - the instance that we will have to solve.
-     * @param runParameters - parameters that affect the solution process.
+     * @param parameters - parameters that affect the solution process.
      */
-    protected void init(MAPF_Instance instance, RunParameters runParameters){
-        if(instance == null || runParameters == null){throw new IllegalArgumentException();}
-
-        this.startTime = System.currentTimeMillis();
-        this.endTime = 0;
-        this.abortedForTimeout = false;
-        this.totalLowLevelStatesGenerated = 0;
-        this.totalLowLevelStatesExpanded = 0;
+    @Override
+    protected void init(MAPF_Instance instance, RunParameters parameters){
+        super.init(instance, parameters);
 
         this.agents = new ArrayList<>(instance.agents);
 
-        this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
-        this.constraints = runParameters.constraints == null ? new ConstraintSet(): runParameters.constraints;
-        this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
-                : runParameters.instanceReport;
-        // if we were given a report, we should leave it be. If we created our report locally, then it is unreachable
-        // outside the class, and should therefore be committed.
-        this.commitReport = runParameters.instanceReport == null;
+        this.constraints = parameters.constraints == null ? new ConstraintSet(): parameters.constraints;
 
-        if(runParameters instanceof RunParameters_PP){
-            RunParameters_PP parameters = (RunParameters_PP)runParameters;
+        if(parameters instanceof RunParameters_PP){
+            RunParameters_PP parametersPP = (RunParameters_PP)parameters;
 
             //reorder according to requested priority
-            if(parameters.preferredPriorityOrder != null) {reorderAgentsByPriority(parameters.preferredPriorityOrder);}
+            if(parametersPP.preferredPriorityOrder != null) {reorderAgentsByPriority(parametersPP.preferredPriorityOrder);}
         }
     }
 
@@ -120,6 +89,11 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     }
 
     /*  = algorithm =  */
+
+    @Override
+    protected Solution runAlgorithm(MAPF_Instance instance, RunParameters parameters) {
+        return solvePrioritisedPlanning(this.agents, instance, this.constraints);
+    }
 
     /**
      * The main loop that solves the MAPF problem.
@@ -156,14 +130,6 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
         endTime = System.currentTimeMillis();
         return solution;
-    }
-
-    protected boolean checkTimeout() {
-        if(System.currentTimeMillis()-startTime > maximumRuntime){
-            this.abortedForTimeout = true;
-            return true;
-        }
-        return false;
     }
 
     protected SingleAgentPlan solveSubproblem(Agent currentAgent, MAPF_Instance fullInstance, ConstraintSet constraints) {
@@ -242,27 +208,9 @@ public class PrioritisedPlanning_Solver implements I_Solver {
 
     /*  = wind down =  */
 
+    @Override
     protected void writeMetricsToReport(Solution solution) {
-        // todo timeout should be maximum time
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeoutThreshold, abortedForTimeout ? 1 : 0);
-        instanceReport.putStringValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
-        if(solution != null){
-            instanceReport.putStringValue(InstanceReport.StandardFields.solution, solution.toString());
-            instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 1);
-        }
-        else{
-            instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 0);
-        }
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel, this.totalLowLevelStatesGenerated);
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel, this.totalLowLevelStatesExpanded);
-        if(commitReport){
-            try {
-                instanceReport.commit();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        super.writeMetricsToReport(solution);
     }
 
     /**
@@ -270,7 +218,9 @@ public class PrioritisedPlanning_Solver implements I_Solver {
      * All fields should be cleared by this method. Any data that might be relevant later should be passed as part
      * of the {@link Solution} that is output by {@link #solve(MAPF_Instance, RunParameters)}, or written to an {@link Metrics.InstanceReport}.
      */
+    @Override
     protected void releaseMemory() {
+        super.releaseMemory();
         this.constraints = null;
         this.agents = null;
         this.instanceReport = null;

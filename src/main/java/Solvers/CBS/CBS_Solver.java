@@ -10,13 +10,10 @@ import Solvers.AStar.RunParameters_SAAStar;
 import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.ConstraintsAndConflicts.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Objects;
 
-public class CBS_Solver implements I_Solver {
-// todo refactor stuff into an abstract class
+public class CBS_Solver extends A_Solver {
 
     /*  = Fields =  */
     /*  =  = Fields related to the MAPF instance  =  */
@@ -24,16 +21,6 @@ public class CBS_Solver implements I_Solver {
     private MAPF_Instance instance;
 
     /*  =  = Fields related to the run =  */
-
-    private long maximumRuntime;
-    protected InstanceReport instanceReport;
-    protected boolean commitReport;
-
-    private long startTime;
-    protected long endTime;
-    private boolean abortedForTimeout;
-    private int totalLowLevelStatesGenerated;
-    private int totalLowLevelStatesExpanded;
 
     private DistanceTableAStarHeuristic aStarHeuristic;
 
@@ -82,37 +69,12 @@ public class CBS_Solver implements I_Solver {
         this(null, null, null, null);
     }
 
-    /*  = Interface Implementation =  */
-
-    @Override
-    public Solution solve(MAPF_Instance instance, RunParameters parameters) {
-        init(instance, parameters);
-        Solution solution = solveCBS(instance,
-                Objects.requireNonNullElseGet(parameters.constraints, ConstraintSet::new));
-        writeMetricsToReport(solution);
-        releaseMemory();
-        return solution;
-    }
-
     /*  = initialization =  */
 
-    private void init(MAPF_Instance instance, RunParameters runParameters) {
-        if(instance == null || runParameters == null){throw new IllegalArgumentException();}
-
-        this.startTime = System.currentTimeMillis();
-        this.endTime = 0;
-        this.abortedForTimeout = false;
-        this.totalLowLevelStatesGenerated = 0;
-        this.totalLowLevelStatesExpanded = 0;
-
+    @Override
+    protected void init(MAPF_Instance instance, RunParameters runParameters) {
+        super.init(instance, runParameters);
         this.instance = instance;
-        this.maximumRuntime = (runParameters.timeout >= 0) ? runParameters.timeout : 5*60*1000;
-        this.instanceReport = runParameters.instanceReport == null ? S_Metrics.newInstanceReport()
-                : runParameters.instanceReport;
-        // if we were given a report, we should leave it be. If we created our report locally, then it is unreachable
-        // outside the class, and should therefore be committed.
-        this.commitReport = runParameters.instanceReport == null;
-
         this.aStarHeuristic = this.lowLevelSolver instanceof SingleAgentAStar_Solver ?
                 new DistanceTableAStarHeuristic(new ArrayList<>(this.instance.agents), this.instance.map) :
                 null;
@@ -123,12 +85,13 @@ public class CBS_Solver implements I_Solver {
     /**
      * Implements the CBS algorithm, as described in the original CBS article from Proceedings of the Twenty-Sixth AAAI
      * Conference on Artificial Intelligence.
-     * @param instance the MAPF problem instance to solve.
-     * @param initialConstraints a set of initial constraints on the agents. This may be modified as part of the run.
-     * @return
+     * @param instance {@inheritDoc}
+     * @param parameters {@inheritDoc}
+     * @return {@inheritDoc}
      */
-    private Solution solveCBS(MAPF_Instance instance, ConstraintSet initialConstraints) {
-        initOpen(initialConstraints);
+    @Override
+    protected Solution runAlgorithm(MAPF_Instance instance, RunParameters parameters) {
+        initOpen(Objects.requireNonNullElseGet(parameters.constraints, ConstraintSet::new));
         CBS_Node goal = mainLoop();
         return solutionFromGoal(goal);
     }
@@ -261,9 +224,11 @@ public class CBS_Solver implements I_Solver {
 
     private void digestSubproblemReport(InstanceReport subproblemReport) {
         Integer statesGenerated = subproblemReport.getIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel);
-        this.totalLowLevelStatesGenerated += statesGenerated==null ? 0 : statesGenerated;
+        super.totalLowLevelStatesGenerated += statesGenerated==null ? 0 : statesGenerated;
         Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel);
-        this.totalLowLevelStatesExpanded += statesExpanded==null ? 0 : statesExpanded;
+        super.totalLowLevelStatesExpanded += statesExpanded==null ? 0 : statesExpanded;
+        Integer lowLevelRuntime = subproblemReport.getIntegerValue(InstanceReport.StandardFields.elapsedTimeMS);
+        super.instanceReport.integerAddition(InstanceReport.StandardFields.TotalLowLevelTimeMS, lowLevelRuntime);
         //we consolidate the subproblem report into the main report, and remove the subproblem report.
         S_Metrics.removeReport(subproblemReport);
     }
@@ -292,52 +257,22 @@ public class CBS_Solver implements I_Solver {
         }
     }
 
-    private boolean checkTimeout() {
-        if(System.currentTimeMillis()-startTime > maximumRuntime){
-            this.abortedForTimeout = true;
-            return true;
-        }
-        return false;
-    }
-
     /*  = wind down =  */
 
-    private void writeMetricsToReport(Solution solution) {
-        //todo more metrics
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeoutThreshold, abortedForTimeout ? 1 : 0);
-        instanceReport.putStringValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
-        if(solution != null){
-            instanceReport.putStringValue(InstanceReport.StandardFields.solution, solution.toString());
-            instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 1);
-        }
-        else{
-            instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 0);
-        }
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodesLowLevel, this.totalLowLevelStatesGenerated);
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel, this.totalLowLevelStatesExpanded);
-        if(commitReport){
-            try {
-                instanceReport.commit();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    @Override
+    protected void writeMetricsToReport(Solution solution) {
+        super.writeMetricsToReport(solution);
     }
 
-    /**
-     * Clears unneeded memory after the run.
-     */
-    private void releaseMemory() {
+    @Override
+    protected void releaseMemory() {
         clearOPEN();
         this.instance = null;
-        this.instanceReport = null;
         this.aStarHeuristic = null;
     }
 
 
     /*  = internal classes and interfaces =  */
-
 
     /**
      * Cost may be more complicated than a simple SIC (Sum of Individual Costs), so it is factored out with this interface.
