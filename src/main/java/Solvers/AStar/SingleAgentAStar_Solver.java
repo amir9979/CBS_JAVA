@@ -113,6 +113,7 @@ public class SingleAgentAStar_Solver implements I_Solver {
             //dequeu
             AStarState currentState = openList.poll();
 
+            // todo change to early goal test!
             if (isGoalState(currentState)){
                 currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
                 return this.existingSolution;

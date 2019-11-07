@@ -77,6 +77,15 @@ public class Solution implements Iterable<SingleAgentPlan>{
         return SIC;
     }
 
+    public int makespan(){
+        int maxCost = 0;
+        for (SingleAgentPlan plan :
+                agentPlans.values()) {
+            maxCost = Math.max(maxCost, plan.getCost());
+        }
+        return maxCost;
+    }
+
     //todo add String serialization and deserialization
 
     @Override

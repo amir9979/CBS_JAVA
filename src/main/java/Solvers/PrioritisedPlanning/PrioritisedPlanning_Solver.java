@@ -243,7 +243,8 @@ public class PrioritisedPlanning_Solver implements I_Solver {
     /*  = wind down =  */
 
     protected void writeMetricsToReport(Solution solution) {
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeout, abortedForTimeout ? 1 : 0);
+        // todo timeout should be maximum time
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeoutThreshold, abortedForTimeout ? 1 : 0);
         instanceReport.putStringValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
         instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
         if(solution != null){

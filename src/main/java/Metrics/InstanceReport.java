@@ -36,7 +36,7 @@ public class InstanceReport {
         public final static String endTime = "End Time";
         public final static String elapsedTimeMS = "Elapsed Time (ms)";
         public final static String TotalLowLevelTimeMS = "Total Low Level Time (ms)";
-        public final static String timeout = "Timeout";
+        public final static String timeoutThreshold = "Timeout Threshold";
         public final static String solved = "Solved";
         public final static String solutionCost = "Solution Cost";
         public final static String solutioncostFunction = "Cost Function";

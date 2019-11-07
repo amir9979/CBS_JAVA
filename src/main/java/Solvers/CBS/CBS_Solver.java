@@ -16,13 +16,14 @@ import java.util.Date;
 import java.util.Objects;
 
 public class CBS_Solver implements I_Solver {
+// todo refactor stuff into an abstract class
 
     /*  = Fields =  */
     /*  =  = Fields related to the MAPF instance  =  */
 
-    /*  =  = Fields related to the run =  */
-
     private MAPF_Instance instance;
+
+    /*  =  = Fields related to the run =  */
 
     private long maximumRuntime;
     protected InstanceReport instanceReport;
@@ -302,7 +303,8 @@ public class CBS_Solver implements I_Solver {
     /*  = wind down =  */
 
     private void writeMetricsToReport(Solution solution) {
-        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeout, abortedForTimeout ? 1 : 0);
+        //todo more metrics
+        instanceReport.putIntegerValue(InstanceReport.StandardFields.timeoutThreshold, abortedForTimeout ? 1 : 0);
         instanceReport.putStringValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
         instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
         if(solution != null){
