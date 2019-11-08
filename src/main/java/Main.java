@@ -3,7 +3,6 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
-import Instances.Maps.MapDimensions;
 
 public class Main {
 
@@ -16,18 +15,19 @@ public class Main {
 
 
     public static void main(String[] args) {
-        runManagerExample();
+        createInstanceExample();
+        //runMultipleExperimentsExample();
     }
 
 
 
-    public static void runManagerExample(){
-        runManagerSimpleExample runManagerSimpleExample = new runManagerSimpleExample();
+    public static void runMultipleExperimentsExample(){
+        RunManagerSimpleExample runManagerSimpleExample = new RunManagerSimpleExample();
         runManagerSimpleExample.runAllExperiments();
     }
 
 
-    public static void runInstanceExample(){
+    public static void createInstanceExample(){
 
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
@@ -37,15 +37,16 @@ public class Main {
 
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(new MapDimensions(16,16), (float)0, new int[]{7});
+        InstanceProperties properties = new InstanceProperties(null, (float)0.15, new int[]{5});
 
 
         /*  =   Set Instance Manager   =  */
-        InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
+        InstanceManager instanceManager = new InstanceManager(null, new InstanceBuilder_BGU(),properties);
 
-        MAPF_Instance instance = runManagerSimpleExample.getInstanceFromPath(instanceManager, instancePath);
+        MAPF_Instance instance = RunManagerSimpleExample.getInstanceFromPath(instanceManager, instancePath);
 
         // Solve
+        System.out.println(instance);
 
     }
 

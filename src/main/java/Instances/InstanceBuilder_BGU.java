@@ -5,7 +5,6 @@ import IO_Package.IO_Manager;
 import IO_Package.Reader;
 import Instances.Agents.Agent;
 import Instances.Maps.*;
-
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -25,6 +24,13 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     private final Stack<MAPF_Instance> instanceStack = new Stack<>();
 
 
+    /*  =  Agent line Indexing =   */
+    private final int INDEX_AGENT_SOURCE_XVALUE = 3;
+    private final int INDEX_AGENT_SOURCE_YVALUE = 4;
+    private final int INDEX_AGENT_TARGET_XVALUE = 1;
+    private final int INDEX_AGENT_TARGET_YVALUE = 2;
+
+
 
     /*      =Cell Types=   */
     private final char EMPTY = '.';
@@ -40,9 +46,9 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     /*  =Default Values=    */
     private final int defaultNumOfDimensions = 2;
-    private final Integer defaultObstaclePercentage = -1;
-    private final int[] defaultDimensions = new int[0];
-    private final int[] defaultNumOfAgents = new int[0];
+    private final float defaultObstacleRate = -1;
+    private final MapDimensions defaultDimensions = new MapDimensions();
+    private final int[] defaultNumOfAgents = new int[]{10};
 
 
 
@@ -63,6 +69,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         GraphMap graphMap = null;
         Agent[] agents = null;
         MapDimensions mapDimensionsFromFile = null;
+        instanceProperties = ( instanceProperties == null ? new InstanceProperties() : instanceProperties);
 
 
         /*  =Get data from reader=  */
@@ -85,18 +92,19 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
                     String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, mapDimensionsFromFile);
 
-                    // If instanceProperties is not null check the obstacle percentage
-                    Integer obstaclePercentage = ( instanceProperties == null ? this.defaultObstaclePercentage : instanceProperties.getObstaclePercentage());
+                    // If instanceProperties is not null check the obstacle rate
+                    float obstacleRate = ( instanceProperties.getObstaclePercentage() == -1 ? this.defaultObstacleRate : instanceProperties.getObstacleRate());
                     // build map
-                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, mapDimensionsFromFile, this.cellTypeHashMap, obstaclePercentage);
+                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, mapDimensionsFromFile, this.cellTypeHashMap, obstacleRate);
 
                     // done - missing check validity of num of obstacles in graphMap
                     break; // end case
 
                 case INDICATOR_AGENTS:
-                    agents = buildAgents(reader, this.defaultNumOfDimensions); // currently supports only 2D
+                    mapDimensionsFromFile = (mapDimensionsFromFile == null ? this.defaultDimensions : mapDimensionsFromFile);
+                    agents = buildAgents(reader, mapDimensionsFromFile.numOfDimensions); // currently supports only 2D
 
-                    if (agents == null || instanceProperties == null){
+                    if (agents == null){
                         break; // No need to check the num of agents
                     }
 
@@ -193,16 +201,17 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
         int agentID = Integer.parseInt(agentLine[0]);
+        dimensions = ( dimensions == 0 ? dimensions = this.defaultNumOfDimensions : dimensions);
 
 
         if(dimensions == 2) {
             /*      source values    */
-            int source_xValue = Integer.valueOf(agentLine[3]);
-            int source_yValue = Integer.valueOf(agentLine[4]);
+            int source_xValue = Integer.valueOf(agentLine[this.INDEX_AGENT_SOURCE_XVALUE]);
+            int source_yValue = Integer.valueOf(agentLine[this.INDEX_AGENT_SOURCE_YVALUE]);
             Coordinate_2D source = new Coordinate_2D(source_xValue, source_yValue);
             /*      Target values    */
-            int target_xValue = Integer.valueOf(agentLine[1]);
-            int target_yValue = Integer.valueOf(agentLine[2]);
+            int target_xValue = Integer.valueOf(agentLine[this.INDEX_AGENT_TARGET_XVALUE]);
+            int target_yValue = Integer.valueOf(agentLine[this.INDEX_AGENT_TARGET_YVALUE]);
             Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
 
             return new Agent(agentID, source, target);
@@ -210,18 +219,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
         if(dimensions == 3) {
-            /*      source values    */
-            int source_xValue = Integer.valueOf(agentLine[4]);
-            int source_yValue = Integer.valueOf(agentLine[5]);
-            int source_zValue = Integer.valueOf(agentLine[6]);
-            Coordinate_3D source = new Coordinate_3D(source_xValue, source_yValue, source_zValue);
-            /*      Target values    */
-            int target_xValue = Integer.valueOf(agentLine[1]);
-            int target_yValue = Integer.valueOf(agentLine[2]);
-            int target_zValue = Integer.valueOf(agentLine[3]);
-            Coordinate_3D target = new Coordinate_3D(target_xValue, target_yValue, target_zValue);
-
-            return new Agent(agentID, source, target);
+            // nicetohave
         }
 
         return null; // Bad dimensions input

@@ -47,16 +47,16 @@ public interface I_InstanceBuilder {
      * @param mapSeparator - Regex value to split map values. by default is "".
      * @param mapDimensions - A {@link MapDimensions}, must be valid.
      * @param cellTypeHashMap - HashMap for converting Character to {@link Enum_MapCellType}
-     * @param obstaclePercentage - Value is an Integer indicates obstacle percentage.
+     * @param obstacleRate - Value is a float indicates obstacle percentage.
      * @return A GraphMap
      */
-    static GraphMap buildGraphMap(String[] mapAsStrings, String mapSeparator, MapDimensions mapDimensions, HashMap<Character,Enum_MapCellType> cellTypeHashMap, Integer obstaclePercentage) {
+    static GraphMap buildGraphMap(String[] mapAsStrings, String mapSeparator, MapDimensions mapDimensions, HashMap<Character,Enum_MapCellType> cellTypeHashMap, float obstacleRate) {
 
         switch ( mapDimensions.numOfDimensions ){
             case 2:
 
                 Character[][] mapAsCharacters_2d = build2D_CharacterMap(mapAsStrings,mapDimensions,mapSeparator);
-                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, obstaclePercentage);
+                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, obstacleRate);
                 if( mapAsCellType_2D == null){
                     return null; // Error while building the map
                 }
@@ -64,7 +64,7 @@ public interface I_InstanceBuilder {
 
             case 3:
                 Character[][][] mapAsCharacters_3d = new Character[][][]{};
-                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsCharacters_3d, cellTypeHashMap,obstaclePercentage);
+                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsCharacters_3d, cellTypeHashMap,obstacleRate);
                 return null; // niceToHave - change to newSimple 4Connected 3D_GraphMap if exists in MapFactory
         }
 
@@ -97,7 +97,7 @@ public interface I_InstanceBuilder {
     }
 
 
-    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, Integer obstaclePercentage) {
+    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, float obstacleRate) {
         // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
 
         int xAxis_length = mapAsCharacters.length;
@@ -114,7 +114,7 @@ public interface I_InstanceBuilder {
             for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
 
                 // done - convert using this.cellTypeHashMap
-                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsCharacters[xIndex][yIndex]);
+                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsCharacters[yIndex][xIndex]);
 
                 if ( cellType.equals(Enum_MapCellType.WALL)){
                     numOfObstacles++; // add one wall to counter
@@ -125,10 +125,12 @@ public interface I_InstanceBuilder {
             }
         }
 
-        // If obstacle percentage is not null,
+        // If obstacle rate is not -1,
         // check that it matches the value from properties
-        // Formulation: floor( obstaclesPercentage * BoardSize) = numOfObstacles
-        if ( obstaclePercentage != -1 && numOfObstacles != (obstaclePercentage *(numOfNonObstacles + numOfObstacles))){
+        // Formula: floor( obstaclesRate * BoardSize) = numOfObstacles
+        int boardSize = (numOfNonObstacles + numOfObstacles);
+        int computedNumOfObstacles = (int) Math.floor((obstacleRate * boardSize));
+        if ( obstacleRate != -1 && computedNumOfObstacles != numOfObstacles ){
             // done - check with Dor that this is correct
             return null; // Invalid obstacle rate
         }
@@ -136,7 +138,7 @@ public interface I_InstanceBuilder {
         return cellTypeMap;
     }
 
-    static Enum_MapCellType[][][] build_3D_cellTypeMap(Character[][][] mapAsCharacters, HashMap<Character,Enum_MapCellType> cellTypeHashMap, Integer obstaclePercentage) {
+    static Enum_MapCellType[][][] build_3D_cellTypeMap(Character[][][] mapAsCharacters, HashMap<Character,Enum_MapCellType> cellTypeHashMap, float obstacleRate) {
         // niceToHave - no need to implement for now
         return null;
     }

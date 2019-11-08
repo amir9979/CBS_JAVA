@@ -115,27 +115,4 @@ public class InstanceManager {
 
     }
 
-
-
-
-    /***  =Scenario Class=  ***/
-    // todo - go over this class
-
-    private class Scenario {
-
-        private String name;
-        private I_Map map;
-        private Agent[] agents;
-
-        public Scenario(String name, I_Map map, Agent[] agents) {
-            this.name   = name;
-            this.map    = map;
-            this.agents = agents;
-        }
-
-        public MAPF_Instance getInstance(int numAgents){
-            return null; //imp
-        }
-
-    }
 }

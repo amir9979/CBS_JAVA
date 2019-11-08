@@ -7,7 +7,7 @@ import Instances.Maps.MapDimensions;
 import Solvers.AStar.AStar_Solver;
 
 
-public class runManagerSimpleExample extends A_RunManager {
+public class RunManagerSimpleExample extends A_RunManager {
 
 
 

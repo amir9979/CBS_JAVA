@@ -39,12 +39,20 @@ Naming:
 
 
 Testing:
+
+    @Test
+    public void <Test name>() {
+        // test body
+    }
+
+    In every test:
+        1. /*   = Expected  values =   */
+        2. /*   = Actual    values =   */
+        3. /*   = Test      values =   */
+
     Before: add @Before to init the tested class
             * the before() method runs before each test
 
-    In every test:
-        1. test invalid values:     /***      Invalid values  ***/
-        2. test valid values:       /***       Valid values   ***/
 
     Assert:
         * Assert.assertTrue(condition)
@@ -55,7 +63,7 @@ Testing:
 
 
 
-Arrays:
+Map Arrays - CellTypeMap:
   In arrays that represent maps, dimensions will be ordered as follows:
     arr[x][y][z]...
     So that arr.length is equal to the x length (the width) of the represented map.
@@ -64,6 +72,7 @@ Arrays:
     1. arr.length -> xAxis_length
     2. arr[0].length -> yAxis_length
     3. int i -> xIndex , int j -> yIndex
-    Example of a stadard for i for j iteration:
+    Example of a standard for i for j iteration:
       for (int xIndex = 0; xIndex < xAxis_length; xIndex++)
           for (int yIndex = 0; yIndex < yAxis_length; yIndex++)
+                CellTypeMap[xIndex][yIndex]

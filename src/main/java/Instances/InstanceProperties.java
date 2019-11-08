@@ -23,9 +23,9 @@ public class InstanceProperties {
      * @param numOfAgents - An array of different num of agents.
      */
     public InstanceProperties(MapDimensions mapSize, Float obstacles, int[] numOfAgents) {
-        this.mapSize = mapSize;
-        this.obstacles = obstacles;
-        this.numOfAgents = numOfAgents;
+        this.mapSize = (mapSize == null ? new MapDimensions() :  mapSize);
+        this.obstacles = (obstacles == null ? (float)-1 : obstacles);
+        this.numOfAgents = (numOfAgents == null ? new int[0] : numOfAgents);
     }
 
 
@@ -35,7 +35,7 @@ public class InstanceProperties {
      */
     public int getObstaclePercentage() {
 
-        if (this.obstacles == null || this.obstacles == -1) {
+        if (this.obstacles == -1) {
             return -1;
         }
         return Math.round(obstacles * 100); // Returns 15
@@ -48,14 +48,6 @@ public class InstanceProperties {
      */
     public Float getObstacleRate() {
         return this.obstacles; // returns 0.15
-    }
-
-    public int[] getNumOfAgents() {
-        return this.numOfAgents;
-    }
-
-    public int getArrayAgentsSize() {
-        return this.numOfAgents.length;
     }
 
 

@@ -17,36 +17,57 @@ public class InstanceBuilder_BGUTest {
     // todo - add test with obstacles
 
     private InstanceBuilder_BGU instanceBuilderBgu = new InstanceBuilder_BGU();
-    private InstanceManager.InstancePath instancePath_Instance_16_0_7;
-    private InstanceProperties instanceProperties = new InstanceProperties(
-                                                        new MapDimensions(new int[]{16,16}),(float)0,new int[]{7,10,15}
-                                                    );
+
+    private final Enum_MapCellType e = Enum_MapCellType.EMPTY;
+    private final Enum_MapCellType w = Enum_MapCellType.WALL;
 
 
 
-    @Before
-    public void Before() throws Exception {
-        this.instancePath_Instance_16_0_7 = null; // init in the beginning of every test
 
+
+    /*  Check that map is valid  */
+    private boolean checkAllMapCells(Enum_MapCellType[][] expectedCellTypeMap, I_Map actualMap){
+
+        for (int xAxis_value = 0; xAxis_value < expectedCellTypeMap.length; xAxis_value++) {
+            for (int yAxis_value = 0; yAxis_value < expectedCellTypeMap[0].length; yAxis_value++) {
+                // Create coordinate
+                I_Coordinate coordinate = new Coordinate_2D(xAxis_value, yAxis_value);
+                // Get the relevant mapCell
+                I_MapCell actualMapCell = actualMap.getMapCell(coordinate);
+
+                // Check that wall doesnt exists in actualMap
+                if( actualMapCell == null && expectedCellTypeMap[xAxis_value][yAxis_value] == w){ continue; }
+
+                // check that actualMapCell is the same as the expectedCellTypeMap[xAxis_value][yAxis_value]
+                if( actualMapCell != null && actualMapCell.getType() != expectedCellTypeMap[xAxis_value][yAxis_value]){ continue; }
+
+
+                return false; // Invalid value
+            }
+        }
+
+        return true; // All cells are valid
     }
 
-    @After
-    public void After() throws Exception {
-    }
+
 
 
     @Test
     public void prepareInstances_Instance_16_0_7() {
 
-
-        /*************      =Valid Values=     *************/
-        String path_16_0_7 = IO_Manager.buildPath(
-                                            new String[]{   IO_Manager.testResources_Directory,
-                                            "Instances\\Instance-16-0-7-0"}
+        /*  Set properties  */
+       InstanceProperties instanceProperties = new InstanceProperties(
+                new MapDimensions(new int[]{16,16}),(float)0,new int[]{7,10,15}
         );
 
 
-        this.instancePath_Instance_16_0_7 = new InstanceManager.InstancePath(path_16_0_7);
+        /*  Set path  */
+       String path_16_0_7 = IO_Manager.buildPath(
+                                                new String[]{  IO_Manager.testResources_Directory,
+                                                               "Instances\\Instance-16-0-7-0"}
+       );
+
+        InstanceManager.InstancePath instancePath_Instance_16_0_7 = new InstanceManager.InstancePath(path_16_0_7);
 
 
         /*****  =Expected values=   *****/
@@ -70,16 +91,11 @@ public class InstanceBuilder_BGUTest {
             }
         }
 
-        // GraphMap expectedMap = MapFactory.newSimple4Connected2D_GraphMap(expectedCellTypeMap);
-
-
 
         /*****  =Actual values=   *****/
 
-
-
         String instanceName = "Instance-16-0-7"; // Name from the InstanceManager
-        this.instanceBuilderBgu.prepareInstances(instanceName, this.instancePath_Instance_16_0_7, this.instanceProperties);
+        this.instanceBuilderBgu.prepareInstances(instanceName, instancePath_Instance_16_0_7, instanceProperties);
         MAPF_Instance mapf_instance = instanceBuilderBgu.getNextExistingInstance();
 
         Assert.assertNotNull(mapf_instance);
@@ -87,24 +103,15 @@ public class InstanceBuilder_BGUTest {
         List<Agent> actualAgents = mapf_instance.agents;
 
         /*  =Check Agents=  */
-
+        Assert.assertTrue(actualAgents.size() == expectedAgents.size());
         for (int i = 0; i < actualAgents.size(); i++) {
             Assert.assertEquals(expectedAgents.get(i) , actualAgents.get(i));
         }
 
 
-
-        // Blocking - add map test
-
-        /*  =Check Map=  */
-
-
-
-
-
-
-
-
+        /*  = Check map =  */
+        I_Map actualMap = mapf_instance.map;
+        Assert.assertTrue(checkAllMapCells(expectedCellTypeMap,actualMap));
 
 
     }
@@ -148,6 +155,120 @@ public class InstanceBuilder_BGUTest {
                             new Coordinate_2D(7,7)));
     }
 
+
+
+
+
+
+
+    @Test
+    public void prepareInstances_Instance_8_15_5() {
+
+        /*  Set path  */
+        String path_8_15_5 = IO_Manager.buildPath(
+                                    new String[]{   IO_Manager.testResources_Directory,
+                                    "Instances\\\\Instance-8-15-5-17 - hard one - cost 29 and some corridors"}
+        );
+
+        InstanceManager.InstancePath instancePath_Instance_8_15_5 = new InstanceManager.InstancePath(path_8_15_5);
+
+
+        /*  Set properties  */
+        InstanceProperties instanceProperties = new InstanceProperties(
+                new MapDimensions(new int[]{8,8}), (float)0.15, new int[]{7,5,15}
+        );
+
+
+
+
+
+        /*****  =Expected values=   *****/
+        List<Agent> expectedAgents = new ArrayList<Agent>(5);
+        addAgents_Instance_8_15_5(expectedAgents);
+
+
+
+        /*      =Create expected cellType Map=       */
+
+        /* Note: Map is twisted, not like in the file
+                ...@..@@
+                ........
+                ......@.
+                ..@....@
+                .......@
+                ........
+                ........
+                .....@@.
+
+        */
+        Enum_MapCellType[][] expectedCellTypeMap = new Enum_MapCellType[][]{
+                {e,e,e,w,e,e,w,w},
+                {e,e,e,e,e,e,e,e},
+                {e,e,e,e,e,e,w,e},
+                {e,e,w,e,e,e,e,w},
+                {e,e,e,e,e,e,e,w},
+                {e,e,e,e,e,e,e,e},
+                {e,e,e,e,e,e,e,e},
+                {e,e,e,e,e,w,w,e},
+
+        };
+
+
+        /*****  =Actual values=   *****/
+
+        String instanceName = "Instance-8-15-5"; // Name from the InstanceManager
+        this.instanceBuilderBgu.prepareInstances(instanceName, instancePath_Instance_8_15_5, instanceProperties);
+        MAPF_Instance mapf_instance = instanceBuilderBgu.getNextExistingInstance();
+
+        Assert.assertNotNull(mapf_instance);
+
+        List<Agent> actualAgents = mapf_instance.agents;
+
+
+        /*  =Check Agents=  */
+        Assert.assertTrue(actualAgents.size() == expectedAgents.size());
+        for (int i = 0; i < actualAgents.size(); i++) {
+            Assert.assertEquals(expectedAgents.get(i) , actualAgents.get(i));
+        }
+
+
+        /*  = Check map =  */
+        I_Map actualMap = mapf_instance.map;
+        Assert.assertTrue(checkAllMapCells(expectedCellTypeMap,actualMap));
+
+
+    }
+
+
+    private void addAgents_Instance_8_15_5(List<Agent> expectedAgents){
+
+        /*
+        Agents from file: instance-8-15-5
+        Agent line meaning: < id > , < x_target , y_target > , < x_start , y_start >
+        */
+
+
+        // 0,7,2,5,1
+        expectedAgents.add( new Agent(0,
+                            new Coordinate_2D(5,1),
+                            new Coordinate_2D(7,2)));
+        // 1,4,5,3,5
+        expectedAgents.add( new Agent(1,
+                            new Coordinate_2D(3,5),
+                            new Coordinate_2D(4,5)));
+        // 2,7,1,7,1
+        expectedAgents.add( new Agent(2,
+                            new Coordinate_2D(7,1),
+                            new Coordinate_2D(7,1)));
+        // 3,0,7,3,1
+        expectedAgents.add( new Agent(3,
+                            new Coordinate_2D(3,1),
+                            new Coordinate_2D(0,7)));
+        // 4,5,1,2,5
+        expectedAgents.add( new Agent(4,
+                            new Coordinate_2D(2,5),
+                            new Coordinate_2D(5,1)));
+    }
 
 
 }
