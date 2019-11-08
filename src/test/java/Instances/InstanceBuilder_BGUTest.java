@@ -39,9 +39,9 @@ public class InstanceBuilder_BGUTest {
                 if( actualMapCell == null && expectedCellTypeMap[xAxis_value][yAxis_value] == w){ continue; }
 
                 // check that actualMapCell is the same as the expectedCellTypeMap[xAxis_value][yAxis_value]
-                if( actualMapCell != null && actualMapCell.getType() != expectedCellTypeMap[xAxis_value][yAxis_value]){ continue; }
+                if( actualMapCell != null && actualMapCell.getType() == expectedCellTypeMap[xAxis_value][yAxis_value]){ continue; }
 
-
+                Assert.assertFalse(true);
                 return false; // Invalid value
             }
         }
