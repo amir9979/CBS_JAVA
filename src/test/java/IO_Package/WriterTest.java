@@ -15,6 +15,9 @@ public class WriterTest {
     private final String directoryPath = IO_ManagerTest.testResources_path;
     private final String fileName = IO_ManagerTest.fileToWriteName;
 
+
+
+
     @Before
     public void before(){
 
@@ -24,14 +27,8 @@ public class WriterTest {
             this.writer = new Writer();
         }
 
-
         // Check that file not exists
         IO_ManagerTest.deleteFileToWrite();
-
-
-        /***       Test openFile with Valid values   ***/
-        Enum_IO enum_io = writer.openFile(this.directoryPath, this.fileName);
-        Assert.assertEquals(Enum_IO.OPENED,enum_io); // Opened successfully
 
     }
 
@@ -42,32 +39,54 @@ public class WriterTest {
     }
 
 
-    @Test
-    public void openFile() {
 
-        /***      Invalid values  ***/
-        Enum_IO enum_io = this.writer.openFile(this.directoryPath, this.fileName);
-        Assert.assertEquals(Enum_IO.CURRENT_FILE_STILL_OPEN,enum_io); // Trying to open an open file
 
-        Writer badPathWriter = new Writer();
-        String badFileDirectory = "fake folder";
-        String badFileName = "not exists.txt";
-        Enum_IO enum_io_notExists = badPathWriter.openFile(badFileDirectory, badFileName);
-        Assert.assertEquals(Enum_IO.INVALID_PATH, enum_io_notExists); // Trying to open an invalid path
+    /*  = Tests =   */
+
+
+    private void openValidFile(){
+
+        /***       Test openFileToAppend with Valid values   ***/
+        Enum_IO enum_io = this.writer.openFileToAppend(this.directoryPath, this.fileName);
+        Assert.assertEquals(Enum_IO.OPENED,enum_io); // Opened successfully
 
     }
 
     @Test
-    public void writeText() {
+    public void dontWriteToInvalidPath(){
+        Writer badPathWriter = new Writer();
+        String badFileDirectory = "fake folder";
+        String badFileName = "not exists.txt";
+        Enum_IO enum_io_notExists = badPathWriter.openFileToAppend(badFileDirectory, badFileName);
+        Assert.assertEquals(Enum_IO.INVALID_PATH, enum_io_notExists); // Trying to open an invalid path
+    }
+
+
+    @Test
+    public void currentlyOpenFile(){
+
+        this.openValidFile();
+
+        // Try to open while still open
+        Enum_IO enum_io = this.writer.openFileToAppend(this.directoryPath, this.fileName);
+        Assert.assertEquals(Enum_IO.CURRENT_FILE_STILL_OPEN,enum_io); // Trying to open an open file
+    }
+
+    @Test
+    public void writeThreeLines(){
+
+        this.openValidFile();
 
         // Write line by line
         for (int i = 0; i < this.linesToWrite.length ; i++) {
-            Assert.assertEquals(Enum_IO.WROTE_SUCCESSFULLY,writer.writeText(linesToWrite[i])); // Wrote successfully
+            Assert.assertEquals(Enum_IO.WROTE_SUCCESSFULLY, this.writer.writeText(this.linesToWrite[i])); // Wrote successfully
         }
     }
 
     @Test
-    public void closeFile() {
+    public void multipleClose(){
+
+        this.openValidFile();
 
         /***       Valid values   ***/
         Enum_IO enum_io = this.writer.closeFile();
@@ -78,6 +97,9 @@ public class WriterTest {
 
 
     }
+
+
+
 
     /* This method helps to remove the 'write_test.txt' */
     private boolean deletedFile(){
@@ -93,6 +115,6 @@ public class WriterTest {
         enum_io = IO_Manager.getInstance().deleteFile(new File(filePath));
 
 
-        return enum_io.equals(Enum_IO.DELETED); // true if deleted successfully
+        return enum_io.equals(Enum_IO.DELETED) || enum_io.equals(Enum_IO.INVALID_PATH); // true if deleted successfully
     }
 }

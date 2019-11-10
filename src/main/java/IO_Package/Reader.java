@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Reader {
-    // Testme - ready to be tested
 
     private File file;
     private Scanner scanner;

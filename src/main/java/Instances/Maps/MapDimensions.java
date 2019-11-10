@@ -31,7 +31,7 @@ public class MapDimensions{
 
 
     public MapDimensions(int[] dimensions){
-        // Blocking - check format, if {16,16} is {x,y}
+        // todo - check format, if {16,16} is {x,y}
 
         switch ( dimensions.length ){
             case 2:

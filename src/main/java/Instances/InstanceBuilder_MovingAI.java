@@ -26,8 +26,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
     /*  =Default Values=    */
-    private final int defaultNumOfDimensions = 2;
-    private final Integer defaultObstaclePercentage = -1;
+    private final Float defaultObstacleRate = (float)-1;
     private final int defaultNumOfAgents = 10;
     private final int defaultNumOfBatches = 5;
     private final int defaultNumOfAgentsInSingleBatch = 10;
@@ -67,7 +66,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
     @Override
-    // todo - change to void!
     public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
 
         if (!(instancePath instanceof InstanceManager.Moving_AI_Path)) {
@@ -88,7 +86,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         int[] numOfAgentsFromProperties = (instanceProperties == null ? new int[]{this.defaultNumOfAgents} : instanceProperties.numOfAgents);
 
 
-        // Blocking - add implementation of 'getAgents'
+        // done - add implementation of 'getAgents'
         int numOfBatches = this.getNumOfBatches(numOfAgentsFromProperties);
         ArrayList<String> agentLinesQueue = getAgentLines(moving_ai_path, numOfBatches * this.defaultNumOfAgentsInSingleBatch); //
 
@@ -96,7 +94,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
             Agent[] agents = getAgents(agentLinesQueue,numOfAgentsFromProperties[i]);
 
-            if (instanceName == null || graphMap == null || agents == null) {
+            if (instanceName == null || agents == null) {
                 continue; // Invalid parameters
             }
 
@@ -138,7 +136,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
     private Agent buildSingleAgent(int id, String agentLine) {
 
-        // imp - build agent from string
+        // done - build agent from string
         String[] splitLine = agentLine.split(this.SEPARATOR_SCENARIO);
         // Init coordinates
         int source_xValue = Integer.parseInt(splitLine[this.INDEX_AGENT_SOURCE_XVALUE]);
@@ -149,9 +147,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
 
 
-        Agent agentFromLine = new Agent(id, source, target);
-
-        return agentFromLine;
+        return new Agent(id, source, target);
     }
 
 
@@ -193,7 +189,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         /*  =Init values=  */
         GraphMap graphMap = null;
         MapDimensions dimensionsFromProperties = ( instanceProperties == null || instanceProperties.mapSize == null ? new MapDimensions() : instanceProperties.mapSize);
-        MapDimensions dimensionsFromFile = new MapDimensions(); // todo - works only with 2d as of now
+        MapDimensions dimensionsFromFile = new MapDimensions();
 
 
 
@@ -230,9 +226,9 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
                 String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensionsFromFile);
 
                 // If instanceProperties is not null check the obstacle percentage
-                Integer obstaclePercentage = ( instanceProperties == null ? this.defaultObstaclePercentage : instanceProperties.getObstaclePercentage());
+                float obstacleRate = ( instanceProperties == null ? this.defaultObstacleRate : instanceProperties.getObstacleRate());
                 // build map
-                graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, dimensionsFromFile, this.cellTypeHashMap, obstaclePercentage);
+                graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, dimensionsFromFile, this.cellTypeHashMap, obstacleRate);
 
                 break;
             }
@@ -268,6 +264,10 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     @Override
     public InstanceManager.InstancePath[] getInstancesPaths(String directoryPath) {
         InstanceManager.InstancePath[] pathArray = IO_Manager.getFilesFromDirectory(directoryPath);
+        if(pathArray == null){
+            return null;
+        }
+
         ArrayList<InstanceManager.InstancePath> list = new ArrayList<>();
 
         for (InstanceManager.InstancePath instancePath : pathArray ) {

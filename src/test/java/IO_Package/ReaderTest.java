@@ -22,7 +22,7 @@ public class ReaderTest {
         }
 
 
-        /***       Test openFile with Valid values   ***/
+        /***       Test openFileToAppend with Valid values   ***/
         Enum_IO enum_io = reader.openFile(this.filePath);
         Assert.assertEquals(Enum_IO.OPENED,enum_io);
 
