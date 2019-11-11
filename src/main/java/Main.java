@@ -3,6 +3,9 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
+import Solvers.CBS.CBS_Solver;
+import Solvers.RunParameters;
+import Solvers.Solution;
 
 public class Main {
 
@@ -15,8 +18,8 @@ public class Main {
 
 
     public static void main(String[] args) {
-        createInstanceExample();
-        //runMultipleExperimentsExample();
+        //unExample();
+        runMultipleExperimentsExample();
     }
 
 
@@ -27,7 +30,7 @@ public class Main {
     }
 
 
-    public static void createInstanceExample(){
+    public static void runExample(){
 
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
@@ -46,9 +49,12 @@ public class Main {
         MAPF_Instance instance = RunManagerSimpleExample.getInstanceFromPath(instanceManager, instancePath);
 
         // Solve
+        CBS_Solver solver = new CBS_Solver();
+        RunParameters runParameters = new RunParameters();
+        Solution solution = solver.solve(instance, runParameters);
 
-        System.out.println(instance);
-
+        //print
+        System.out.println(solution);
     }
 
 

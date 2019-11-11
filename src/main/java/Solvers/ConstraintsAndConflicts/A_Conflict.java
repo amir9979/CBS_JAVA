@@ -4,6 +4,8 @@ import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
 import Solvers.Move;
 
+import java.util.Objects;
+
 public abstract class A_Conflict {
     public final Agent agent1;
     public final Agent agent2;
@@ -17,6 +19,9 @@ public abstract class A_Conflict {
         this.location = location;
     }
 
+    /**
+     * @return an array of constraints, each of which could prevent this conflict
+     */
     public abstract Constraint[] getPreventingConstraints();
 
 //    public static boolean hasConflicts(Solution solution) {
@@ -56,4 +61,19 @@ public abstract class A_Conflict {
                 && (SwappingConflict.haveConflicts(move1, move2) || VertexConflict.haveConflicts(move1, move2));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof A_Conflict)) return false;
+        A_Conflict conflict = (A_Conflict) o;
+        return time == conflict.time &&
+                (( Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2)) ||
+                 ( Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1))  ) &&
+                  Objects.equals(location, conflict.location);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash( agent1 ) * Objects.hash( agent2 ) * Objects.hash( time, location );
+    }
 }

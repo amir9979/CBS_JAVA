@@ -4,7 +4,7 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.Maps.MapDimensions;
-import Solvers.AStar.AStar_Solver;
+import Solvers.CBS.CBS_Solver;
 
 
 public class RunManagerSimpleExample extends A_RunManager {
@@ -15,7 +15,7 @@ public class RunManagerSimpleExample extends A_RunManager {
 
     @Override
     void setSolvers() {
-        this.solvers.add(new AStar_Solver());
+        this.solvers.add(new CBS_Solver());
     }
 
 

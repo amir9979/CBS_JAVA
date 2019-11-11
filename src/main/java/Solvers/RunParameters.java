@@ -39,8 +39,8 @@ public class RunParameters {
     public final InstanceReport instanceReport;
 
     /**
-     * A {@link Solution} that already exists, and which the solver can use as a base.
-     * If possible, the solver should add to this solution rather than create a new one.
+     * A {@link Solution} that already exists, and which the solver should use as a base.
+     * The solver should add to, or modify, this solution rather than create a new one.
      */
     public Solution existingSolution;
 

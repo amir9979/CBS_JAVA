@@ -158,9 +158,17 @@ public class SingleAgentPlan implements Iterable<Move> {
 
     /**
      * Returns the total time of the plan, which is the difference between end and start times. It is the same as the number of moves in the plan.
-     * @return the total time of the plan, which is the difference between end and start times. Return 0 if plan is empty.
+     * @return the total time of the plan. Return 0 if plan is empty.
      */
-    public int size(){return moves.isEmpty() ? 0 : this.getEndTime()-this.getPlanStartTime();}
+    public int size(){return moves.size();}
+
+    /**
+     * @return the cost of the plan.
+     */
+    public int getCost() {
+        // the cost of the plan is the size(length) of the plan.
+        return this.size();
+    }
 
     /**
      * Compares with another {@link SingleAgentPlan}, looking for vertex conflicts ({@link VertexConflict}) or
@@ -175,9 +183,6 @@ public class SingleAgentPlan implements Iterable<Move> {
                 this.moves) {
             Move otherMoveAtTime = other.moveAt(localMove.timeNow);
             if(otherMoveAtTime != null){
-                boolean vertexConflict = otherMoveAtTime.currLocation.equals(localMove.currLocation);
-                boolean swappingConflict = otherMoveAtTime.prevLocation.equals(localMove.currLocation)
-                        && localMove.prevLocation.equals(otherMoveAtTime.currLocation);
                 if(A_Conflict.haveConflicts(localMove, otherMoveAtTime)){return true;}
             }
         }

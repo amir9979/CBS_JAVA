@@ -21,13 +21,19 @@ public class Solution implements Iterable<SingleAgentPlan>{
         this.agentPlans = new HashMap<>(agentPlans);
     }
 
-    public Solution(Collection<? extends SingleAgentPlan> plans) {
-        Map<Agent, SingleAgentPlan> agentPlanMap = new HashMap<>();
-        for (SingleAgentPlan plan :
-                plans) {
-            agentPlanMap.put(plan.agent, plan);
+    public Solution(Iterable<? extends SingleAgentPlan> plans) {
+        if(plans instanceof Solution){
+            Solution sol = ((Solution)plans);
+            this.agentPlans = new HashMap<>(sol.agentPlans);
         }
-        this.agentPlans = agentPlanMap;
+        else{
+            Map<Agent, SingleAgentPlan> agentPlanMap = new HashMap<>();
+            for (SingleAgentPlan plan :
+                    plans) {
+                agentPlanMap.put(plan.agent, plan);
+            }
+            this.agentPlans = agentPlanMap;
+        }
     }
 
     public Solution(){
@@ -60,6 +66,24 @@ public class Solution implements Iterable<SingleAgentPlan>{
             }
         }
         return true;
+    }
+
+    public int sumIndividualCosts(){
+        int SIC = 0;
+        for (SingleAgentPlan plan :
+                agentPlans.values()) {
+            SIC += plan.getCost();
+        }
+        return SIC;
+    }
+
+    public int makespan(){
+        int maxCost = 0;
+        for (SingleAgentPlan plan :
+                agentPlans.values()) {
+            maxCost = Math.max(maxCost, plan.getCost());
+        }
+        return maxCost;
     }
 
     //todo add String serialization and deserialization
