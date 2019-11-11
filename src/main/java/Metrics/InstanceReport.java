@@ -15,9 +15,9 @@ public class InstanceReport {
     private static final int MAX_STRING_SIZE = 32767 - 12;
     public static final String EXTENTION_STRING = " - Extended ";
 
-    private Map<String, String> stringFields = new HashMap<String, String>();
-    private Map<String, Integer> integerFields = new HashMap<String, Integer>();
-    private Map<String, Float> floatFields = new HashMap<String, Float>();
+    private Map<String, String> stringFields = new HashMap<String, String>(8);
+    private Map<String, Integer> integerFields = new HashMap<String, Integer>(8);
+    private Map<String, Float> floatFields = new HashMap<String, Float>(4);
     private boolean isCommited = false;
 
     /**

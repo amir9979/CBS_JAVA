@@ -66,6 +66,7 @@ class PrioritisedPlanning_SolverTest {
     private I_Coordinate coor04 = new Coordinate_2D(0,4);
     private I_Coordinate coor00 = new Coordinate_2D(0,0);
     private I_Coordinate coor01 = new Coordinate_2D(0,1);
+    private I_Coordinate coor10 = new Coordinate_2D(1,0);
 
     private I_MapCell cell12 = mapCircle.getMapCell(coor12);
     private I_MapCell cell13 = mapCircle.getMapCell(coor13);
@@ -84,14 +85,15 @@ class PrioritisedPlanning_SolverTest {
     private I_MapCell cell04 = mapCircle.getMapCell(coor04);
     private I_MapCell cell00 = mapCircle.getMapCell(coor00);
     private I_MapCell cell01 = mapCircle.getMapCell(coor01);
+    private I_MapCell cell10 = mapCircle.getMapCell(coor10);
 
     private Agent agent33to12 = new Agent(0, coor33, coor12);
     private Agent agent12to33 = new Agent(1, coor12, coor33);
     private Agent agent53to05 = new Agent(0, coor53, coor05);
     private Agent agent43to11 = new Agent(0, coor43, coor11);
     private Agent agent04to00 = new Agent(0, coor04, coor00);
-    private Agent agent00to01 = new Agent(0, coor00, coor01);
-    private Agent agent01to00 = new Agent(1, coor01, coor00);
+    private Agent agent00to10 = new Agent(0, coor00, coor10);
+    private Agent agent10to00 = new Agent(1, coor10, coor00);
 
     InstanceBuilder_BGU builder = new InstanceBuilder_BGU();
     InstanceManager im = new InstanceManager(IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,"Instances"}),
@@ -100,7 +102,7 @@ class PrioritisedPlanning_SolverTest {
     private MAPF_Instance instanceEmpty1 = new MAPF_Instance("instanceEmpty", mapEmpty, new Agent[]{agent33to12, agent12to33, agent53to05, agent43to11, agent04to00});
     private MAPF_Instance instanceCircle1 = new MAPF_Instance("instanceCircle1", mapCircle, new Agent[]{agent33to12, agent12to33});
     private MAPF_Instance instanceCircle2 = new MAPF_Instance("instanceCircle1", mapCircle, new Agent[]{agent12to33, agent33to12});
-    private MAPF_Instance instanceUnsolvable = new MAPF_Instance("instanceUnsolvable", mapWithPocket, new Agent[]{agent00to01, agent01to00});
+    private MAPF_Instance instanceUnsolvable = new MAPF_Instance("instanceUnsolvable", mapWithPocket, new Agent[]{agent00to10, agent10to00});
 
     I_Solver ppSolver = new PrioritisedPlanning_Solver(new SingleAgentAStar_Solver());
 

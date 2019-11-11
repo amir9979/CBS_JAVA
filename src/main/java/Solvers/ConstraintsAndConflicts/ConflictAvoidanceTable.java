@@ -21,6 +21,10 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     public final Comparator<A_Conflict> comparator = Comparator.comparing((A_Conflict conflict) -> conflict.time);
 
 
+    /**
+     * Constructor.
+     * @param conflictSelectionStrategy how to choose conflicts.
+     */
     public ConflictAvoidanceTable(ConflictSelectionStrategy conflictSelectionStrategy) {
         /* Changed allConflicts from a HashSet to a TreeSet to make MinTimeConflictSelectionStrategy more efficient.
          If we want to make this more generic, we should scrap ConflictSelectionStrategy and instead make this field
@@ -34,8 +38,17 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         this.conflictSelectionStrategy = conflictSelectionStrategy;
     }
 
+    /**
+     * Default constructor.
+     */
+    public ConflictAvoidanceTable() {
+        this(new MinTimeConflictSelectionStrategy());
+    }
 
-    // Copy constructor
+    /**
+     * Copy constructor.
+     * @param other another {@link ConflictAvoidanceTable} to copy.
+     */
     public ConflictAvoidanceTable(ConflictAvoidanceTable other){
         this.allConflicts = new TreeSet<>(this.comparator);
         this.allConflicts.addAll(other.allConflicts);

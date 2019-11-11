@@ -11,11 +11,15 @@ import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.ConstraintsAndConflicts.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class CBS_Solver extends A_Solver {
 
     /*  = Fields =  */
+
+    private static Comparator<? super CBS_Node> nodeComparator = Comparator.comparing(CBS_Node::getSolutionCost);
+
     /*  =  = Fields related to the MAPF instance  =  */
 
     private MAPF_Instance instance;
@@ -285,7 +289,7 @@ public class CBS_Solver extends A_Solver {
      * A data type for representing a single node in the CBS search tree.
      * Try to keep most logic in {@link CBS_Solver}, avoiding methods in this class.
      */
-    private class CBS_Node{
+    private class CBS_Node implements Comparable<CBS_Node>{
 
         /*  =  = fields =  */
 
@@ -347,6 +351,7 @@ public class CBS_Solver extends A_Solver {
             this.solution = solution;
             this.solutionCost = solutionCost;
             this.constraints = constraints;
+            this.conflictAvoidanceTable = new ConflictAvoidanceTable();
             for (SingleAgentPlan plan:
                  solution) {
                 this.conflictAvoidanceTable.add(plan);
@@ -431,6 +436,11 @@ public class CBS_Solver extends A_Solver {
 
         public CBS_Node getRightChild() {
             return rightChild;
+        }
+
+        @Override
+        public int compareTo(CBS_Node o) {
+            return Objects.compare(this, o, CBS_Solver.nodeComparator);
         }
     }
 
