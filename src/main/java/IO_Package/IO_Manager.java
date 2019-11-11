@@ -1,17 +1,15 @@
 package IO_Package;
 
 import Instances.InstanceManager;
-
 import java.io.File;
 import java.util.HashSet;
 
 public class IO_Manager { // Singleton class
-    // testme
 
     private HashSet<String> openedPaths; // Keeps track on opened files
     public static final String pathSeparator = System.getProperty("file.separator");
     public static final String workingDirectory = System.getProperty("user.dir") + "\\src"; // absolute path to src
-    public static final String testResources_Directory = buildPath(new String[]{workingDirectory,"test\\resources"});
+    public static final String testResources_Directory = buildPath(new String[]{workingDirectory, "test\\resources"});
 
 
     /* Singleton */
@@ -21,7 +19,7 @@ public class IO_Manager { // Singleton class
     }
 
     private IO_Manager() {
-        // Todo - check if HashSet does 'contains' properly on Strings
+        // done - check if HashSet does 'contains' properly on Strings
         this.openedPaths = new HashSet<String>();
     }
 
@@ -73,7 +71,7 @@ public class IO_Manager { // Singleton class
         }
 
         Writer writer = new Writer();
-        Enum_IO enum_io = writer.openFile(folderPath, fileName);
+        Enum_IO enum_io = writer.openFileToAppend(folderPath, fileName);
 
         if(enum_io.equals(Enum_IO.OPENED)){
             // Means it's in the openPath list
@@ -142,6 +140,10 @@ public class IO_Manager { // Singleton class
         if ( isDirectory( new File(directoryPath))){
             File directory = new File(directoryPath);
             File[] listOfFiles = directory.listFiles();
+
+            if ( listOfFiles == null){
+                return null;
+            }
 
             InstanceManager.InstancePath[] pathList = new InstanceManager.InstancePath[listOfFiles.length];
 

@@ -3,9 +3,7 @@ package Instances;
 import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
 import Instances.Maps.*;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,8 +11,7 @@ import java.util.List;
 
 public class InstanceBuilder_BGUTest {
 
-    // testme
-    // todo - add test with obstacles
+    // done - add test with obstacles
 
     private InstanceBuilder_BGU instanceBuilderBgu = new InstanceBuilder_BGU();
 
@@ -268,6 +265,25 @@ public class InstanceBuilder_BGUTest {
         expectedAgents.add( new Agent(4,
                             new Coordinate_2D(2,5),
                             new Coordinate_2D(5,1)));
+    }
+
+
+
+    @Test
+    public void nullProperties(){
+
+        /*  =   Set Path   =*/
+        String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
+                "Instances\\\\Instance-8-15-5-17 - hard one - cost 29 and some corridors"}
+        );
+        InstanceManager.InstancePath instancePath = new InstanceManager.InstancePath(path);
+
+        InstanceManager instanceManager = new InstanceManager(new InstanceBuilder_BGU());
+
+        MAPF_Instance instance = instanceManager.getSpecificInstance(instancePath);
+        Assert.assertNotNull(instance);
+
+
     }
 
 

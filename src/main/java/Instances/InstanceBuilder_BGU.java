@@ -11,7 +11,7 @@ import java.util.Stack;
 public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
 
-    // testme - check properties ( continue if properties = null )
+    // done - check properties ( continue if properties = null )
 
 
     private final String INDICATOR_AGENTS = "Agents:";
@@ -48,7 +48,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     private final int defaultNumOfDimensions = 2;
     private final float defaultObstacleRate = -1;
     private final MapDimensions defaultDimensions = new MapDimensions();
-    private final int[] defaultNumOfAgents = new int[]{10};
+    private final int[] defaultNumOfAgents = new int[0];
 
 
 
@@ -109,9 +109,11 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
                     }
 
 
-                    int index = I_InstanceBuilder.equalsAny(agents.length, instanceProperties.numOfAgents);
+                    int[] numOfAgents = ( instanceProperties.numOfAgents == null ? this.defaultNumOfAgents : instanceProperties.numOfAgents);
+                    int index = I_InstanceBuilder.equalsAny(agents.length, numOfAgents);
+
                     // index equals -1 if agents.length doesn't match any of the values in numOfAgents
-                    if( instanceProperties.numOfAgents.length > 0 && index == -1 ){
+                    if( numOfAgents.length != this.defaultNumOfAgents.length && index == -1 ){
                         agents = null;
                     }
 

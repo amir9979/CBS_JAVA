@@ -47,9 +47,6 @@ public class InstanceManager {
         String[] splitedPath = currentPath.path.split(regexSeparator); // Done - check if the "/" is correct
         String instanceName = splitedPath[splitedPath.length-1];
 
-        // todo - add queue, method getInstance
-        // If not empty, getNext. else prepare
-
         this.instanceBuilder.prepareInstances(instanceName, currentPath, this.instanceProperties);
         return this.instanceBuilder.getNextExistingInstance();
 

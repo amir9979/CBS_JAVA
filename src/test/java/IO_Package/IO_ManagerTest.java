@@ -8,10 +8,9 @@ import org.junit.Test;
 import java.io.File;
 
 public class IO_ManagerTest {
-    // Todo - delete 'file to write' after test
-    // imp - write missing tests
 
-    IO_Manager io_manager = IO_Manager.getInstance();
+    private IO_Manager io_manager = IO_Manager.getInstance();
+    private Reader reader;
 
 
     static final String testResources_path = IO_Manager.testResources_Directory;
@@ -27,7 +26,7 @@ public class IO_ManagerTest {
 
 
     /***    WriterTest   ***/
-    static final String fileToWriteName = "write_test.txt";
+    static final String fileToWriteName = "IO_Package\\write_test.txt";
     static final String fileToWritePath = IO_Manager.buildPath(new String[]{testResources_path, fileToWriteName});
 
     static final String[] linesToWrite = {  "Try to write\n" ,
@@ -37,95 +36,98 @@ public class IO_ManagerTest {
 
 
 
-
-    @Before
-    public void before(){
-
-    }
-
     @After
     public void after(){
-
+        this.deleteFileToWrite();
     }
 
+
+
     public static void deleteFileToWrite(){
-        boolean deleted = false;
-        // Check that file not exists
+
         File file = new File(fileToWritePath);
         if ( IO_Manager.pathExists(file) ){
-            deleted = file.delete();
+            IO_Manager.getInstance().deleteFile(file);
         }
     }
 
 
-    @Test
-    public void getReader() {
+    private void openFileToRead(){
 
-        /***       Valid values   ***/
-        Reader reader = io_manager.getReader(fileToReadPath);
+        io_manager.removeOpenPath(fileToReadPath);
+        this.reader = io_manager.getReader(fileToReadPath);
         Assert.assertNotNull(reader);
-        reader.closeFile();
-        reader = io_manager.getReader(fileToReadPath);
-        Assert.assertNotNull(reader);
-
-
-        /***       Invalid values   ***/
-        reader = io_manager.getReader(fileToReadPath);
-        Assert.assertNull(reader);
-
-
     }
+
+    @Test
+    public void closeRemovesFromOpenList(){
+
+        this.openFileToRead();
+        Assert.assertNotNull(this.reader);
+
+        // Close file
+        this.reader.closeFile();
+
+        // open the file again
+        this.reader = this.io_manager.getReader(fileToReadPath);
+        Assert.assertNotNull(reader);
+
+        this.reader.closeFile();
+    }
+
+    @Test
+    public void unableMultipleOpening() {
+
+        this.openFileToRead();
+
+        Reader reader_null = this.io_manager.getReader(fileToReadPath);
+        Assert.assertNull(reader_null); // expecting null
+
+        this.reader.closeFile();
+    }
+
+
+
+    @Test
+    public void fakeFile(){
+        Assert.assertFalse(this.io_manager.isOpen("fake_file.txt"));
+    }
+
+
 
     @Test
     public void getWriter() {
 
-        File file = new File(testResources_path,fileToWriteName);
+        File file = new File(testResources_path, fileToWriteName);
         if ( IO_Manager.pathExists(file) ){
             file.delete();
         }
 
         /***       Valid values   ***/
-        Writer writer = io_manager.getWriter(testResources_path,fileToWriteName);
+        Writer writer = this.io_manager.getWriter(testResources_path, fileToWriteName);
         Assert.assertNotNull(writer);
 
 
-        /***       Invalid values   ***/
-        writer = io_manager.getWriter(testResources_path,fileToWriteName); // path still open
-        Assert.assertNull(writer);
+        // getWriter should return null if path is still open
+        Writer writer_null = this.io_manager.getWriter(testResources_path, fileToWriteName);
+        Assert.assertNull(writer_null);
 
-        deleteFileToWrite();
-
+        writer.closeFile();
     }
 
-    @Test
-    public void pathExists() {
-        // imp
-    }
 
-    @Test
-    public void isDirectory() {
-        // imp
-    }
-
-    @Test
-    public void deleteFile() {
-        // imp
-    }
 
     @Test
     public void isOpen() {
 
-        /***       Invalid values   ***/
-        Assert.assertFalse(this.io_manager.isOpen("fake_file.txt"));
-
-
-        /***       Valid values   ***/
         String openPath = "open_path.txt";
+        // Try to add
         this.io_manager.addOpenPath(openPath);
         Assert.assertTrue(this.io_manager.isOpen(openPath));
+
+        // Try to remove
         this.io_manager.removeOpenPath(openPath);
-
-
+        Assert.assertFalse(this.io_manager.isOpen(openPath));
     }
 
     @Test
@@ -133,6 +135,5 @@ public class IO_ManagerTest {
         // BuildPath format: folder\fileName.txt
         String path = IO_Manager.buildPath(new String[]{"folder","file_name"});
         Assert.assertEquals("folder\\file_name", path);
-
     }
 }

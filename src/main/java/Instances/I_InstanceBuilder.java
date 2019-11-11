@@ -172,7 +172,7 @@ public interface I_InstanceBuilder {
 
     static int equalsAny(int lookFor, int[] values){
 
-        if( values == null ){
+        if( values == null){
             return -1;
         }
 
