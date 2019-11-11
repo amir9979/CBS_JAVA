@@ -11,6 +11,9 @@ import java.util.*;
 public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
+    public static final MapDimensions.MapOrientation mapOrientation = MapDimensions.MapOrientation.X_HORIZONTAL_Y_VERTICAL;
+
+
     public static final String FILE_TYPE_MAP = ".map";
     public static final String FILE_TYPE_SCENARIO = ".scen";
 
@@ -189,7 +192,10 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         /*  =Init values=  */
         GraphMap graphMap = null;
         MapDimensions dimensionsFromProperties = ( instanceProperties == null || instanceProperties.mapSize == null ? new MapDimensions() : instanceProperties.mapSize);
+        dimensionsFromProperties.setMapOrientation(this.getMapOrientation());
         MapDimensions dimensionsFromFile = new MapDimensions();
+        dimensionsFromFile.setMapOrientation(this.getMapOrientation());
+
 
 
 
@@ -256,9 +262,10 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         return null;
     }
 
-
-
-
+    @Override
+    public MapDimensions.MapOrientation getMapOrientation() {
+        return mapOrientation;
+    }
 
 
     @Override

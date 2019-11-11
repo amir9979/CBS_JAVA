@@ -9,6 +9,8 @@ import java.util.HashMap;
 /*  An Interface for parsing instance files   */
 public interface I_InstanceBuilder {
 
+
+
     /*  Builds Instances and saves it in a data structure, ready for future use */
     void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties);
 
@@ -17,6 +19,10 @@ public interface I_InstanceBuilder {
 
     /*  Returns the next existing instance from the prepareInstances structure  */
     MAPF_Instance getNextExistingInstance();
+
+
+    MapDimensions.MapOrientation getMapOrientation();
+
 
 
 
@@ -56,7 +62,7 @@ public interface I_InstanceBuilder {
             case 2:
 
                 Character[][] mapAsCharacters_2d = build2D_CharacterMap(mapAsStrings,mapDimensions,mapSeparator);
-                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, obstacleRate);
+                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, mapDimensions.mapOrientation, obstacleRate);
                 if( mapAsCellType_2D == null){
                     return null; // Error while building the map
                 }
@@ -97,8 +103,12 @@ public interface I_InstanceBuilder {
     }
 
 
-    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, float obstacleRate) {
+    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, MapDimensions.MapOrientation mapOrientation, float obstacleRate) {
         // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
+
+        if(mapAsCharacters == null){
+            return null;
+        }
 
         int xAxis_length = mapAsCharacters.length;
         int yAxis_length = mapAsCharacters[0].length;
@@ -114,7 +124,15 @@ public interface I_InstanceBuilder {
             for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
 
                 // done - convert using this.cellTypeHashMap
-                Enum_MapCellType cellType = cellTypeHashMap.get(mapAsCharacters[yIndex][xIndex]);
+
+                Character character = null;
+                if( mapOrientation.equals(MapDimensions.MapOrientation.X_HORIZONTAL_Y_VERTICAL)){
+                    character = mapAsCharacters[yIndex][xIndex];
+                }else if( mapOrientation.equals(MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL)){
+                    character = mapAsCharacters[xIndex][yIndex];
+                }
+
+                Enum_MapCellType cellType = cellTypeHashMap.get(character);
 
                 if ( cellType.equals(Enum_MapCellType.WALL)){
                     numOfObstacles++; // add one wall to counter

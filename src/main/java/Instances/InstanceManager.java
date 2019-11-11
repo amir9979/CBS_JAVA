@@ -30,6 +30,11 @@ public class InstanceManager {
         this.instanceBuilder    = instanceBuilder;
         this.instanceProperties = properties;
 
+        if( this.instanceProperties == null){
+            this.instanceProperties = new InstanceProperties();
+        }
+        this.instanceProperties.mapSize.setMapOrientation(instanceBuilder.getMapOrientation());
+
         if(this.sourceDirectory != null){
             this.addInstancesPaths_toStack( this.sourceDirectory );
         }
@@ -38,6 +43,7 @@ public class InstanceManager {
 
     public InstanceManager(I_InstanceBuilder instanceBuilder){
         this.instanceBuilder = instanceBuilder;
+        this.instanceProperties = new InstanceProperties(this.instanceBuilder.getMapOrientation());
     }
 
 

@@ -46,6 +46,7 @@ public class Main {
         MAPF_Instance instance = RunManagerSimpleExample.getInstanceFromPath(instanceManager, instancePath);
 
         // Solve
+
         System.out.println(instance);
 
     }
