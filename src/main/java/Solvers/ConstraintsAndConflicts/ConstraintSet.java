@@ -57,7 +57,10 @@ public class ConstraintSet{
             this.constraints.put(dummy, dummy);
         }
 
-        return this.constraints.get(dummy).add(constraint);
+        boolean added = this.constraints.get(dummy).add(constraint);
+        if(added) {this.originalConstraints.add(constraint);}
+
+        return added;
     }
 
     /**
@@ -88,6 +91,7 @@ public class ConstraintSet{
             return false;
         }
         else{
+            this.originalConstraints.remove(constraint);
             return this.constraints.get(dummy).remove(constraint);
         }
     }

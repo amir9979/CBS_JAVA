@@ -1,4 +1,4 @@
-package Solvers.PrioritisedPlanning;
+package Solvers.CBS;
 
 import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
@@ -7,15 +7,15 @@ import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
 import Instances.Maps.*;
-import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.I_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-class PrioritisedPlanning_SolverTest {
+class CBS_SolverTest {
 
     private final Enum_MapCellType e = Enum_MapCellType.EMPTY;
     private final Enum_MapCellType w = Enum_MapCellType.WALL;
@@ -104,7 +104,7 @@ class PrioritisedPlanning_SolverTest {
     private MAPF_Instance instanceCircle2 = new MAPF_Instance("instanceCircle1", mapCircle, new Agent[]{agent12to33, agent33to12});
     private MAPF_Instance instanceUnsolvable = new MAPF_Instance("instanceUnsolvable", mapWithPocket, new Agent[]{agent00to10, agent10to00});
 
-    I_Solver ppSolver = new PrioritisedPlanning_Solver(new SingleAgentAStar_Solver());
+    I_Solver cbsSolver = new CBS_Solver();
 
     @BeforeEach
     void setUp() {
@@ -114,7 +114,7 @@ class PrioritisedPlanning_SolverTest {
     @Test
     void emptyMapValidityTest1() {
         MAPF_Instance testInstance = instanceEmpty1;
-        Solution solved = ppSolver.solve(testInstance, new RunParameters());
+        Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         assertTrue(solved.isValidSolution());
     }
@@ -122,7 +122,7 @@ class PrioritisedPlanning_SolverTest {
     @Test
     void circleMapValidityTest1() {
         MAPF_Instance testInstance = instanceCircle1;
-        Solution solved = ppSolver.solve(testInstance, new RunParameters());
+        Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         assertTrue(solved.isValidSolution());
     }
@@ -130,7 +130,7 @@ class PrioritisedPlanning_SolverTest {
     @Test
     void circleMapValidityTest2() {
         MAPF_Instance testInstance = instanceCircle2;
-        Solution solved = ppSolver.solve(testInstance, new RunParameters());
+        Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         assertTrue(solved.isValidSolution());
     }
@@ -138,10 +138,8 @@ class PrioritisedPlanning_SolverTest {
     @Test
     void unsolvableShouldBeInvalid() {
         MAPF_Instance testInstance = instanceUnsolvable;
-        Solution solved = ppSolver.solve(testInstance, new RunParameters());
+        Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         assertNull(solved);
     }
-
-
 }

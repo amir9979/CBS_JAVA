@@ -15,9 +15,9 @@ public class InstanceReport {
     private static final int MAX_STRING_SIZE = 32767 - 12;
     public static final String EXTENTION_STRING = " - Extended ";
 
-    private Map<String, String> stringFields = new HashMap<String, String>();
-    private Map<String, Integer> integerFields = new HashMap<String, Integer>();
-    private Map<String, Float> floatFields = new HashMap<String, Float>();
+    private Map<String, String> stringFields = new HashMap<String, String>(8);
+    private Map<String, Integer> integerFields = new HashMap<String, Integer>(8);
+    private Map<String, Float> floatFields = new HashMap<String, Float>(4);
     private boolean isCommited = false;
 
     /**
@@ -26,16 +26,21 @@ public class InstanceReport {
      */
     public static class StandardFields{
         public final static String experimentName = "Experiment Name";
-        public final static String instanceName = "Instance Name";
-        public final static String instanceID = "Instance ID";
+        public final static String mapName = "Map Name";
+        public final static String numAgents = "Num Agents";
+        public final static String expandedNodesLowLevel = "Expanded Nodes (Low Level)";
         public final static String expandedNodes = "Expanded Nodes";
+        public final static String generatedNodesLowLevel = "Generated Nodes(Low Level)";
         public final static String generatedNodes = "Generated Nodes";
         public final static String startTime = "Start Time";
         public final static String endTime = "End Time";
         public final static String elapsedTimeMS = "Elapsed Time (ms)";
+        public final static String TotalLowLevelTimeMS = "Total Low Level Time (ms)";
+        public final static String timeoutThresholdMS = "Timeout Threshold";
         public final static String solved = "Solved";
+        public final static String solutionCost = "Solution Cost";
+        public final static String solutioncostFunction = "Cost Function";
         public final static String solution = "Solution";
-        public final static String timeout = "Timeout";
     }
 
     /**
