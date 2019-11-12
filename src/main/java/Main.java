@@ -11,6 +11,8 @@ import Solvers.Solution;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public class Main {
 
@@ -20,7 +22,8 @@ public class Main {
     // testme
     // blocking
 
-    public static final String resultsOutputPath = "";
+//    public static final String resultsOutputPath = "";
+    public static final String resultsOutputPath = "C:\\Users\\John\\Desktop\\cbsTest";
 
     public static void main(String[] args) {
 
@@ -83,10 +86,13 @@ public class Main {
      * {@link A_RunManager run managers} instead.
      */
     private static void outputResults() {
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
+        String updatedPath = resultsOutputPath + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
         try {
-            S_Metrics.exportCSV(new FileOutputStream(resultsOutputPath),
+            S_Metrics.exportCSV(new FileOutputStream(updatedPath),
                     new String[]{InstanceReport.StandardFields.experimentName, InstanceReport.StandardFields.mapName, InstanceReport.StandardFields.numAgents,
-                            InstanceReport.StandardFields.solved, InstanceReport.StandardFields.elapsedTimeMS, InstanceReport.StandardFields.solution});
+                            InstanceReport.StandardFields.solved, InstanceReport.StandardFields.elapsedTimeMS, InstanceReport.StandardFields.solutionCost,
+                            InstanceReport.StandardFields.solution});
         } catch (IOException e) {
             e.printStackTrace();
         }

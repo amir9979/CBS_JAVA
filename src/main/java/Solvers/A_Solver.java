@@ -76,11 +76,12 @@ public abstract class A_Solver implements I_Solver{
      * @param solution
      */
     protected void writeMetricsToReport(Solution solution){
+        this.endTime = System.currentTimeMillis();
         instanceReport.putIntegerValue(InstanceReport.StandardFields.timeoutThresholdMS, (int) this.maximumRuntime);
         instanceReport.putStringValue(InstanceReport.StandardFields.startTime, new Date(startTime).toString());
         instanceReport.putIntegerValue(InstanceReport.StandardFields.elapsedTimeMS, (int)(endTime-startTime));
         if(solution != null){
-            instanceReport.putStringValue(InstanceReport.StandardFields.solution, solution.toString());
+            instanceReport.putStringValue(InstanceReport.StandardFields.solution, solution.readableToString());
             instanceReport.putIntegerValue(InstanceReport.StandardFields.solved, 1);
         }
         else{
