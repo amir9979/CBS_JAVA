@@ -1,6 +1,5 @@
-import Experiments.GridExperiment;
+import Experiments.Experiment;
 import IO_Package.IO_Manager;
-import Instances.I_InstanceBuilder;
 import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Solvers.CBS.CBS_Solver;
@@ -20,7 +19,7 @@ public class TestingBenchmarkRunManager extends A_RunManager {
                                                             "TestingBenchmark"});
 
         InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU());
-        this.experiments.add(new GridExperiment(instanceManager));
+        this.experiments.add(new Experiment("Test Benchmark", instanceManager));
 
     }
 }
