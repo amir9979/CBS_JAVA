@@ -280,9 +280,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return null; // Missing expected separator
         }
 
-        MapDimensions mapDimensions = new MapDimensions(dimensions);
-        mapDimensions.setMapOrientation(this.mapOrientation);
-        return mapDimensions;
+        return new MapDimensions(dimensions, this.getMapOrientation());
     }
 
 
