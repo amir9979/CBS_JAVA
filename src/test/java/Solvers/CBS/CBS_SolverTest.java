@@ -126,7 +126,7 @@ class CBS_SolverTest {
         Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         System.out.println(solved.readableToString());
-        validate(solved, 5, solved.sumIndividualCosts(),solved.makespan()); //need to find actual optimal costs
+        validate(solved, 7, solved.sumIndividualCosts(),solved.makespan()); //need to find actual optimal costs
     }
 
     @Test
@@ -135,7 +135,7 @@ class CBS_SolverTest {
         Solution solved = cbsSolver.solve(testInstance, new RunParameters(System.currentTimeMillis() + (60*60*1000)));
 
         System.out.println(solved.readableToString());
-        validate(solved, 2, 5+5, 5);
+        validate(solved, 2, 8, 5);
 
     }
 
@@ -145,7 +145,7 @@ class CBS_SolverTest {
         Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         System.out.println(solved.readableToString());
-        validate(solved, 2, 5+5, 5);
+        validate(solved, 2, 8, 5);
     }
 
     @Test

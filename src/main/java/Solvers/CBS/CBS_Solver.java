@@ -145,7 +145,7 @@ public class CBS_Solver extends A_Solver {
             }
         }
 
-        return null;
+        return null; //probably a timeout
     }
 
     /**
@@ -177,6 +177,9 @@ public class CBS_Solver extends A_Solver {
         node.leftChild = initNode(node, constraints[0], true);
         node.rightChild = initNode(node, constraints[1], false);
 
+        if(node.leftChild == null || node.rightChild == null){
+            return; //probably a timeout in the low level. should abort.
+        }
         openList.add(node.leftChild);
         openList.add(node.rightChild);
     }
@@ -203,13 +206,22 @@ public class CBS_Solver extends A_Solver {
         }
 
         // modify for this node
-//        // replace the current plan for the agent with an empty plan, so that the low level won't try to continue the existing plan.
-//        solution.putPlan(new SingleAgentPlan(agent));
+        /*  replace the current plan for the agent with an empty plan, so that the low level won't try to continue the
+            existing plan.
+            Also we don't want to reuse SingleAgentPlan objects, as they are pointed to by other Solution objects, which
+            we don't want to modify.
+         */
+        solution.putPlan(new SingleAgentPlan(agent));
         constraints.add(constraint);
 
-//        //the low-level updates the solution, so this is a reference to the same object as solution
-        Solution agentSolution = solveSubproblem(agent, null, constraints);
-        if(agentSolution == null) {return null;} //probably a timeout
+        //the low-level should update the solution, so this is a reference to the same object as solution. We do this to
+        //reuse Solution objects instead of creating extra ones.
+        Solution agentSolution = solveSubproblem(agent, solution, constraints);
+        if(agentSolution == null) {
+            return null; //probably a timeout
+        }
+        // in case the low-level didn't update the Solution object it was given, this makes sure we preserve other agents'
+        // plans, and add the re-planned agent's new plan.
         solution.putPlan(agentSolution.getPlanFor(agent));
 
         return new CBS_Node(solution, costFunction.solutionCost(solution, this), constraint, constraints,

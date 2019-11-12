@@ -95,6 +95,10 @@ public class SingleAgentPlan implements Iterable<Move> {
         }
     }
 
+    /**
+     * Clears the plan. Be careful when using this. The agent remains the same agent, and classes that use this plan
+     * may behave unexpectedly if the plan they hold suddenly changes.
+     */
     public void clearMoves(){this.moves.clear();}
 
     /**
