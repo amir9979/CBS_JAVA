@@ -5,13 +5,10 @@ import Instances.Agents.Agent;
 import Instances.Maps.Coordinate_2D;
 import Instances.Maps.MapDimensions;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 
 public class InstanceBuilder_MovingAITest {
 
@@ -33,6 +30,9 @@ public class InstanceBuilder_MovingAITest {
         // Check that instance was created successfully and added to the list
         MAPF_Instance nextInstance = this.instanceBuilder_movingAI.getNextExistingInstance();
         Assert.assertNotNull(nextInstance);
+
+
+
     }
 
 

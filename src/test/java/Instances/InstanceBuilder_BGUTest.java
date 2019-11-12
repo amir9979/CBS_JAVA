@@ -54,7 +54,9 @@ public class InstanceBuilder_BGUTest {
 
         /*  Set properties  */
        InstanceProperties instanceProperties = new InstanceProperties(
-                new MapDimensions(new int[]{16,16}),(float)0,new int[]{7,10,15}
+                                                                new MapDimensions(new int[]{16,16}),
+                                                                (float)0,
+                                                                new int[]{7,10,15}
         );
 
 
@@ -187,26 +189,26 @@ public class InstanceBuilder_BGUTest {
 
         /*      =Create expected cellType Map=       */
 
-        /* Note: Map is twisted, not like in the file
-                ...@..@@
+        /* Note: Map from file
                 ........
-                ......@.
-                ..@....@
+                ........
+                ...@....
+                @.......
+                ........
                 .......@
-                ........
-                ........
-                .....@@.
+                @.@....@
+                @..@@...
 
         */
         Enum_MapCellType[][] expectedCellTypeMap = new Enum_MapCellType[][]{
-                {e,e,e,w,e,e,w,w},
                 {e,e,e,e,e,e,e,e},
-                {e,e,e,e,e,e,w,e},
-                {e,e,w,e,e,e,e,w},
+                {e,e,e,e,e,e,e,e},
+                {e,e,e,w,e,e,e,e},
+                {w,e,e,e,e,e,e,e},
+                {e,e,e,e,e,e,e,e},
                 {e,e,e,e,e,e,e,w},
-                {e,e,e,e,e,e,e,e},
-                {e,e,e,e,e,e,e,e},
-                {e,e,e,e,e,w,w,e},
+                {w,e,w,e,e,e,e,w},
+                {w,e,e,w,w,e,e,e},
 
         };
 

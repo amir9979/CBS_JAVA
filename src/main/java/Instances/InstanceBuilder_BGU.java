@@ -13,6 +13,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     // done - check properties ( continue if properties = null )
 
+    public static final MapDimensions.MapOrientation mapOrientation = MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL;
 
     private final String INDICATOR_AGENTS = "Agents:";
     private final String SEPARATOR_AGENTS = ",";
@@ -70,6 +71,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         Agent[] agents = null;
         MapDimensions mapDimensionsFromFile = null;
         instanceProperties = ( instanceProperties == null ? new InstanceProperties() : instanceProperties);
+        instanceProperties.mapSize.setMapOrientation(this.getMapOrientation());
 
 
         /*  =Get data from reader=  */
@@ -138,6 +140,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     @Override
     public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties){
+
         MAPF_Instance mapf_instance = this.getInstance(instanceName, instancePath, instanceProperties);
         if ( mapf_instance != null ){
             this.instanceStack.push(mapf_instance);
@@ -154,7 +157,10 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         return null;
     }
 
-
+    @Override
+    public MapDimensions.MapOrientation getMapOrientation() {
+        return mapOrientation;
+    }
 
 
     /***  =Validity check=  ***/
@@ -274,7 +280,9 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
             return null; // Missing expected separator
         }
 
-        return new MapDimensions(dimensions);
+        MapDimensions mapDimensions = new MapDimensions(dimensions);
+        mapDimensions.setMapOrientation(this.mapOrientation);
+        return mapDimensions;
     }
 
 

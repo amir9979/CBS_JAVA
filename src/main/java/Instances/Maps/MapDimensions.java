@@ -4,15 +4,32 @@ package Instances.Maps;
 
 public class MapDimensions{
 
+    public enum MapOrientation{
+        /*  (X0,Y0)|(X1,Y0)
+            (X0,Y1)|(X1,Y1)
+        */
+        X_HORIZONTAL_Y_VERTICAL,
+
+        /*  (Y0,X0)|(Y1,X0)
+            (Y0,X1)|(Y1,X1)
+        */
+        Y_HORIZONTAL_X_VERTICAL
+    }
+
 
     public int numOfDimensions;
     public int xAxis_length;
     public int yAxis_length;
     public int zAxis_length;
+    public MapOrientation mapOrientation;
 
 
     public MapDimensions(){
         this.numOfDimensions = 0; // Indicates unknown size
+    }
+
+    public void setMapOrientation(MapOrientation mapOrientation) {
+        this.mapOrientation = mapOrientation;
     }
 
     public MapDimensions(int xAxis_length, int yAxis_length) {
@@ -30,23 +47,51 @@ public class MapDimensions{
     }
 
 
+
+    public MapDimensions(int[] dimensions, MapOrientation mapOrientation){
+
+        this.setMapOrientation(mapOrientation);
+
+        switch ( dimensions.length ){
+            case 2:
+                this.numOfDimensions = 2;
+
+                if( this.mapOrientation.equals(MapOrientation.X_HORIZONTAL_Y_VERTICAL)){
+                    this.yAxis_length = dimensions[0];
+                    this.xAxis_length = dimensions[1];
+                }else if( this.mapOrientation.equals(MapOrientation.Y_HORIZONTAL_X_VERTICAL)){
+                    this.xAxis_length = dimensions[0];
+                    this.yAxis_length = dimensions[1];
+                }
+
+                break;
+
+            case 3:
+                // nicetohave - set for 3d
+                break;
+        }
+
+
+
+    }
+
+
+    /*  Assuming that axis lengths are equals */
     public MapDimensions(int[] dimensions){
-        // todo - check format, if {16,16} is {x,y}
 
         switch ( dimensions.length ){
             case 2:
                 this.numOfDimensions = 2;
                 this.xAxis_length = dimensions[0];
-                this.yAxis_length = dimensions[1];
+                this.yAxis_length = dimensions[0];
+
                 break;
 
             case 3:
-                this.numOfDimensions = 3;
-                this.xAxis_length = dimensions[0];
-                this.yAxis_length = dimensions[1];
-                this.zAxis_length = dimensions[2];
+                // nicetohave - set for 3d
                 break;
         }
+
 
 
     }
@@ -58,6 +103,7 @@ public class MapDimensions{
         if (!(other instanceof MapDimensions)) return false;
         MapDimensions that = (MapDimensions) other;
         return  this.numOfDimensions    == that.numOfDimensions &&
+                this.mapOrientation     == that.mapOrientation &&
                 this.xAxis_length       == that.xAxis_length &&
                 this.yAxis_length       == that.yAxis_length &&
                 this.zAxis_length       == that.zAxis_length;

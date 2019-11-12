@@ -16,6 +16,14 @@ public class InstanceProperties {
         this.numOfAgents = new int[0];
     }
 
+
+    public InstanceProperties(MapDimensions.MapOrientation mapOrientation){
+        this();
+        this.mapSize.setMapOrientation(mapOrientation);
+    }
+
+
+
     /***
      * Properties constructor
      * @param mapSize - {@link MapDimensions} indicates the Axis lengths , zero for unknown
