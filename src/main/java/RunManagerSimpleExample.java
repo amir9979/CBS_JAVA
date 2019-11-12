@@ -1,4 +1,4 @@
-import Experiments.GridExperiment;
+import Experiments.Experiment;
 import IO_Package.IO_Manager;
 import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
@@ -44,7 +44,7 @@ public class RunManagerSimpleExample extends A_RunManager {
         InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU(),properties);
 
         /*  =   Add new experiment   =  */
-        GridExperiment gridExperiment = new GridExperiment(instanceManager,numOfInstances);
+        Experiment gridExperiment = new Experiment("Experiment_16_7", instanceManager,numOfInstances);
         this.experiments.add(gridExperiment);
     }
 

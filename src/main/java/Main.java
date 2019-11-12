@@ -3,9 +3,14 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
+import Metrics.InstanceReport;
+import Metrics.S_Metrics;
 import Solvers.CBS.CBS_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class Main {
 
@@ -15,7 +20,7 @@ public class Main {
     // testme
     // blocking
 
-
+    public static final String resultsOutputPath = "";
 
     public static void main(String[] args) {
 
@@ -25,17 +30,21 @@ public class Main {
         // runMultipleExperimentsExample();
     }
 
-
-
     public static void runTestingBenchmarkExperiment(){
         TestingBenchmarkRunManager testingBenchmarkRunManager = new TestingBenchmarkRunManager();
         testingBenchmarkRunManager.runAllExperiments();
+
+        //output results
+        outputResults();
     }
 
 
     public static void runMultipleExperimentsExample(){
         RunManagerSimpleExample runManagerSimpleExample = new RunManagerSimpleExample();
         runManagerSimpleExample.runAllExperiments();
+
+        //output results
+        outputResults();
     }
 
 
@@ -64,8 +73,23 @@ public class Main {
 
         //print
         System.out.println(solution);
+
+        //output results
+        outputResults();
     }
 
-
+    /**
+     * An example of a simple output of results to a file. It is best to handle this inside your custom
+     * {@link A_RunManager run managers} instead.
+     */
+    private static void outputResults() {
+        try {
+            S_Metrics.exportCSV(new FileOutputStream(resultsOutputPath),
+                    new String[]{InstanceReport.StandardFields.experimentName, InstanceReport.StandardFields.mapName, InstanceReport.StandardFields.numAgents,
+                            InstanceReport.StandardFields.solved, InstanceReport.StandardFields.elapsedTimeMS, InstanceReport.StandardFields.solution});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
