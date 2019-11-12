@@ -190,7 +190,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             }
             if ( this.agent_plan.get(agentMovingToPrevPosition).moveAt(time).prevLocation.equals(nextLocation)){
 
-                SwappingConflict swappingConflict = new SwappingConflict(singleAgentPlan.agent,agentMovingToPrevPosition,time,previousLocation,nextLocation);
+                SwappingConflict swappingConflict = new SwappingConflict(singleAgentPlan.agent,agentMovingToPrevPosition,time,nextLocation, previousLocation);
                 // Add conflict to both of the agents
                 addConflictToAgent(singleAgentPlan.agent,swappingConflict);
                 addConflictToAgent(agentMovingToPrevPosition,swappingConflict);
