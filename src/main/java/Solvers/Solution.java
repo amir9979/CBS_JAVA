@@ -68,6 +68,14 @@ public class Solution implements Iterable<SingleAgentPlan>{
         return true;
     }
 
+    /**
+     * The number of plans (agents) in the solution.
+     * @return the number of plans (agents) in the solution.
+     */
+    public int size(){
+        return agentPlans.size();
+    }
+
     public int sumIndividualCosts(){
         int SIC = 0;
         for (SingleAgentPlan plan :

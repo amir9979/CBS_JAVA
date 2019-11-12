@@ -10,6 +10,7 @@ public class RunParameters_SAAStar extends RunParameters {
      * A heuristic function to use for this run.
      */
     public AStarHeuristic heuristicFunction;
+    public int problemStartTime = 0;
 
     public RunParameters_SAAStar(long timeout, ConstraintSet constraints, InstanceReport instanceReport, Solution existingSolution, AStarHeuristic heuristicFunction) {
         super(timeout, constraints, instanceReport, existingSolution);
