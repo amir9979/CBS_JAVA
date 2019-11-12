@@ -132,8 +132,11 @@ public class CBS_Solver extends A_Solver {
     private CBS_Node mainLoop() {
         while(!openList.isEmpty() && !checkTimeout()){
             CBS_Node node = openList.poll();
+
+            // verify solution (find conflicts)
             updateConflictAvoidanceTableIn(node);
             node.setSelectedConflict(node.conflictAvoidanceTable.selectConflict());
+
             if(isGoal(node)){
                 return node;
             }
@@ -141,7 +144,7 @@ public class CBS_Solver extends A_Solver {
                 expand(node);
             }
         }
-        // will never get here, since an unsolvable instance will simply lead to an infinite loop and eventually a timeout
+
         return null;
     }
 
@@ -186,21 +189,31 @@ public class CBS_Solver extends A_Solver {
      * @return a new {@link CBS_Node}.
      */
     private CBS_Node initNode(CBS_Node parent, Constraint constraint, boolean copyDatastructures) {
-        Solution parentSolution = parent.solution;
-        I_ConflictAvoidanceTable parentCAT = parent.getConflictAvoidanceTable();
-        ConstraintSet parentConstraints = parent.getConstraints();
+        Agent agent = constraint.agent;
+
+        Solution solution = parent.solution;
+        I_ConflictAvoidanceTable cat = parent.getConflictAvoidanceTable();
+        ConstraintSet constraints = parent.getConstraints();
+
+        // replace with copies if required
         if(copyDatastructures) {
-            parentSolution = new Solution(parentSolution);
-            parentCAT = parentCAT.copy();
-            parentConstraints = new ConstraintSet(parentConstraints);
+            solution = new Solution(solution);
+            cat = cat.copy();
+            constraints = new ConstraintSet(constraints);
         }
-        parentConstraints.add(constraint);
 
-        //the low-level updates the solution, so this is a reference to the same object as parentSolution
-        Solution updatedSolution = solveSubproblem(constraint.agent, parentSolution, parentConstraints);
+        // modify for this node
+//        // replace the current plan for the agent with an empty plan, so that the low level won't try to continue the existing plan.
+//        solution.putPlan(new SingleAgentPlan(agent));
+        constraints.add(constraint);
 
-        return new CBS_Node(updatedSolution, costFunction.solutionCost(updatedSolution, this), constraint, parentConstraints,
-                parentCAT /*as is. will be updated if needed when popping from open*/, parent);
+//        //the low-level updates the solution, so this is a reference to the same object as solution
+        Solution agentSolution = solveSubproblem(agent, null, constraints);
+        if(agentSolution == null) {return null;} //probably a timeout
+        solution.putPlan(agentSolution.getPlanFor(agent));
+
+        return new CBS_Node(solution, costFunction.solutionCost(solution, this), constraint, constraints,
+                cat /*as is. will be updated if needed when popping from open*/, parent);
     }
 
     /**

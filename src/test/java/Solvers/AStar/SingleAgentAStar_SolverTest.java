@@ -148,7 +148,7 @@ class SingleAgentAStar_SolverTest {
     }
 
     @Test
-    void circleOptimalityWaitingBecauseOfConstraint(){
+    void circleOptimalityWaitingBecauseOfConstraint1(){
         MAPF_Instance testInstance = instanceCircle1;
         Agent agent = testInstance.agents.get(0);
 
@@ -171,6 +171,56 @@ class SingleAgentAStar_SolverTest {
         assertEquals(4, solved.getPlanFor(agent).size());
         assertEquals(expected, solved);
 
+    }
+
+    @Test
+    void circleOptimalityWaitingBecauseOfConstraint2(){
+        MAPF_Instance testInstance = instanceCircle1;
+        Agent agent = testInstance.agents.get(0);
+
+        //constraint
+        Constraint vertexConstraint = new Constraint(agent, 1, null, cell32);
+        ConstraintSet constraints = new ConstraintSet();
+        constraints.add(vertexConstraint);
+        RunParameters parameters = new RunParameters(constraints);
+
+        Solution solved = aStar.solve(testInstance, parameters);
+
+        SingleAgentPlan plan = new SingleAgentPlan(agent);
+        plan.addMove(new Move(agent, 1, cell33, cell33));
+        plan.addMove(new Move(agent, 2, cell33, cell32));
+        plan.addMove(new Move(agent, 3, cell32, cell22));
+        plan.addMove(new Move(agent, 4, cell22, cell12));
+        Solution expected = new Solution();
+        expected.putPlan(plan);
+
+        assertEquals(4, solved.getPlanFor(agent).size());
+        assertEquals(expected, solved);
+    }
+
+    @Test
+    void circleOptimalityWaitingBecauseOfConstraint3(){
+        MAPF_Instance testInstance = instanceCircle1;
+        Agent agent = testInstance.agents.get(0);
+
+        //constraint
+        Constraint swappingConstraint = new Constraint(agent, 1, cell33, cell32);
+        ConstraintSet constraints = new ConstraintSet();
+        constraints.add(swappingConstraint);
+        RunParameters parameters = new RunParameters(constraints);
+
+        Solution solved = aStar.solve(testInstance, parameters);
+
+        SingleAgentPlan plan = new SingleAgentPlan(agent);
+        plan.addMove(new Move(agent, 1, cell33, cell33));
+        plan.addMove(new Move(agent, 2, cell33, cell32));
+        plan.addMove(new Move(agent, 3, cell32, cell22));
+        plan.addMove(new Move(agent, 4, cell22, cell12));
+        Solution expected = new Solution();
+        expected.putPlan(plan);
+
+        assertEquals(4, solved.getPlanFor(agent).size());
+        assertEquals(expected, solved);
     }
 
     @Test

@@ -89,17 +89,18 @@ class CBS_SolverTest {
 
     private Agent agent33to12 = new Agent(0, coor33, coor12);
     private Agent agent12to33 = new Agent(1, coor12, coor33);
-    private Agent agent53to05 = new Agent(0, coor53, coor05);
-    private Agent agent43to11 = new Agent(0, coor43, coor11);
-    private Agent agent04to00 = new Agent(0, coor04, coor00);
-    private Agent agent00to10 = new Agent(0, coor00, coor10);
-    private Agent agent10to00 = new Agent(1, coor10, coor00);
+    private Agent agent53to05 = new Agent(2, coor53, coor05);
+    private Agent agent43to11 = new Agent(3, coor43, coor11);
+    private Agent agent04to00 = new Agent(4, coor04, coor00);
+    private Agent agent00to10 = new Agent(5, coor00, coor10);
+    private Agent agent10to00 = new Agent(6, coor10, coor00);
 
     InstanceBuilder_BGU builder = new InstanceBuilder_BGU();
     InstanceManager im = new InstanceManager(IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,"Instances"}),
             new InstanceBuilder_BGU(), new InstanceProperties(new MapDimensions(new int[]{6,6}),0f,new int[]{1}));
 
-    private MAPF_Instance instanceEmpty1 = new MAPF_Instance("instanceEmpty", mapEmpty, new Agent[]{agent33to12, agent12to33, agent53to05, agent43to11, agent04to00});
+    private MAPF_Instance instanceEmpty1 = new MAPF_Instance("instanceEmpty", mapEmpty,
+            new Agent[]{agent33to12, agent12to33, agent53to05, agent43to11, agent04to00, agent00to10, agent10to00});
     private MAPF_Instance instanceCircle1 = new MAPF_Instance("instanceCircle1", mapCircle, new Agent[]{agent33to12, agent12to33});
     private MAPF_Instance instanceCircle2 = new MAPF_Instance("instanceCircle1", mapCircle, new Agent[]{agent12to33, agent33to12});
     private MAPF_Instance instanceUnsolvable = new MAPF_Instance("instanceUnsolvable", mapWithPocket, new Agent[]{agent00to10, agent10to00});
@@ -111,20 +112,31 @@ class CBS_SolverTest {
 
     }
 
+    void validate(Solution solution, int numAgents, int optimalSIC, int optimalMakespan){
+        assertTrue(solution.isValidSolution()); //is valid (no conflicts)
+
+        assertEquals(numAgents, solution.size()); // solution includes all agents
+        assertEquals(optimalSIC, solution.sumIndividualCosts()); // SIC is optimal
+        assertEquals(optimalMakespan, solution.makespan()); // makespan is optimal
+    }
+
     @Test
     void emptyMapValidityTest1() {
         MAPF_Instance testInstance = instanceEmpty1;
         Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
-        assertTrue(solved.isValidSolution());
+        System.out.println(solved.readableToString());
+        validate(solved, 5, solved.sumIndividualCosts(),solved.makespan()); //need to find actual optimal costs
     }
 
     @Test
     void circleMapValidityTest1() {
         MAPF_Instance testInstance = instanceCircle1;
-        Solution solved = cbsSolver.solve(testInstance, new RunParameters());
+        Solution solved = cbsSolver.solve(testInstance, new RunParameters(System.currentTimeMillis() + (60*60*1000)));
 
-        assertTrue(solved.isValidSolution());
+        System.out.println(solved.readableToString());
+        validate(solved, 2, 5+5, 5);
+
     }
 
     @Test
@@ -132,7 +144,8 @@ class CBS_SolverTest {
         MAPF_Instance testInstance = instanceCircle2;
         Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
-        assertTrue(solved.isValidSolution());
+        System.out.println(solved.readableToString());
+        validate(solved, 2, 5+5, 5);
     }
 
     @Test

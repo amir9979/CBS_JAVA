@@ -65,6 +65,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
             }
             else {
                 this.existingPlan = new SingleAgentPlan(this.agent);
+                this.existingSolution.putPlan(this.existingPlan);
                 this.problemStartTime = DEFAULT_PROBLEM_START_TIME;
             }
         }
