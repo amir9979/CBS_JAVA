@@ -3,9 +3,16 @@ import Instances.InstanceBuilder_BGU;
 import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
+import Metrics.InstanceReport;
+import Metrics.S_Metrics;
 import Solvers.CBS.CBS_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public class Main {
 
@@ -15,18 +22,32 @@ public class Main {
     // testme
     // blocking
 
-
+//    public static final String resultsOutputPath = "";
+    public static final String resultsOutputPath = "C:\\Users\\John\\Desktop\\cbsTest";
 
     public static void main(String[] args) {
-        runExample();
+
+        runTestingBenchmarkExperiment();
+
+        // runExample();
         // runMultipleExperimentsExample();
     }
 
+    public static void runTestingBenchmarkExperiment(){
+        TestingBenchmarkRunManager testingBenchmarkRunManager = new TestingBenchmarkRunManager();
+        testingBenchmarkRunManager.runAllExperiments();
+
+        //output results
+        outputResults();
+    }
 
 
     public static void runMultipleExperimentsExample(){
         RunManagerSimpleExample runManagerSimpleExample = new RunManagerSimpleExample();
         runManagerSimpleExample.runAllExperiments();
+
+        //output results
+        outputResults();
     }
 
 
@@ -55,8 +76,26 @@ public class Main {
 
         //print
         System.out.println(solution);
+
+        //output results
+        outputResults();
     }
 
-
+    /**
+     * An example of a simple output of results to a file. It is best to handle this inside your custom
+     * {@link A_RunManager run managers} instead.
+     */
+    private static void outputResults() {
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
+        String updatedPath = resultsOutputPath + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
+        try {
+            S_Metrics.exportCSV(new FileOutputStream(updatedPath),
+                    new String[]{InstanceReport.StandardFields.experimentName, InstanceReport.StandardFields.mapName, InstanceReport.StandardFields.numAgents,
+                            InstanceReport.StandardFields.solved, InstanceReport.StandardFields.elapsedTimeMS, InstanceReport.StandardFields.solutionCost,
+                            InstanceReport.StandardFields.solution});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

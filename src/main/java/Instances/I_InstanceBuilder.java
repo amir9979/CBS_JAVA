@@ -32,13 +32,19 @@ public interface I_InstanceBuilder {
 
     static String[] buildMapAsStringArray(Reader reader, MapDimensions mapDimensions){
 
-        int yAxis_length = mapDimensions.yAxis_length; // Indicates num of lines
-        String[] mapAsStringArray = new String[yAxis_length];
-        for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
+        int axis_length = 0;// Indicates num of lines
+        if(mapDimensions.mapOrientation.equals(MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL)){
+            axis_length = mapDimensions.xAxis_length;
+        }else if( mapDimensions.mapOrientation.equals(MapDimensions.MapOrientation.X_HORIZONTAL_Y_VERTICAL)){
+            axis_length = mapDimensions.yAxis_length;
+        }
+
+        String[] mapAsStringArray = new String[axis_length];
+        for (int index = 0; index < axis_length; index++) {
 
             String nextLine = reader.getNextLine();
             if ( nextLine != null ){
-                mapAsStringArray[yIndex] = nextLine;
+                mapAsStringArray[index] = nextLine;
             }else {
                 return null; // unexpected num of lines
             }
@@ -83,16 +89,12 @@ public interface I_InstanceBuilder {
 
         int xAxis_length = mapDimensions.xAxis_length;
         int yAxis_length = mapDimensions.yAxis_length;
-        if( mapAsStrings.length != yAxis_length ){
-            return null; // invalid value
-        }
+
 
         Character[][] mapAsCharacters_2d = new Character[xAxis_length][yAxis_length];
         for (int yAxis_oldValue = 0; yAxis_oldValue < mapAsStrings.length; yAxis_oldValue++) {
             String[] yAxisLine = mapAsStrings[yAxis_oldValue].split(mapSeparator);
-            if( yAxisLine.length != xAxis_length ){
-                return null; // invalid xAxis_length
-            }
+
             for (int yAxis_newValue = 0; yAxis_newValue < yAxisLine.length ; yAxis_newValue++) {
                 mapAsCharacters_2d[yAxis_oldValue][yAxis_newValue] = yAxisLine[yAxis_newValue].charAt(0);
             }
