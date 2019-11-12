@@ -18,10 +18,19 @@ public class Main {
 
 
     public static void main(String[] args) {
-        runExample();
+
+        runTestingBenchmarkExperiment();
+
+        // runExample();
         // runMultipleExperimentsExample();
     }
 
+
+
+    public static void runTestingBenchmarkExperiment(){
+        TestingBenchmarkRunManager testingBenchmarkRunManager = new TestingBenchmarkRunManager();
+        testingBenchmarkRunManager.runAllExperiments();
+    }
 
 
     public static void runMultipleExperimentsExample(){

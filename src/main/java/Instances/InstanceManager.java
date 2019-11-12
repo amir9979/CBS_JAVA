@@ -1,8 +1,5 @@
 package Instances;
 
-import Instances.Agents.Agent;
-import Instances.Maps.I_Map;
-
 import java.util.Objects;
 import java.util.Stack;
 
@@ -26,8 +23,9 @@ public class InstanceManager {
                            I_InstanceBuilder instanceBuilder,
                            InstanceProperties properties) {
 
-        this.sourceDirectory    = sourceDirectory;
-        this.instanceBuilder    = instanceBuilder;
+        this(sourceDirectory, instanceBuilder);
+
+        // Set properties
         this.instanceProperties = properties;
 
         if( this.instanceProperties == null){
@@ -35,15 +33,25 @@ public class InstanceManager {
         }
         this.instanceProperties.mapSize.setMapOrientation(instanceBuilder.getMapOrientation());
 
-        if(this.sourceDirectory != null){
-            this.addInstancesPaths_toStack( this.sourceDirectory );
-        }
+
 
     }
 
     public InstanceManager(I_InstanceBuilder instanceBuilder){
         this.instanceBuilder = instanceBuilder;
         this.instanceProperties = new InstanceProperties(this.instanceBuilder.getMapOrientation());
+    }
+
+
+    public InstanceManager(String sourceDirectory,
+                           I_InstanceBuilder instanceBuilder){
+
+        this.sourceDirectory = sourceDirectory;
+        this.instanceBuilder = instanceBuilder;
+
+        if(this.sourceDirectory != null){
+            this.addInstancesPaths_toStack( this.sourceDirectory );
+        }
     }
 
 
