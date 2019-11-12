@@ -24,6 +24,9 @@ public abstract class A_RunManager {
                 experiment.runExperiment(solver);
             }
         }
+
+
+        System.out.println("RunAllExperiments - Done!");
     }
 
 
