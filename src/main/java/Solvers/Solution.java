@@ -60,8 +60,10 @@ public class Solution implements Iterable<SingleAgentPlan>{
                 agentPlans.values()) {
             for (SingleAgentPlan otherPlan :
                     agentPlans.values()) {
-                if(! (plan == otherPlan) ){ //don't compare plan with self
-                    if(plan.conflictsWith(otherPlan)) {return false;}
+                if(plan != otherPlan){ //don't compare plan with self
+                    if(plan.conflictsWith(otherPlan)) {
+                        return false;
+                    }
                 }
             }
         }

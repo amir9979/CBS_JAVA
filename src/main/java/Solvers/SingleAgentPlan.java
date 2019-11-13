@@ -1,6 +1,7 @@
 package Solvers;
 
 import Instances.Agents.Agent;
+import Instances.Maps.I_MapCell;
 import Solvers.ConstraintsAndConflicts.A_Conflict;
 import Solvers.ConstraintsAndConflicts.SwappingConflict;
 import Solvers.ConstraintsAndConflicts.VertexConflict;
@@ -181,13 +182,44 @@ public class SingleAgentPlan implements Iterable<Move> {
      * @return true if a conflict exists between the plans.
      */
     public boolean conflictsWith(SingleAgentPlan other){
-        // todo improve by finding lower and upper bound for time, and checking only in that range
-        // todo use the static functions in the Conflict classes instead
-        for (Move localMove :
-                this.moves) {
-            Move otherMoveAtTime = other.moveAt(localMove.timeNow);
-            if(otherMoveAtTime != null){
-                if(A_Conflict.haveConflicts(localMove, otherMoveAtTime)){return true;}
+        // find lower and upper bound for time, and check only in that range
+        //the min time to check is the max first move time
+        int minTime = Math.max(this.getFirstMoveTime(), other.getFirstMoveTime());
+        //the max time to check is the min last move time
+        int maxTime = Math.min(this.getEndTime(), other.getEndTime());
+
+        for(int time = minTime; time<= maxTime; time++){
+            Move localMove = this.moveAt(time);
+            Move otherMoveAtTime = other.moveAt(time);
+
+            if(A_Conflict.haveConflicts(localMove, otherMoveAtTime)){
+                return true;
+            }
+        }
+
+        // if we've made it all the way here, the plans don't conflict in their shared timespan.
+        // now check if one plan ended and then the other plan had a move that conflicts with the first plan's last position (goal)
+        return checkForConflictAtGoal(other, maxTime);
+
+    }
+
+    /**
+     * helper function for {@link #conflictsWith(SingleAgentPlan)}.
+     * @param other another plan.
+     * @param maxTime the maximum time at which both plans have moves.
+     * @return true if one of the plans ends, and then the other plan makes a move that conflicts with the ended plan's agent staying at its goal.
+     */
+    private boolean checkForConflictAtGoal(SingleAgentPlan other, int maxTime) {
+        if(this.getEndTime() != other.getEndTime()){
+            SingleAgentPlan lateEndingPlan = this.getEndTime() > maxTime ? this : other;
+            SingleAgentPlan earlyEndingPlan = this.getEndTime() <= maxTime ? this : other;
+            I_MapCell goalLocation = earlyEndingPlan.moveAt(maxTime).currLocation;
+
+            for (int time = maxTime+1; time <= lateEndingPlan.getEndTime(); time++) {
+                Move stayMove = new Move(earlyEndingPlan.agent, time, goalLocation, goalLocation);
+                if(A_Conflict.haveConflicts(lateEndingPlan.moveAt(time), stayMove)){
+                    return true;
+                }
             }
         }
         return false;
