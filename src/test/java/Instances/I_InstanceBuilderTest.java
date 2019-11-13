@@ -1,32 +1,42 @@
 package Instances;
 
+import Instances.Maps.Enum_MapCellType;
 import Instances.Maps.MapDimensions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
 
 
 public class I_InstanceBuilderTest {
 
 
+    /*      =Cell Types=   */
+    private final char EMPTY = '.';
+    private final char WALL = '@';
+
+    private HashMap<Character, Enum_MapCellType> cellTypeHashMap = new HashMap<>(){{
+        put(EMPTY,Enum_MapCellType.EMPTY);
+        put(WALL,Enum_MapCellType.WALL);
+    }};
+
+    /*  =Expected value=    */
+    Character[][] charMap_Instance_8_15_5 = new Character[][]   {
+            {'.','.','.','.','.','.','.','.'},
+            {'.','.','.','.','.','.','.','.'},
+            {'.','.','.','@','.','.','.','.'},
+            {'@','.','.','.','.','.','.','.'},
+            {'.','.','.','.','.','.','.','.'},
+            {'.','.','.','.','.','.','.','@'},
+            {'@','.','@','.','.','.','.','@'},
+            {'@','.','.','@','@','.','.','.'}
+    };
+
 
     @Test
     public void build2D_CharacterMap_Instance_8_15_5(){
-
-        /*  =Expected value=    */
-        Character[][] expectedMap = new Character[][]   {
-                                    {'.','.','.','.','.','.','.','.'},
-                                    {'.','.','.','.','.','.','.','.'},
-                                    {'.','.','.','@','.','.','.','.'},
-                                    {'@','.','.','.','.','.','.','.'},
-                                    {'.','.','.','.','.','.','.','.'},
-                                    {'.','.','.','.','.','.','.','@'},
-                                    {'@','.','@','.','.','.','.','@'},
-                                    {'@','.','.','@','@','.','.','.'}
-                                                        };
-
 
 
         String[] mapAsString = new String[] {
@@ -45,12 +55,23 @@ public class I_InstanceBuilderTest {
         Character[][] actualMap = I_InstanceBuilder.build2D_CharacterMap(mapAsString,mapDimensions,"");
 
         //  Check every Character in the array
-        for (int i = 0; i < expectedMap.length; i++) {
-            for (int j = 0; j < expectedMap[i].length; j++) {
-                Assert.assertEquals(expectedMap[i][j],actualMap[i][j]);
+        for (int i = 0; i < charMap_Instance_8_15_5.length; i++) {
+            for (int j = 0; j < charMap_Instance_8_15_5[i].length; j++) {
+                Assert.assertEquals(charMap_Instance_8_15_5[i][j],actualMap[i][j]);
             }
         }
+    }
 
+
+    @Test
+    public void testObstacleCalculation_build_2D_cellTypeMap(){
+
+        InstanceProperties properties = new InstanceProperties();
+        InstanceProperties.ObstacleWrapper obstacle = properties.obstacles;
+
+        I_InstanceBuilder.build_2D_cellTypeMap( this.charMap_Instance_8_15_5, this.cellTypeHashMap, MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL, obstacle);
+
+        Assert.assertEquals( 15, obstacle.getAsPercentage());
 
 
     }

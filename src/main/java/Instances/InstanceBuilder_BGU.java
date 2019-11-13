@@ -47,7 +47,6 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     /*  =Default Values=    */
     private final int defaultNumOfDimensions = 2;
-    private final float defaultObstacleRate = -1;
     private final MapDimensions defaultDimensions = new MapDimensions();
     private final int[] defaultNumOfAgents = new int[0];
 
@@ -94,10 +93,8 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
                     String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, mapDimensionsFromFile);
 
-                    // If instanceProperties is not null check the obstacle rate
-                    float obstacleRate = ( instanceProperties.getObstaclePercentage() == -1 ? this.defaultObstacleRate : instanceProperties.getObstacleRate());
                     // build map
-                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, mapDimensionsFromFile, this.cellTypeHashMap, obstacleRate);
+                    graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, mapDimensionsFromFile, this.cellTypeHashMap, instanceProperties.obstacles);
 
                     // done - missing check validity of num of obstacles in graphMap
                     break; // end case
@@ -134,6 +131,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
         }
 
         mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
+        mapf_instance.setObstaclePercentage(instanceProperties.obstacles.getAsPercentage());
         return mapf_instance;
 
     }
