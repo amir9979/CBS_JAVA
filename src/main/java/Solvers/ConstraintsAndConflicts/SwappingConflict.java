@@ -53,15 +53,15 @@ public class SwappingConflict extends A_Conflict{
     }
 
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SwappingConflict)) return false;
-        SwappingConflict conflict = (SwappingConflict) o;
-        return time == conflict.time &&
-                (Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2) && Objects.equals(this.location, ((SwappingConflict) o).location) && Objects.equals(this.agent2_destination, ((SwappingConflict) o).agent2_destination)) ||
-                (Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1) && Objects.equals(this.location, ((SwappingConflict) o).agent2_destination) && Objects.equals(this.agent2_destination, ((SwappingConflict) o).location));
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        SwappingConflict that = (SwappingConflict) o;
+
+        return agent2_destination.equals(that.agent2_destination);
 
     }
 

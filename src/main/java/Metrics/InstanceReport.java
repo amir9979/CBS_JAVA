@@ -27,20 +27,21 @@ public class InstanceReport {
     public static class StandardFields{
         public final static String experimentName = "Experiment Name";
         public final static String mapName = "Map Name";
-        public final static String numAgents = "Num Agents";
+        public final static String numAgents = "# Agents";
+        public final static String obstacles = "Obstacles";
         public final static String solver = "Solver";
         public final static String expandedNodesLowLevel = "Expanded Nodes (Low Level)";
         public final static String expandedNodes = "Expanded Nodes";
         public final static String generatedNodesLowLevel = "Generated Nodes(Low Level)";
         public final static String generatedNodes = "Generated Nodes";
-        public final static String startTime = "Start Time";
-        public final static String endTime = "End Time";
+        public final static String startDateTime = "Start Date";
+        public final static String endDateTime = "End Date";
         public final static String elapsedTimeMS = "Elapsed Time (ms)";
         public final static String TotalLowLevelTimeMS = "Total Low Level Time (ms)";
         public final static String timeoutThresholdMS = "Timeout Threshold";
         public final static String solved = "Solved";
         public final static String solutionCost = "Solution Cost";
-        public final static String solutioncostFunction = "Cost Function";
+        public final static String solutionCostFunction = "Cost Function";
         public final static String solution = "Solution";
     }
 
@@ -60,21 +61,12 @@ public class InstanceReport {
         if(fieldValue.length() > MAX_STRING_SIZE){ //split if too large, to display properly in excel
             //todo this wasn't displaying properly so for now I just made it keep only the first part of the solution. Should fix it later. @Jonathan Morag
 //            return putStringInParts(fieldName, fieldValue);
-            return this.stringFields.put(fieldName, wrapStringCSVSafety(fieldValue.substring(0, MAX_STRING_SIZE - 9) + "..."));
+            return this.stringFields.put(fieldName, fieldValue.substring(0, MAX_STRING_SIZE - 9) + "...");
         }
         else{
             //wrap with " for csv compliance
-            return this.stringFields.put(fieldName, wrapStringCSVSafety(fieldValue));
+            return this.stringFields.put(fieldName, fieldValue);
         }
-    }
-
-    /**
-     * Adds "" marks in case the string might contain ',' to make it safe for CSV.
-     * @param fieldValue - original value.
-     * @return
-     */
-    private String wrapStringCSVSafety(String fieldValue) {
-        return "\"" + fieldValue + "\"";
     }
 
     /**
@@ -99,7 +91,7 @@ public class InstanceReport {
         for (; i < fieldValue.length(); i+= MAX_STRING_SIZE ) {
             //create substring
             int endSubstringIndex = Math.min(i + MAX_STRING_SIZE, fieldValue.length());
-            String wrappedSubstring = wrapStringCSVSafety(fieldValue.substring(i, endSubstringIndex) );
+            String wrappedSubstring = fieldValue.substring(i, endSubstringIndex);
 
             if(extensionIndex == 0){ // not an extension yet, use original field name.
                 result = stringFields.put(fieldName, wrappedSubstring);

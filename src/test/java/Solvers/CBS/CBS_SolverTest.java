@@ -1,5 +1,6 @@
 package Solvers.CBS;
 
+import Experiments.Experiment;
 import IO_Package.IO_Manager;
 import Instances.Agents.Agent;
 import Instances.InstanceBuilder_BGU;
@@ -7,11 +8,21 @@ import Instances.InstanceManager;
 import Instances.InstanceProperties;
 import Instances.MAPF_Instance;
 import Instances.Maps.*;
+import Metrics.InstanceReport;
+import Metrics.S_Metrics;
 import Solvers.I_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,6 +59,16 @@ class CBS_SolverTest {
             {w, e, w, e, e, e},
     };
     private I_Map mapWithPocket = MapFactory.newSimple4Connected2D_GraphMap(map_2D_withPocket);
+
+    Enum_MapCellType[][] map_2D_smalMaze = {
+            {e, e, e, w, e, w},
+            {e, w, e, e, e, e},
+            {e, w, e, w, w, e},
+            {e, e, e, e, e, e},
+            {e, e, w, e, w, w},
+            {w, w, w, e, e, e},
+    };
+    private I_Map mapSmallMaze = MapFactory.newSimple4Connected2D_GraphMap(map_2D_smalMaze);
 
     private I_Coordinate coor12 = new Coordinate_2D(1,2);
     private I_Coordinate coor13 = new Coordinate_2D(1,3);
@@ -154,5 +175,90 @@ class CBS_SolverTest {
         Solution solved = cbsSolver.solve(testInstance, new RunParameters());
 
         assertNull(solved);
+    }
+
+    @Test
+    void TestingBenchmark(){
+
+        I_Solver solver = cbsSolver;
+
+        String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
+                "TestingBenchmark"});
+
+        InstanceManager instanceManager = new InstanceManager(path, new InstanceBuilder_BGU());
+
+        MAPF_Instance instance = null;
+
+        // load the pre-made benchmark
+        try {
+            Map<String, Map<String, String>> benchmarks = readResultsCSV(path + "\\Results.csv");
+            // run all benchmark instances. this code is mostly copied from Experiment.
+            while ((instance = instanceManager.getNextInstance()) != null) {
+                //build report
+                InstanceReport report = S_Metrics.newInstanceReport();
+                report.putStringValue(InstanceReport.StandardFields.experimentName, "TestingBenchmark");
+                report.putStringValue(InstanceReport.StandardFields.mapName, instance.name);
+                report.putIntegerValue(InstanceReport.StandardFields.numAgents, instance.agents.size());
+                report.putStringValue(InstanceReport.StandardFields.solver, solver.getClass().getSimpleName());
+
+                RunParameters runParameters = new RunParameters(report);
+
+                //solve
+                System.out.println("---------- solving "  + instance.name + " ----------");
+                Solution solution = solver.solve(instance, runParameters);
+
+                // validate
+                Map<String, String> benchmarkForInstance = benchmarks.get(instance.name);
+                if(benchmarkForInstance == null){
+                    System.out.println("can't find benchmark for " + instance.name);
+                    continue;
+                }
+
+                System.out.println("Solved?: " + (solution != null ? "yes" : "no"));
+                assertNotNull(solution);
+
+                boolean valid = solution.isValidSolution();
+                System.out.println("Valid?: " + (valid ? "yes" : "no"));
+                assertTrue(valid);
+
+                int optimalCost = Integer.parseInt(benchmarkForInstance.get("Plan Cost"));
+                int costWeGot = solution.sumIndividualCosts();
+                System.out.println("cost is " + (optimalCost==costWeGot ? "optimal (" + costWeGot +")" :
+                        ("not optimal (" + costWeGot + " instead of " + optimalCost + ")")));
+                assertEquals(optimalCost, costWeGot);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    private Map<String, Map<String, String>> readResultsCSV(String pathToCsv) throws IOException {
+        Map<String, Map<String, String>> result  = new HashMap<>();
+        BufferedReader csvReader = new BufferedReader(new FileReader(pathToCsv));
+
+        String headerRow = csvReader.readLine();
+        String[] header = headerRow.split(",");
+        int fileNameIndex = -1;
+        for (int i = 0; i < header.length; i++) {
+            if(header[i].equals("File")) {fileNameIndex = i;}
+        }
+
+        String row;
+        while ((row = csvReader.readLine()) != null) {
+            String[] tupleAsArray = row.split(",");
+            if(tupleAsArray.length < 1 ) continue;
+            Map<String, String> tupleAsMap = new HashMap<>(tupleAsArray.length);
+            for (int i = 0; i < tupleAsArray.length; i++) {
+                String value = tupleAsArray[i];
+                tupleAsMap.put(header[i], value);
+            }
+
+            String key = tupleAsArray[fileNameIndex];
+            result.put(key, tupleAsMap);
+        }
+        csvReader.close();
+
+        return result;
     }
 }

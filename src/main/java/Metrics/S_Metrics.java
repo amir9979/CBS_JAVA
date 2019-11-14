@@ -126,6 +126,10 @@ public class S_Metrics {
         S_Metrics.reports.clear();
     }
 
+    public static List<InstanceReport> getAllReports(){
+        return List.copyOf(S_Metrics.reports);
+    }
+
     /**
      * Adds the given output stream to the list of OutputStreams. When {@link InstanceReport}s are committed, or when
      * {@link #exportAll()} is called, {@link InstanceReport}s will be written to this given OutputStream.
@@ -248,7 +252,7 @@ public class S_Metrics {
         for(int i = 0; i< headerArray.length ; i++){
             String field = headerArray[i];
             if(instanceReport.hasField(field)){
-                reportLine.append(instanceReport.getValue(field));
+                reportLine.append(wrapStringCSVSafety(instanceReport.getValue(field)));
             }
             if(i != headerArray.length - 1 ) {reportLine.append(delimiter);} //no delimiter after the last one
         }
@@ -264,6 +268,15 @@ public class S_Metrics {
      */
     public static String instanceReportToStringCSV(InstanceReport instanceReport){
         return  instanceReportToStringCSV(instanceReport, S_Metrics.CSV_DELIMITER, S_Metrics.header);
+    }
+
+    /**
+     * Adds "" marks in case the string might contain ',' to make it safe for CSV.
+     * @param fieldValue - original value.
+     * @return
+     */
+    private static String wrapStringCSVSafety(String fieldValue) {
+        return "\"" + fieldValue + "\"";
     }
 
     //      human readable      //

@@ -208,7 +208,7 @@ public class CBS_Solver extends A_Solver {
         // modify for this node
         /*  replace the current plan for the agent with an empty plan, so that the low level won't try to continue the
             existing plan.
-            Also we don't want to reuse SingleAgentPlan objects, as they are pointed to by other Solution objects, which
+            Also we don't want to reuse (modify) SingleAgentPlan objects, as they are pointed to by other Solution objects, which
             we don't want to modify.
          */
         solution.putPlan(new SingleAgentPlan(agent));
@@ -244,7 +244,8 @@ public class CBS_Solver extends A_Solver {
     }
 
     private RunParameters getSubproblemParameters(Solution currentSolution, ConstraintSet constraints, InstanceReport instanceReport) {
-        RunParameters subproblemParametes = new RunParameters(constraints, instanceReport, currentSolution);
+        long timeLeftToTimeout = super.maximumRuntime - (System.currentTimeMillis() - super.startTime);
+        RunParameters subproblemParametes = new RunParameters(timeLeftToTimeout, constraints, instanceReport, currentSolution);
         if(this.lowLevelSolver instanceof SingleAgentAStar_Solver){ // upgrades to a better heuristic
             subproblemParametes = new RunParameters_SAAStar(subproblemParametes, this.aStarHeuristic);
         }
@@ -291,8 +292,10 @@ public class CBS_Solver extends A_Solver {
     @Override
     protected void writeMetricsToReport(Solution solution) {
         super.writeMetricsToReport(solution);
-        super.instanceReport.putStringValue(InstanceReport.StandardFields.solutioncostFunction, "SIC");
-        super.instanceReport.putIntegerValue(InstanceReport.StandardFields.solutionCost, solution.sumIndividualCosts());
+        if(solution != null){
+            super.instanceReport.putStringValue(InstanceReport.StandardFields.solutionCostFunction, "SIC");
+            super.instanceReport.putIntegerValue(InstanceReport.StandardFields.solutionCost, solution.sumIndividualCosts());
+        }
     }
 
     @Override

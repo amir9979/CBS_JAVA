@@ -22,8 +22,8 @@ public class Main {
     // testme
     // blocking
 
-//    public static final String resultsOutputPath = "";
-    public static final String resultsOutputPath = "C:\\Users\\John\\Desktop\\cbsTest";
+//    public static final String resultsOutputDir = "";
+    public static final String resultsOutputDir = "C:\\Users\\John\\Desktop\\cbsTest";
 
     public static void main(String[] args) {
 
@@ -87,7 +87,7 @@ public class Main {
      */
     private static void outputResults() {
         DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
-        String updatedPath = resultsOutputPath + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
+        String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
         try {
             S_Metrics.exportCSV(new FileOutputStream(updatedPath),
                     new String[]{InstanceReport.StandardFields.experimentName, InstanceReport.StandardFields.mapName, InstanceReport.StandardFields.numAgents,
