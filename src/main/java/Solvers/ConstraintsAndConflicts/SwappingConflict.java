@@ -56,18 +56,14 @@ public class SwappingConflict extends A_Conflict{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SwappingConflict)) return false;
         if (!super.equals(o)) return false;
-
         SwappingConflict that = (SwappingConflict) o;
-
-        return agent2_destination.equals(that.agent2_destination);
-
+        return Objects.equals(agent2_destination, that.agent2_destination);
     }
 
     @Override
     public int hashCode() {
-        return  Objects.hash( this.agent1 ) * Objects.hash( this.agent2 ) * Objects.hash( this.time ) *
-                Objects.hash( this.location ) * Objects.hash( this.agent2_destination );
+        return Objects.hash(super.hashCode(), agent2_destination);
     }
 }

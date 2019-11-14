@@ -61,19 +61,20 @@ public abstract class A_Conflict {
                 && (SwappingConflict.haveConflicts(move1, move2) || VertexConflict.haveConflicts(move1, move2));
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof A_Conflict)) return false;
         A_Conflict conflict = (A_Conflict) o;
-        return time == conflict.time &&
-                (( Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2)) ||
-                 ( Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1))  ) &&
-                  Objects.equals(location, conflict.location);
+        return  time == conflict.time &&
+                agent1.equals(conflict.agent1) &&
+                agent2.equals(conflict.agent2) &&
+                location.equals(conflict.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash( agent1 ) * Objects.hash( agent2 ) * Objects.hash( time, location );
+        return Objects.hash(agent1, agent2, time, location);
     }
 }

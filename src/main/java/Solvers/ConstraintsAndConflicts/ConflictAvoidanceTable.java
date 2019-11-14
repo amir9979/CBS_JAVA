@@ -30,7 +30,8 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
          If we want to make this more generic, we should scrap ConflictSelectionStrategy and instead make this field
          an instance of some new class, thus combining storage and selection of conflicts. @Jonathan Morag 28/10/2019
          */
-        this.allConflicts = new TreeSet<>(this.comparator);
+        this.allConflicts = new HashSet<>();
+//        this.allConflicts = new TreeSet<>(this.comparator);
         this.agent_Conflicts = new HashMap<>();
         this.timeLocation_Agents = new HashMap<>();
         this.agent_plan = new HashMap<>();
@@ -50,7 +51,8 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
      * @param other another {@link ConflictAvoidanceTable} to copy.
      */
     public ConflictAvoidanceTable(ConflictAvoidanceTable other){
-        this.allConflicts = new TreeSet<>(this.comparator);
+//        this.allConflicts = new TreeSet<>(this.comparator);
+        this.allConflicts = new HashSet<>();
         this.allConflicts.addAll(other.allConflicts);
         this.agent_Conflicts = new HashMap<>();
         for (Map.Entry<Agent,HashSet<A_Conflict>> agentConflictsFromOther: other.agent_Conflicts.entrySet()){
@@ -199,10 +201,25 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             }
             if ( this.agent_plan.get(agentMovingToPrevPosition).moveAt(time).prevLocation.equals(nextLocation)){
 
-                SwappingConflict swappingConflict = new SwappingConflict(singleAgentPlan.agent,agentMovingToPrevPosition,time,nextLocation, previousLocation);
-                // Add conflict to both of the agents
-                addConflictToAgent(singleAgentPlan.agent,swappingConflict);
-                addConflictToAgent(agentMovingToPrevPosition,swappingConflict);
+
+                // Add conflicts to both of the agents
+                SwappingConflict swappingConflict_addedAgentFirst = new SwappingConflict(   singleAgentPlan.agent,
+                                                                                            agentMovingToPrevPosition,
+                                                                                            time,
+                                                                                            nextLocation,
+                                                                                            previousLocation);
+
+                addConflictToAgent(singleAgentPlan.agent, swappingConflict_addedAgentFirst);
+                addConflictToAgent(agentMovingToPrevPosition, swappingConflict_addedAgentFirst);
+
+                SwappingConflict swappingConflict_addedAgentSecond = new SwappingConflict(  agentMovingToPrevPosition,
+                                                                                            singleAgentPlan.agent,
+                                                                                            time,
+                                                                                            previousLocation,
+                                                                                            nextLocation);
+
+                addConflictToAgent(singleAgentPlan.agent, swappingConflict_addedAgentSecond);
+                addConflictToAgent(agentMovingToPrevPosition, swappingConflict_addedAgentSecond);
             }
         }
 
@@ -261,11 +278,19 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
         // Remove the plan's goal location
         int goalTime = previousPlan.size();
-        HashSet<AgentAtGoal> agentsAtGoal = this.goal_agentTime.get(previousPlan.moveAt(goalTime).currLocation);
+        Move prevMove = previousPlan.moveAt(goalTime);
+        HashSet<AgentAtGoal> agentsAtGoal = this.goal_agentTime.get(prevMove.currLocation);
         if( agentsAtGoal != null ){
+
+            TimeLocation timeLocation = new TimeLocation(goalTime, prevMove.currLocation);
+            HashSet<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
+            agentsAtTimeLocation.remove(previousPlan.agent);
+            if (agentsAtTimeLocation.size() == 0){
+                this.timeLocation_Agents.remove(timeLocation);
+            }
             agentsAtGoal.remove(new AgentAtGoal(previousPlan.agent,goalTime));
             if ( agentsAtGoal.size() == 0 ){
-                this.goal_agentTime.remove(previousPlan.moveAt(goalTime).currLocation);
+                this.goal_agentTime.remove(prevMove.currLocation);
             }
         }
 
