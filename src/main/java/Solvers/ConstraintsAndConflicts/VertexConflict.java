@@ -4,6 +4,8 @@ import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
 import Solvers.Move;
 
+import java.util.Objects;
+
 /**
  * Represents a conflict between 2 {@link Agent}s, at a certain time, in a certain {@link I_MapCell location}.
  * This is known as a Vertex Conflict.
@@ -39,6 +41,31 @@ public class VertexConflict extends A_Conflict {
     }
 
 
+
+
+    /**
+     * Override A_Conflict equals and hashcode, because we don't differ between:
+     *     1. < agent1, agent2 >
+     *     2. < agent2, agent1 >
+     * @param o {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof A_Conflict)) return false;
+        A_Conflict conflict = (A_Conflict) o;
+        return time == conflict.time &&
+                ((  Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2)) ||
+                (   Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1))  ) &&
+                    Objects.equals(location, conflict.location);
+    }
+
+
+    @Override
+    public int hashCode() {
+        return agent1.hashCode() + agent2.hashCode() + Objects.hash( time, location );
+    }
 
 
 }
