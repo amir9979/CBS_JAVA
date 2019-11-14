@@ -20,9 +20,10 @@ public abstract class A_RunManager {
 
         for ( Experiment experiment : experiments ) {
             for ( I_Solver solver : solvers ) {
-
                 experiment.runExperiment(solver);
             }
+
+            System.out.println(experiment.experimentName + " - Done!");
         }
 
 

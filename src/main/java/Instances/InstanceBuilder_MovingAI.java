@@ -29,7 +29,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
     /*  =Default Values=    */
-    private final Float defaultObstacleRate = (float)-1;
     private final int defaultNumOfAgents = 10;
     private final int defaultNumOfBatches = 5;
     private final int defaultNumOfAgentsInSingleBatch = 10;
@@ -76,6 +75,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         }
 
         InstanceManager.Moving_AI_Path moving_ai_path = (InstanceManager.Moving_AI_Path) instancePath;
+        if( instanceProperties == null ){ instanceProperties = new InstanceProperties(); }
 
 
         MAPF_Instance mapf_instance = null;
@@ -86,7 +86,8 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
         // create agent properties
-        int[] numOfAgentsFromProperties = (instanceProperties == null ? new int[]{this.defaultNumOfAgents} : instanceProperties.numOfAgents);
+        int[] numOfAgentsFromProperties = (instanceProperties.numOfAgents == null || instanceProperties.numOfAgents.length == 0
+                                            ? new int[]{this.defaultNumOfAgents} : instanceProperties.numOfAgents);
 
 
         // done - add implementation of 'getAgents'
@@ -102,7 +103,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
             }
 
             mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
-
+            mapf_instance.setObstaclePercentage(instanceProperties.obstacles.getAsPercentage());
             this.instanceList.add(mapf_instance);
 
         }
@@ -121,10 +122,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
         // Iterate over all the agents in numOfAgentsByBatches
         for (int id = 0; !agentLinesList.isEmpty() && id < numOfAgentsByBatches * this.defaultNumOfAgentsInSingleBatch; id++) {
-
-            /* Straight from the API :
-                The remove() and poll() methods differ only in their behavior when the queue is empty,
-                the remove() method throws an exception, while the poll() method returns null   */
 
             if( id < numOfAgents ){
                 Agent agentToAdd = buildSingleAgent(id ,agentLinesList.remove(0));
@@ -231,10 +228,8 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
             }else if( nextLine.startsWith(this.INDICATOR_MAP) ){
                 String[] mapAsStrings = I_InstanceBuilder.buildMapAsStringArray(reader, dimensionsFromFile);
 
-                // If instanceProperties is not null check the obstacle percentage
-                float obstacleRate = ( instanceProperties == null ? this.defaultObstacleRate : instanceProperties.getObstacleRate());
                 // build map
-                graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, dimensionsFromFile, this.cellTypeHashMap, obstacleRate);
+                graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, dimensionsFromFile, this.cellTypeHashMap, instanceProperties.obstacles);
 
                 break;
             }

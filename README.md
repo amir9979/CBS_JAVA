@@ -5,7 +5,7 @@
 ### How to 
 * How to create a single instance
     
-        >> Note: An example is provided in the Main.java, using createInstanceExample() method
+        >> Note: An example is provided in the Main.java, using solveOneInstanceExample() method
         
         In order to create a single MAPF_Instance you will need:
         1. An InstanceManager

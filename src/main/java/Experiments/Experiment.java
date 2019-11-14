@@ -34,6 +34,7 @@ public  class Experiment {
     instanceReport.putStringValue(InstanceReport.StandardFields.experimentName, this.experimentName);
     instanceReport.putStringValue(InstanceReport.StandardFields.mapName, instance.name);
     instanceReport.putIntegerValue(InstanceReport.StandardFields.numAgents, instance.agents.size());
+    instanceReport.putIntegerValue(InstanceReport.StandardFields.obstaclePercentage, instance.getObstaclePercentage());
     instanceReport.putStringValue(InstanceReport.StandardFields.solver, solver.getClass().getSimpleName());
 
     return instanceReport;
@@ -56,7 +57,7 @@ public  class Experiment {
 
       System.out.println("solving "  + instance.name);
       Solution solution = solver.solve(instance, runParameters);
-      System.out.println("Solution: " + solution);
+      // System.out.println("Solution: " + solution);
       System.out.println("Solution is " + (solution.isValidSolution() ? "valid!" : "invalid!!!"));
     }
 

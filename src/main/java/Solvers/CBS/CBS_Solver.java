@@ -266,7 +266,7 @@ public class CBS_Solver extends A_Solver {
     @Override
     protected void writeMetricsToReport(Solution solution) {
         super.writeMetricsToReport(solution);
-        super.instanceReport.putStringValue(InstanceReport.StandardFields.solutioncostFunction, "SIC");
+        super.instanceReport.putStringValue(InstanceReport.StandardFields.solutionCostFunction, "SOC");
         super.instanceReport.putIntegerValue(InstanceReport.StandardFields.solutionCost, solution.sumIndividualCosts());
     }
 
