@@ -91,9 +91,14 @@ public class Main {
         String updatedPath = resultsOutputPath + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
         try {
             S_Metrics.exportCSV(new FileOutputStream(updatedPath),
-                    new String[]{InstanceReport.StandardFields.experimentName, InstanceReport.StandardFields.mapName, InstanceReport.StandardFields.numAgents,
-                            InstanceReport.StandardFields.solved, InstanceReport.StandardFields.elapsedTimeMS, InstanceReport.StandardFields.solutionCost,
-                            InstanceReport.StandardFields.solution});
+                    new String[]{   InstanceReport.StandardFields.experimentName,
+                                    InstanceReport.StandardFields.mapName,
+                                    InstanceReport.StandardFields.numAgents,
+                                    InstanceReport.StandardFields.obstaclePercentage,
+                                    InstanceReport.StandardFields.solved,
+                                    InstanceReport.StandardFields.elapsedTimeMS,
+                                    InstanceReport.StandardFields.solutionCost,
+                                    InstanceReport.StandardFields.solution});
         } catch (IOException e) {
             e.printStackTrace();
         }
