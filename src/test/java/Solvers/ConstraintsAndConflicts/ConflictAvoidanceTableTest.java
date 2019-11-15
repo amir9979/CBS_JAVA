@@ -47,7 +47,7 @@ public class ConflictAvoidanceTableTest {
             return false;
         }
 
-            for (Agent agent: expectedAgents){
+        for (Agent agent: expectedAgents){
             if (! actualAgents.contains(agent)){
                 return false;
             }
@@ -90,7 +90,11 @@ public class ConflictAvoidanceTableTest {
         Agent a1 = new Agent(1,new Coordinate_2D(0,0),new Coordinate_2D(0,1));
         SingleAgentPlan a1_plan;
         ArrayList<Move> a1_moves = new ArrayList<>();
-        a1_moves.add(new Move(a1,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
+        a1_moves.add(new Move(a1,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,2, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,3, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,4, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,5, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
 
         a1_plan = new SingleAgentPlan(a1,a1_moves);
         conflictAvoidanceTable.add(a1_plan);
@@ -116,7 +120,7 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected conflicts ==     */
 
-        VertexConflict expectedGoalConflict = new VertexConflict(a1, a2, 1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)));
+        VertexConflict expectedGoalConflict = new VertexConflict(a1, a2, 5, this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)));
 
         HashSet<A_Conflict> expectedSet = new HashSet<>();
         expectedSet.add(expectedGoalConflict);
