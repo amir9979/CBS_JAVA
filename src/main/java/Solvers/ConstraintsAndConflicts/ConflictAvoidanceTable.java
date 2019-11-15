@@ -13,12 +13,13 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     // first commit
 
     public final Set<A_Conflict> allConflicts;
-    public final HashMap<Agent, HashSet<A_Conflict>> agent_Conflicts;
-    public final HashMap<TimeLocation, HashSet<Agent>> timeLocation_Agents;
-    public final HashMap<Agent,SingleAgentPlan> agent_plan;
+    public final Map<Agent, Set<A_Conflict>> agent_Conflicts;
+    public final Map<TimeLocation, Set<Agent>> timeLocation_Agents;
+    private final Map<I_MapCell,List<Integer>> location_timeList;
+    public final Map<Agent,SingleAgentPlan> agent_plan;
     public final ConflictSelectionStrategy conflictSelectionStrategy;
-    public final HashMap<I_MapCell,HashSet<AgentAtGoal>> goal_agentTime;
-    public final Comparator<A_Conflict> comparator = Comparator.comparing((A_Conflict conflict) -> conflict.time);
+    public final Map<I_MapCell,AgentAtGoal> goal_agentTime;
+    // public final Comparator<A_Conflict> comparator = Comparator.comparing((A_Conflict conflict) -> conflict.time);
 
 
     /**
@@ -30,9 +31,10 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
          If we want to make this more generic, we should scrap ConflictSelectionStrategy and instead make this field
          an instance of some new class, thus combining storage and selection of conflicts. @Jonathan Morag 28/10/2019
          */
-        this.allConflicts = new TreeSet<>(this.comparator);
+        this.allConflicts = new HashSet<>();
         this.agent_Conflicts = new HashMap<>();
         this.timeLocation_Agents = new HashMap<>();
+        this.location_timeList = new HashMap<>();
         this.agent_plan = new HashMap<>();
         this.goal_agentTime = new HashMap<>();
         this.conflictSelectionStrategy = conflictSelectionStrategy;
@@ -50,23 +52,27 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
      * @param other another {@link ConflictAvoidanceTable} to copy.
      */
     public ConflictAvoidanceTable(ConflictAvoidanceTable other){
-        this.allConflicts = new TreeSet<>(this.comparator);
+        this.allConflicts = new HashSet<>();
         this.allConflicts.addAll(other.allConflicts);
         this.agent_Conflicts = new HashMap<>();
-        for (Map.Entry<Agent,HashSet<A_Conflict>> agentConflictsFromOther: other.agent_Conflicts.entrySet()){
+        for (Map.Entry<Agent,Set<A_Conflict>> agentConflictsFromOther: other.agent_Conflicts.entrySet()){
             this.agent_Conflicts.put(agentConflictsFromOther.getKey(), new HashSet<>(agentConflictsFromOther.getValue()));
         }
         this.timeLocation_Agents = new HashMap<>();
-        for ( Map.Entry<TimeLocation,HashSet<Agent>> timeLocationAgentFromOther: other.timeLocation_Agents.entrySet()){
+        for ( Map.Entry<TimeLocation,Set<Agent>> timeLocationAgentFromOther: other.timeLocation_Agents.entrySet()){
             this.timeLocation_Agents.put(timeLocationAgentFromOther.getKey(), new HashSet<>(timeLocationAgentFromOther.getValue()));
+        }
+        this.location_timeList = new HashMap<>();
+        for ( Map.Entry<I_MapCell,List<Integer>> location_timeListFromOther: other.location_timeList.entrySet()){
+            this.location_timeList.put(location_timeListFromOther.getKey(), new ArrayList<>(location_timeListFromOther.getValue()));
         }
         this.agent_plan = new HashMap<>();
         for ( Map.Entry<Agent,SingleAgentPlan> agentPlanFromOther: other.agent_plan.entrySet()){
             this.agent_plan.put(agentPlanFromOther.getKey(),agentPlanFromOther.getValue());
         }
         this.goal_agentTime = new HashMap<>();
-        for ( Map.Entry<I_MapCell,HashSet<AgentAtGoal>> goalAgentTimeFromOther : other.goal_agentTime.entrySet()){
-            this.goal_agentTime.put(goalAgentTimeFromOther.getKey(),new HashSet<>(goalAgentTimeFromOther.getValue()));
+        for ( Map.Entry<I_MapCell,AgentAtGoal> goalAgentTimeFromOther : other.goal_agentTime.entrySet()){
+            this.goal_agentTime.put(goalAgentTimeFromOther.getKey(),goalAgentTimeFromOther.getValue());
         }
         this.conflictSelectionStrategy = other.conflictSelectionStrategy;
     }
@@ -118,12 +124,13 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
         // Todo - check if time starts at t = 1
         // Adds the plan's start location
-        TimeLocation timeLocation_0 = new TimeLocation(0, singleAgentPlan.moveAt(1).prevLocation);
-        this.timeLocation_Agents.computeIfAbsent(timeLocation_0, k -> new HashSet<>());
-        this.timeLocation_Agents.get(timeLocation_0).add(singleAgentPlan.agent);
-        addConflictsByTimeLocation(timeLocation_0, singleAgentPlan); // checks for conflicts
+        int agentFirstMoveTime = singleAgentPlan.getFirstMoveTime();
+        TimeLocation timeLocation_firstMove = new TimeLocation(agentFirstMoveTime - 1, singleAgentPlan.moveAt(agentFirstMoveTime).prevLocation);
+        this.timeLocation_Agents.computeIfAbsent(timeLocation_firstMove, k -> new HashSet<>());
+        this.timeLocation_Agents.get(timeLocation_firstMove).add(singleAgentPlan.agent);
+        addConflictsByTimeLocation(timeLocation_firstMove, singleAgentPlan); // checks for conflicts
 
-        for (int time = 1; time <= singleAgentPlan.size(); time++) {
+        for (int time = agentFirstMoveTime; time <= singleAgentPlan.getEndTime(); time++) {
             TimeLocation timeLocation = new TimeLocation(time, singleAgentPlan.moveAt(time).currLocation);
             this.timeLocation_Agents.computeIfAbsent(timeLocation, k -> new HashSet<>());
             this.timeLocation_Agents.get(timeLocation).add(singleAgentPlan.agent);
@@ -131,7 +138,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         }
 
         // Add the plan's goal location
-        int goalTime = singleAgentPlan.size();
+        int goalTime = singleAgentPlan.getEndTime();
         I_MapCell goalLocation = singleAgentPlan.moveAt(goalTime).currLocation;
 
         // Add to timeLocation_Agents
@@ -141,8 +148,30 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         addConflictsByTimeLocation(timeLocation, singleAgentPlan);// Checks for conflicts
 
         // Add to goal_agentTime
-        this.goal_agentTime.computeIfAbsent(goalLocation, k -> new HashSet<AgentAtGoal>());
-        this.goal_agentTime.get(goalLocation).add(new AgentAtGoal(singleAgentPlan.agent,goalTime));
+        this.goal_agentTime.put(goalLocation, new AgentAtGoal(singleAgentPlan.agent,goalTime));
+
+        /*  = Check if this agentAtGoal conflicts with other agents =   */
+        addVertexConflictsWithGoal(new TimeLocation(goalTime, goalLocation), singleAgentPlan);
+
+    }
+
+
+    private void addVertexConflictsWithGoal(TimeLocation timeLocation, SingleAgentPlan singleAgentPlan){
+
+        I_MapCell location = timeLocation.location;
+        List<Integer> timeList = this.location_timeList.get(location);
+        if( timeList == null ){
+            return;
+        }
+        Collections.sort(timeList);
+
+
+        for (int index = Collections.binarySearch(timeList, timeLocation.time); index < timeList.size(); index ++) {
+            Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
+            addVertexConflicts(new TimeLocation(timeList.get(index), location), singleAgentPlan.agent, agentsAtTimeLocation);
+        }
+
+
     }
 
 
@@ -155,17 +184,15 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
     private void addConflictsByTimeLocation(TimeLocation timeLocation, SingleAgentPlan singleAgentPlan) {
 
-        HashSet<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
+        Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
         addVertexConflicts(timeLocation, singleAgentPlan.agent, agentsAtTimeLocation);
 
         /*  = Check conflicts with agents at their goal =    */
-        HashSet<AgentAtGoal> agentsAtGoal = this.goal_agentTime.get(timeLocation.location);
-        if( agentsAtGoal != null ){
-            for (AgentAtGoal agentAtGoal : agentsAtGoal) {
-                if ( timeLocation.time >= agentAtGoal.time ){
-                    // Adds a Vertex conflict if time at location is greater than another agent time at goal
-                    addVertexConflicts(timeLocation, singleAgentPlan.agent, new HashSet<>(){{add(agentAtGoal.agent);}});
-                }
+        AgentAtGoal agentAtGoal = this.goal_agentTime.get(timeLocation.location);
+        if( agentAtGoal != null ){
+            if ( timeLocation.time >= agentAtGoal.time ){
+                // Adds a Vertex conflict if time at location is greater than another agent time at goal
+                addVertexConflicts(timeLocation, singleAgentPlan.agent, new HashSet<>(){{add(agentAtGoal.agent);}});
             }
         }
 
@@ -184,7 +211,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         if( time < 1 ){ return;}
         I_MapCell previousLocation = singleAgentPlan.moveAt(time).prevLocation;
         I_MapCell nextLocation = singleAgentPlan.moveAt(time).currLocation;
-        HashSet<Agent> agentsMovingToPrevLocations = this.timeLocation_Agents.get(new TimeLocation(time,previousLocation));
+        Set<Agent> agentsMovingToPrevLocations = this.timeLocation_Agents.get(new TimeLocation(time,previousLocation));
         if ( agentsMovingToPrevLocations == null ){
             return;
         }
@@ -210,7 +237,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
 
 
-    private void addVertexConflicts(TimeLocation timeLocation, Agent agent, HashSet<Agent> agentsAtTimeLocation) {
+    private void addVertexConflicts(TimeLocation timeLocation, Agent agent, Set<Agent> agentsAtTimeLocation) {
 
 
         for (Agent agentConflictsWith : agentsAtTimeLocation) {
@@ -239,7 +266,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         if ( prevMove_time1 != null ){
             // Remove the plan's start location
             TimeLocation timeLocation = new TimeLocation(0, prevMove_time1.prevLocation);
-            HashSet<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
+            Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
             agentsAtTimeLocation.remove(previousPlan.agent);
             if (agentsAtTimeLocation.size() == 0){
                 this.timeLocation_Agents.remove(timeLocation);
@@ -251,7 +278,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             Move prevMove = previousPlan.moveAt(time);
             if ( prevMove != null ){
                 TimeLocation timeLocation = new TimeLocation(time, prevMove.currLocation);
-                HashSet<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
+                Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
                 agentsAtTimeLocation.remove(previousPlan.agent);
                 if (agentsAtTimeLocation.size() == 0){
                     this.timeLocation_Agents.remove(timeLocation);
@@ -259,15 +286,25 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             }
         }
 
-        // Remove the plan's goal location
+        /* Remove the plan's goal location from:
+              1. this.goal_agentTime
+              2. this.location_timeList
+        */
         int goalTime = previousPlan.size();
-        HashSet<AgentAtGoal> agentsAtGoal = this.goal_agentTime.get(previousPlan.moveAt(goalTime).currLocation);
-        if( agentsAtGoal != null ){
-            agentsAtGoal.remove(new AgentAtGoal(previousPlan.agent,goalTime));
-            if ( agentsAtGoal.size() == 0 ){
-                this.goal_agentTime.remove(previousPlan.moveAt(goalTime).currLocation);
+        I_MapCell goalLocation = previousPlan.moveAt(goalTime).currLocation;
+        AgentAtGoal agentAtGoal = this.goal_agentTime.get(goalLocation);
+        if ( agentAtGoal != null ){
+            this.goal_agentTime.remove(goalLocation);
+        }
+
+        List<Integer> timeList = this.location_timeList.get(goalLocation);
+        if( timeList != null){
+            timeList.remove(goalTime);
+            if (timeList.isEmpty()){
+                this.location_timeList.remove(goalLocation);
             }
         }
+
 
 
     }
@@ -275,7 +312,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
     private void removeAgentConflicts(Agent agent) {
 
-        HashSet<A_Conflict> agent_conflict = this.agent_Conflicts.get(agent);
+        Set<A_Conflict> agent_conflict = this.agent_Conflicts.get(agent);
 
         if(agent_conflict == null){
             return; // No conflicts to remove
