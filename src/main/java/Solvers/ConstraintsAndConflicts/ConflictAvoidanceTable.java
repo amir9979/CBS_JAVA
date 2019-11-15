@@ -122,7 +122,6 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             return;
         }
 
-
         int agentFirstMoveTime = singleAgentPlan.getFirstMoveTime();
 
         for (int time = agentFirstMoveTime; time <= singleAgentPlan.getEndTime(); time++) {
@@ -166,14 +165,12 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         I_MapCell location = timeLocation.location;
         this.location_timeList.computeIfAbsent(location,k -> new HashSet<>());
         Set<Integer> timeList = this.location_timeList.get(location);
-        ArrayList<Integer> sortedList = new ArrayList<>();
-        sortedList.addAll(timeList);
-        Collections.sort(sortedList);
 
-        for (int index = Collections.binarySearch(sortedList, timeLocation.time); index < timeList.size(); index ++) {
-            int time = sortedList.get(index);
-            Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(new TimeLocation(time,location));
-            addVertexConflicts(new TimeLocation(time, location), singleAgentPlan.agent, agentsAtTimeLocation);
+        for (int time : timeList) {
+            if( time >= timeLocation.time){
+                Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(new TimeLocation(time,location));
+                addVertexConflicts(new TimeLocation(time, location), singleAgentPlan.agent, agentsAtTimeLocation);
+            }
         }
 
     }
@@ -316,18 +313,10 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
         Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
         agentsAtTimeLocation.remove(plan.agent);
-        if (agentsAtTimeLocation.size() == 0){
+        if (agentsAtTimeLocation.isEmpty()){
             this.timeLocation_Agents.remove(timeLocation);
+            this.location_timeList.remove(timeLocation.location);
         }
-
-        Set<Integer> timeList = this.location_timeList.get(timeLocation.location);
-        if( timeList != null){
-            timeList.remove(timeLocation.time);
-            if (timeList.isEmpty()){
-                this.location_timeList.remove(timeLocation.location);
-            }
-        }
-
 
     }
 
