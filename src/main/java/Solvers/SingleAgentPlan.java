@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 
 /**
  * A plan for a single agent, which is a sequence of {@link Move}s.
- * An instance of this class is unmodifiable outside of this class's package.
  */
 public class SingleAgentPlan implements Iterable<Move> {
     private List<Move> moves;
@@ -200,7 +199,6 @@ public class SingleAgentPlan implements Iterable<Move> {
         // if we've made it all the way here, the plans don't conflict in their shared timespan.
         // now check if one plan ended and then the other plan had a move that conflicts with the first plan's last position (goal)
         return checkForConflictAtGoal(other, maxTime);
-
     }
 
     /**
