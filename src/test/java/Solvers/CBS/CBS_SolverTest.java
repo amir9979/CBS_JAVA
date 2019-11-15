@@ -196,7 +196,7 @@ class CBS_SolverTest {
                 report.putIntegerValue(InstanceReport.StandardFields.numAgents, instance.agents.size());
                 report.putStringValue(InstanceReport.StandardFields.solver, solver.getClass().getSimpleName());
 
-                RunParameters runParameters = new RunParameters(report);
+                RunParameters runParameters = new RunParameters(30*1000L, null, report, null);
 
                 //solve
                 System.out.println("---------- solving "  + instance.name + " ----------");
@@ -212,15 +212,17 @@ class CBS_SolverTest {
                 System.out.println("Solved?: " + (solution != null ? "yes" : "no"));
                 //assertNotNull(solution);
 
-                boolean valid = solution.isValidSolution();
-                System.out.println("Valid?: " + (valid ? "yes" : "no"));
-                //assertTrue(valid);
+                if(solution != null){
+                    boolean valid = solution.isValidSolution();
+                    System.out.println("Valid?: " + (valid ? "yes" : "no"));
+                    //assertTrue(valid);
 
-                int optimalCost = Integer.parseInt(benchmarkForInstance.get("Plan Cost"));
-                int costWeGot = solution.sumIndividualCosts();
-                System.out.println("cost is " + (optimalCost==costWeGot ? "optimal (" + costWeGot +")" :
-                        ("not optimal (" + costWeGot + " instead of " + optimalCost + ")")));
-                //assertEquals(optimalCost, costWeGot);
+                    int optimalCost = Integer.parseInt(benchmarkForInstance.get("Plan Cost"));
+                    int costWeGot = solution.sumIndividualCosts();
+                    System.out.println("cost is " + (optimalCost==costWeGot ? "optimal (" + costWeGot +")" :
+                            ("not optimal (" + costWeGot + " instead of " + optimalCost + ")")));
+                    //assertEquals(optimalCost, costWeGot);
+                }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
