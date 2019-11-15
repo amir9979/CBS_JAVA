@@ -34,6 +34,7 @@ public  class Experiment {
     instanceReport.putStringValue(InstanceReport.StandardFields.experimentName, this.experimentName);
     instanceReport.putStringValue(InstanceReport.StandardFields.mapName, instance.name);
     instanceReport.putIntegerValue(InstanceReport.StandardFields.numAgents, instance.agents.size());
+    instanceReport.putIntegerValue(InstanceReport.StandardFields.obstaclePercentage, instance.getObstaclePercentage());
     instanceReport.putStringValue(InstanceReport.StandardFields.solver, solver.getClass().getSimpleName());
 
     return instanceReport;

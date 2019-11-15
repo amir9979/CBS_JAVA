@@ -28,7 +28,7 @@ public class InstanceReport {
         public final static String experimentName = "Experiment Name";
         public final static String mapName = "Map Name";
         public final static String numAgents = "# Agents";
-        public final static String obstacles = "Obstacles";
+        public final static String obstaclePercentage = "Obstacles (%)";
         public final static String solver = "Solver";
         public final static String expandedNodesLowLevel = "Expanded Nodes (Low Level)";
         public final static String expandedNodes = "Expanded Nodes";

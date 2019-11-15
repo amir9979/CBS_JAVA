@@ -5,7 +5,6 @@ import Instances.Maps.*;
 import Solvers.Move;
 import Solvers.SingleAgentPlan;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
@@ -20,6 +19,9 @@ public class ConflictAvoidanceTableTest {
             { e, w, w, e},
     };
     private I_Map mapH = MapFactory.newSimple4Connected2D_GraphMap(map_2D_H);
+
+    private Enum_MapCellType[][] twoCellMap = new Enum_MapCellType[][]{{e,e}};
+    private I_Map mapTwoCells = MapFactory.newSimple4Connected2D_GraphMap(twoCellMap);
 
 
 
@@ -45,7 +47,7 @@ public class ConflictAvoidanceTableTest {
             return false;
         }
 
-            for (Agent agent: expectedAgents){
+        for (Agent agent: expectedAgents){
             if (! actualAgents.contains(agent)){
                 return false;
             }
@@ -54,16 +56,16 @@ public class ConflictAvoidanceTableTest {
     }
 
 
-    private boolean equalsTimeLocations(HashMap<ConflictAvoidanceTable.TimeLocation,HashSet<Agent>> expectedConflicts, HashMap<ConflictAvoidanceTable.TimeLocation,HashSet<Agent>> actualConflicts){
+    private boolean equalsTimeLocations(Map<ConflictAvoidanceTable.TimeLocation,Set<Agent>> expectedTimeLocation_agents, Map<ConflictAvoidanceTable.TimeLocation,Set<Agent>> actualTimeLocation_agents){
 
-        if( actualConflicts.size() != expectedConflicts.size() ){
+        if( actualTimeLocation_agents.size() != expectedTimeLocation_agents.size() ){
             return false;
         }
-        for (Map.Entry<ConflictAvoidanceTable.TimeLocation,HashSet<Agent>> timeLocation_agents: expectedConflicts.entrySet()){
+        for (Map.Entry<ConflictAvoidanceTable.TimeLocation,Set<Agent>> timeLocation_agents: expectedTimeLocation_agents.entrySet()){
 
             ConflictAvoidanceTable.TimeLocation timeLocation = timeLocation_agents.getKey();
-            HashSet<Agent> expectedAgents = expectedConflicts.get(timeLocation);
-            HashSet<Agent> actualAgents = actualConflicts.get(timeLocation);
+            Set<Agent> expectedAgents = expectedTimeLocation_agents.get(timeLocation);
+            Set<Agent> actualAgents = actualTimeLocation_agents.get(timeLocation);
             if (! this.equalsAllAgents(expectedAgents,actualAgents)){
                 return false;
             }
@@ -73,14 +75,12 @@ public class ConflictAvoidanceTableTest {
 
 
 
-
     @Test
-    public void swappingConflict2CellMap(){
+    public void goalConflict(){
 
         ConflictAvoidanceTable conflictAvoidanceTable = new ConflictAvoidanceTable(new MinTimeConflictSelectionStrategy());
 
-        Enum_MapCellType[][] twoCellMap = new Enum_MapCellType[][]{{e,e}};
-        I_Map mapTwoCells = MapFactory.newSimple4Connected2D_GraphMap(twoCellMap);
+
 
         /*  = Add a1 Plan =
             { S1 , G1 }
@@ -90,7 +90,67 @@ public class ConflictAvoidanceTableTest {
         Agent a1 = new Agent(1,new Coordinate_2D(0,0),new Coordinate_2D(0,1));
         SingleAgentPlan a1_plan;
         ArrayList<Move> a1_moves = new ArrayList<>();
-        a1_moves.add(new Move(a1,1,mapTwoCells.getMapCell(new Coordinate_2D(0,0)),mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
+        a1_moves.add(new Move(a1,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,2, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,3, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,4, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a1_moves.add(new Move(a1,5, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
+
+        a1_plan = new SingleAgentPlan(a1,a1_moves);
+        conflictAvoidanceTable.add(a1_plan);
+
+
+
+
+        /*  = Add a2 Plan =
+            { EE , S2 & G2 } // (0,1) is Start and Goal
+            EE = Empty
+            S = Start
+            G = Goal
+        */
+        Agent a2 = new Agent(2,new Coordinate_2D(0,1),new Coordinate_2D(0,1));
+        SingleAgentPlan a2_plan;
+        ArrayList<Move> a2_moves = new ArrayList<>();
+        a2_moves.add(new Move(a2,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)), mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
+
+
+        a2_plan = new SingleAgentPlan(a2,a2_moves);
+        conflictAvoidanceTable.add(a2_plan);
+
+
+        /*      == Expected conflicts ==     */
+
+        VertexConflict expectedGoalConflict = new VertexConflict(a1, a2, 5, this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)));
+
+        HashSet<A_Conflict> expectedSet = new HashSet<>();
+        expectedSet.add(expectedGoalConflict);
+
+
+        /*      = Test actual values =  */
+        Assert.assertTrue(equalsAllConflicts(expectedSet, conflictAvoidanceTable.allConflicts));
+
+    }
+
+
+
+
+
+    @Test
+    public void swappingConflict2CellMap(){
+
+        ConflictAvoidanceTable conflictAvoidanceTable = new ConflictAvoidanceTable(new MinTimeConflictSelectionStrategy());
+
+
+
+        /*  = Add a1 Plan =
+            { S1 , G1 }
+            S = Start
+            G = Goal
+        */
+        Agent a1 = new Agent(1,new Coordinate_2D(0,0),new Coordinate_2D(0,1));
+        SingleAgentPlan a1_plan;
+        ArrayList<Move> a1_moves = new ArrayList<>();
+        a1_moves.add(new Move(a1,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
 
         a1_plan = new SingleAgentPlan(a1,a1_moves);
         conflictAvoidanceTable.add(a1_plan);
@@ -106,7 +166,7 @@ public class ConflictAvoidanceTableTest {
         Agent a2 = new Agent(2,new Coordinate_2D(0,1),new Coordinate_2D(0,0));
         SingleAgentPlan a2_plan;
         ArrayList<Move> a2_moves = new ArrayList<>();
-        a2_moves.add(new Move(a2,1,mapTwoCells.getMapCell(new Coordinate_2D(0,1)),mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
+        a2_moves.add(new Move(a2,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)), mapTwoCells.getMapCell(new Coordinate_2D(0,0))));
 
 
         a2_plan = new SingleAgentPlan(a2,a2_moves);
@@ -115,12 +175,10 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected conflicts ==     */
 
-        SwappingConflict expectedConflict_a1 = new SwappingConflict(a1,a2,1,mapTwoCells.getMapCell(new Coordinate_2D(0,1)),mapTwoCells.getMapCell(new Coordinate_2D(0,0)));
-        SwappingConflict expectedConflict_a2 = new SwappingConflict(a2,a1,1,mapTwoCells.getMapCell(new Coordinate_2D(0,0)),mapTwoCells.getMapCell(new Coordinate_2D(0,1)));
+        SwappingConflict expectedConflict_time1 = new SwappingConflict(a1,a2,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)));
 
         HashSet<A_Conflict> expectedSet = new HashSet<>();
-        expectedSet.add(expectedConflict_a1);
-        expectedSet.add(expectedConflict_a2);
+        expectedSet.add(expectedConflict_time1);
 
 
         /*      = Test actual values =  */
@@ -199,7 +257,7 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected locations ==     */
 
-        HashMap<ConflictAvoidanceTable.TimeLocation,HashSet<Agent>> expected_timeLocationAgents = new HashMap<>();
+        Map<ConflictAvoidanceTable.TimeLocation,Set<Agent>> expected_timeLocationAgents = new HashMap<>();
         // Agent 1
         ConflictAvoidanceTable.TimeLocation time0_a1 = new ConflictAvoidanceTable.TimeLocation(0, mapH.getMapCell(new Coordinate_2D(0,0)));
         expected_timeLocationAgents.computeIfAbsent(time0_a1,k -> new HashSet<Agent>());
@@ -371,7 +429,7 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected locations ==     */
 
-        HashMap<ConflictAvoidanceTable.TimeLocation,HashSet<Agent>> expected_timeLocationAgents = new HashMap<>();
+        Map<ConflictAvoidanceTable.TimeLocation,Set<Agent>> expected_timeLocationAgents = new HashMap<>();
         // Agent 1
         ConflictAvoidanceTable.TimeLocation time0_a1 = new ConflictAvoidanceTable.TimeLocation(0, mapH.getMapCell(new Coordinate_2D(0,0)));
         expected_timeLocationAgents.computeIfAbsent(time0_a1,k -> new HashSet<Agent>());
@@ -415,12 +473,10 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected conflicts ==     */
 
-        SwappingConflict expectedConflict_a1_time3 = new SwappingConflict(a1,a2,3,mapH.getMapCell(new Coordinate_2D(1,2)),mapH.getMapCell(new Coordinate_2D(1,1)));
-        SwappingConflict expectedConflict_a2_time3 = new SwappingConflict(a2,a1,3,mapH.getMapCell(new Coordinate_2D(1,1)),mapH.getMapCell(new Coordinate_2D(1,2)));
+        SwappingConflict expectedConflict_time3 = new SwappingConflict(a1,a2,3,mapH.getMapCell(new Coordinate_2D(1,1)),mapH.getMapCell(new Coordinate_2D(1,2)));
 
         HashSet<A_Conflict> expectedSet = new HashSet<>();
-        expectedSet.add(expectedConflict_a1_time3);
-        expectedSet.add(expectedConflict_a2_time3);
+        expectedSet.add(expectedConflict_time3);
 
 
         /*  = Test actual values =  */
@@ -431,8 +487,8 @@ public class ConflictAvoidanceTableTest {
 
 
         /*      = Test Select conflict =     */
-        A_Conflict actualConflict_time3 = copiedTable.selectConflict();
-        Assert.assertEquals(3, actualConflict_time3.time);
+        A_Conflict actualConflict_time1 = copiedTable.selectConflict();
+        Assert.assertEquals(expectedConflict_time3,actualConflict_time1);
 
 
 

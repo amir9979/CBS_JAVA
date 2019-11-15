@@ -59,16 +59,16 @@ public interface I_InstanceBuilder {
      * @param mapSeparator - Regex value to split map values. by default is "".
      * @param mapDimensions - A {@link MapDimensions}, must be valid.
      * @param cellTypeHashMap - HashMap for converting Character to {@link Enum_MapCellType}
-     * @param obstacleRate - Value is a float indicates obstacle percentage.
+     * @param obstacle - Value is a {@link Instances.InstanceProperties.ObstacleWrapper} indicates obstacle in the map.
      * @return A GraphMap
      */
-    static GraphMap buildGraphMap(String[] mapAsStrings, String mapSeparator, MapDimensions mapDimensions, HashMap<Character,Enum_MapCellType> cellTypeHashMap, float obstacleRate) {
+    static GraphMap buildGraphMap(String[] mapAsStrings, String mapSeparator, MapDimensions mapDimensions, HashMap<Character,Enum_MapCellType> cellTypeHashMap, InstanceProperties.ObstacleWrapper obstacle) {
 
         switch ( mapDimensions.numOfDimensions ){
             case 2:
 
                 Character[][] mapAsCharacters_2d = build2D_CharacterMap(mapAsStrings,mapDimensions,mapSeparator);
-                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, mapDimensions.mapOrientation, obstacleRate);
+                Enum_MapCellType[][] mapAsCellType_2D = build_2D_cellTypeMap(mapAsCharacters_2d, cellTypeHashMap, mapDimensions.mapOrientation, obstacle);
                 if( mapAsCellType_2D == null){
                     return null; // Error while building the map
                 }
@@ -76,7 +76,7 @@ public interface I_InstanceBuilder {
 
             case 3:
                 Character[][][] mapAsCharacters_3d = new Character[][][]{};
-                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsCharacters_3d, cellTypeHashMap,obstacleRate);
+                Enum_MapCellType[][][] mapAsCellType_3D = build_3D_cellTypeMap(mapAsCharacters_3d, cellTypeHashMap, obstacle);
                 return null; // niceToHave - change to newSimple 4Connected 3D_GraphMap if exists in MapFactory
         }
 
@@ -105,7 +105,7 @@ public interface I_InstanceBuilder {
     }
 
 
-    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, MapDimensions.MapOrientation mapOrientation, float obstacleRate) {
+    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, MapDimensions.MapOrientation mapOrientation, InstanceProperties.ObstacleWrapper obstacle) {
         // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
 
         if(mapAsCharacters == null){
@@ -149,16 +149,20 @@ public interface I_InstanceBuilder {
         // check that it matches the value from properties
         // Formula: floor( obstaclesRate * BoardSize) = numOfObstacles
         int boardSize = (numOfNonObstacles + numOfObstacles);
-        int computedNumOfObstacles = (int) Math.floor((obstacleRate * boardSize));
-        if ( obstacleRate != -1 && computedNumOfObstacles != numOfObstacles ){
+        int computedNumOfObstacles = (int) Math.floor((obstacle.getAsRate() * boardSize));
+        if ( obstacle.getAsRate() != -1 && computedNumOfObstacles != numOfObstacles ){
             // done - check with Dor that this is correct
             return null; // Invalid obstacle rate
         }
 
+        // Set Obstacle for future use in MAPF_Instance
+        int obstaclePercentage = (int) Math.ceil( ((double) numOfObstacles / (double) boardSize) * 100 );
+        obstacle.setWithPercentage(obstaclePercentage);
+
         return cellTypeMap;
     }
 
-    static Enum_MapCellType[][][] build_3D_cellTypeMap(Character[][][] mapAsCharacters, HashMap<Character,Enum_MapCellType> cellTypeHashMap, float obstacleRate) {
+    static Enum_MapCellType[][][] build_3D_cellTypeMap(Character[][][] mapAsCharacters, HashMap<Character,Enum_MapCellType> cellTypeHashMap, InstanceProperties.ObstacleWrapper obstacle) {
         // niceToHave - no need to implement for now
         return null;
     }

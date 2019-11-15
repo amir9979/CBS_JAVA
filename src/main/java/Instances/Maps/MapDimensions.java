@@ -8,12 +8,12 @@ public class MapDimensions{
         /*  (X0,Y0)|(X1,Y0)
             (X0,Y1)|(X1,Y1)
         */
-        X_HORIZONTAL_Y_VERTICAL,
+        X_HORIZONTAL_Y_VERTICAL, // MovingAi Instances
 
         /*  (Y0,X0)|(Y1,X0)
             (Y0,X1)|(Y1,X1)
         */
-        Y_HORIZONTAL_X_VERTICAL
+        Y_HORIZONTAL_X_VERTICAL // BGU Instances
     }
 
 

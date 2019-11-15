@@ -29,6 +29,12 @@ public class MAPF_Instance {
     public final List<Agent> agents;
 
 
+    /*
+    * Obstacle as a percentage, Like: 15%
+    */
+    private int ObstaclePercentage = -1;
+
+
     public MAPF_Instance(String name, I_Map map, Agent[] agents) {
         if(name == null || map == null || agents == null){throw new IllegalArgumentException();}
         this.name = name;
@@ -49,6 +55,14 @@ public class MAPF_Instance {
     public MAPF_Instance getSubproblemFor(Agent agent){
         if(agent == null || !this.agents.contains(agent)){throw new IllegalArgumentException("Agent not present in instance.");}
         return new MAPF_Instance(name+"-agent" + agent.iD, map, new Agent[]{agent});
+    }
+
+    public void setObstaclePercentage(int obstaclePercentage){
+        this.ObstaclePercentage = obstaclePercentage;
+    }
+
+    public int getObstaclePercentage(){
+        return this.ObstaclePercentage;
     }
 
 }

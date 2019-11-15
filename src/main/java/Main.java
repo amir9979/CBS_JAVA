@@ -22,14 +22,15 @@ public class Main {
     // testme
     // blocking
 
-//    public static final String resultsOutputDir = "";
-    public static final String resultsOutputDir = "C:\\Users\\John\\Desktop\\cbsTest";
+//    public static final String resultsOutputPath = "";
+    public static final String resultsOutputPath = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
+                                                                                        "\\Reports default directory"});
 
     public static void main(String[] args) {
 
         runTestingBenchmarkExperiment();
 
-        // runExample();
+        // solveOneInstanceExample();
         // runMultipleExperimentsExample();
     }
 
@@ -51,7 +52,7 @@ public class Main {
     }
 
 
-    public static void runExample(){
+    public static void solveOneInstanceExample(){
 
         /*  =   Set Path   =*/
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
@@ -61,7 +62,7 @@ public class Main {
 
 
         /*  =   Set Properties   =  */
-        InstanceProperties properties = new InstanceProperties(null, (float)0.15, new int[]{5});
+        InstanceProperties properties = new InstanceProperties(null, 0.15, new int[]{5});
 
 
         /*  =   Set Instance Manager   =  */
@@ -90,12 +91,20 @@ public class Main {
         String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
         try {
             S_Metrics.exportCSV(new FileOutputStream(updatedPath),
-                    new String[]{InstanceReport.StandardFields.experimentName, InstanceReport.StandardFields.mapName, InstanceReport.StandardFields.numAgents,
-                            InstanceReport.StandardFields.solved, InstanceReport.StandardFields.elapsedTimeMS, InstanceReport.StandardFields.solutionCost,
-                            InstanceReport.StandardFields.solution});
+                    new String[]{   InstanceReport.StandardFields.experimentName,
+                                    InstanceReport.StandardFields.mapName,
+                                    InstanceReport.StandardFields.numAgents,
+                                    InstanceReport.StandardFields.obstaclePercentage,
+                                    InstanceReport.StandardFields.solved,
+                                    InstanceReport.StandardFields.elapsedTimeMS,
+                                    InstanceReport.StandardFields.solutionCost,
+                                    InstanceReport.StandardFields.solution});
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+
 
 }
