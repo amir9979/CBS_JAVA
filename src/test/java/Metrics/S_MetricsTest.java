@@ -67,7 +67,6 @@ class S_MetricsTest {
         }
     }
 
-    @Test
     void manualTest_FileOutput_FullHeader_withCommits(){
         try {
             S_Metrics.setHeader(new String[]{"iName", "int1", "fl1"});
@@ -78,7 +77,6 @@ class S_MetricsTest {
         }
     }
 
-    @Test
     void manualTest_FileOutput_PartialHeader_withCommits(){
         try {
             S_Metrics.setHeader(new String[]{"iName", "fl1"});
@@ -89,7 +87,6 @@ class S_MetricsTest {
         }
     }
 
-    @Test
     void exportAll() {
         try {
             S_Metrics.setHeader(new String[]{"iName", "int1", "fl1"});
@@ -103,7 +100,6 @@ class S_MetricsTest {
         S_Metrics.exportAll();
     }
 
-    @Test
     void exportCSV() {
         try {
             writeSomeInstanceReports(false);

@@ -2,6 +2,7 @@ package Solvers.PrioritisedPlanning;
 
 import Instances.Agents.Agent;
 import Instances.MAPF_Instance;
+import Instances.Maps.I_MapCell;
 import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
@@ -196,13 +197,27 @@ public class PrioritisedPlanning_Solver extends A_Solver {
                 /*the constraint is in opposite direction of the move*/ move.currLocation, move.prevLocation);
     }
 
+    /**
+     * Creates constraints to protect a {@link SingleAgentPlan plan}.
+     * To also protect an agent at its goal, extra vertex constraints are added. This is not efficient and doesn't
+     * guarantee validity.
+     * @param planForAgent
+     * @return
+     */
     private List<Constraint> allConstraintsForPlan(SingleAgentPlan planForAgent) {
         List<Constraint> constraints = new LinkedList<>();
+        // protect the agent's plan
         for (Move move :
                 planForAgent) {
             constraints.add(vertexConstraintsForMove(move));
             constraints.add(swappingConstraintsForMove(move));
         }
+        // protect the agent at goal. add vertex constraints for three times the length of the plan.
+        Move lastMove = planForAgent.moveAt(planForAgent.getEndTime());
+        for (int time = lastMove.timeNow + 1; time < lastMove.timeNow + (planForAgent.size() * 2 ); time++) {
+            constraints.add(new Constraint(null, time, lastMove.currLocation));
+        }
+
         return constraints;
     }
 

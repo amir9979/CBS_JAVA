@@ -89,11 +89,11 @@ class PrioritisedPlanning_SolverTest {
 
     private Agent agent33to12 = new Agent(0, coor33, coor12);
     private Agent agent12to33 = new Agent(1, coor12, coor33);
-    private Agent agent53to05 = new Agent(0, coor53, coor05);
-    private Agent agent43to11 = new Agent(0, coor43, coor11);
-    private Agent agent04to00 = new Agent(0, coor04, coor00);
-    private Agent agent00to10 = new Agent(0, coor00, coor10);
-    private Agent agent10to00 = new Agent(1, coor10, coor00);
+    private Agent agent53to05 = new Agent(2, coor53, coor05);
+    private Agent agent43to11 = new Agent(3, coor43, coor11);
+    private Agent agent04to00 = new Agent(4, coor04, coor00);
+    private Agent agent00to10 = new Agent(5, coor00, coor10);
+    private Agent agent10to00 = new Agent(6, coor10, coor00);
 
     InstanceBuilder_BGU builder = new InstanceBuilder_BGU();
     InstanceManager im = new InstanceManager(IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,"Instances"}),
