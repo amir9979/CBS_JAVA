@@ -27,6 +27,8 @@ public class CBS_Solver extends A_Solver {
     /*  =  = Fields related to the run =  */
 
     private DistanceTableAStarHeuristic aStarHeuristic;
+    private int generatedNodes;
+    private int expandedNodes;
 
     /*  =  = Fields related to the class instance =  */
 
@@ -78,6 +80,8 @@ public class CBS_Solver extends A_Solver {
     @Override
     protected void init(MAPF_Instance instance, RunParameters runParameters) {
         super.init(instance, runParameters);
+        generatedNodes = 0;
+        expandedNodes = 0;
         this.instance = instance;
         this.aStarHeuristic = this.lowLevelSolver instanceof SingleAgentAStar_Solver ?
                 new DistanceTableAStarHeuristic(new ArrayList<>(this.instance.agents), this.instance.map) :
@@ -107,14 +111,16 @@ public class CBS_Solver extends A_Solver {
     private void initOpen(ConstraintSet initialConstraints) {
         if(this.openListManagementMode == OpenListManagementMode.AUTOMATIC ||
                 this.openListManagementMode == OpenListManagementMode.AUTO_INIT_MANUAL_CLEAR){
-            openList.add(initRoot(initialConstraints));
+            openList.add(generateRoot(initialConstraints));
         }
     }
 
     /**
      * Creates a root node.
      */
-    private CBS_Node initRoot(ConstraintSet initialConstraints) {
+    private CBS_Node generateRoot(ConstraintSet initialConstraints) {
+        this.generatedNodes++;
+
         Solution solution = new Solution(); // init an empty solution
         // for every agent, add its plan to the solution
         for (Agent agent :
@@ -141,7 +147,7 @@ public class CBS_Solver extends A_Solver {
                 return node;
             }
             else {
-                expand(node);
+                expandNode(node);
             }
         }
 
@@ -171,11 +177,13 @@ public class CBS_Solver extends A_Solver {
      * Expands a {@link CBS_Node}.
      * @param node a node to expand.
      */
-    private void expand(CBS_Node node) {
+    private void expandNode(CBS_Node node) {
+        this.expandedNodes++;
+
         Constraint[] constraints = node.selectedConflict.getPreventingConstraints();
         // make copies of data structures for left child, while reusing the parent's data structures on the right child.
-        node.leftChild = initNode(node, constraints[0], true);
-        node.rightChild = initNode(node, constraints[1], false);
+        node.leftChild = generateNode(node, constraints[0], true);
+        node.rightChild = generateNode(node, constraints[1], false);
 
         if(node.leftChild == null || node.rightChild == null){
             return; //probably a timeout in the low level. should abort.
@@ -191,7 +199,9 @@ public class CBS_Solver extends A_Solver {
      * @param copyDatastructures for one child, we may be able to reuse the parent's data structures, instead of copying them.
      * @return a new {@link CBS_Node}.
      */
-    private CBS_Node initNode(CBS_Node parent, Constraint constraint, boolean copyDatastructures) {
+    private CBS_Node generateNode(CBS_Node parent, Constraint constraint, boolean copyDatastructures) {
+        this.generatedNodes++;
+
         Agent agent = constraint.agent;
 
         Solution solution = parent.solution;
@@ -292,6 +302,8 @@ public class CBS_Solver extends A_Solver {
     @Override
     protected void writeMetricsToReport(Solution solution) {
         super.writeMetricsToReport(solution);
+        super.instanceReport.putIntegerValue(InstanceReport.StandardFields.generatedNodes, this.generatedNodes);
+        super.instanceReport.putIntegerValue(InstanceReport.StandardFields.expandedNodes, this.expandedNodes);
         if(solution != null){
             super.instanceReport.putStringValue(InstanceReport.StandardFields.solutionCostFunction, "SIC");
             super.instanceReport.putIntegerValue(InstanceReport.StandardFields.solutionCost, solution.sumIndividualCosts());

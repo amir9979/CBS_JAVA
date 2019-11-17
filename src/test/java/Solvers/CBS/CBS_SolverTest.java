@@ -205,7 +205,7 @@ class CBS_SolverTest {
                 report.putIntegerValue(InstanceReport.StandardFields.numAgents, instance.agents.size());
                 report.putStringValue(InstanceReport.StandardFields.solver, solver.getClass().getSimpleName());
 
-                RunParameters runParameters = new RunParameters(30*1000L, null, report, null);
+                RunParameters runParameters = new RunParameters(20*1000L, null, report, null);
 
                 //solve
                 System.out.println("---------- solving "  + instance.name + " ----------");
@@ -262,9 +262,12 @@ class CBS_SolverTest {
                                 InstanceReport.StandardFields.mapName,
                                 InstanceReport.StandardFields.numAgents,
                                 InstanceReport.StandardFields.obstaclePercentage,
+                                InstanceReport.StandardFields.timeoutThresholdMS,
                                 InstanceReport.StandardFields.solved,
                                 InstanceReport.StandardFields.elapsedTimeMS,
                                 InstanceReport.StandardFields.solutionCost,
+                                InstanceReport.StandardFields.generatedNodes,
+                                InstanceReport.StandardFields.expandedNodes,
                                 InstanceReport.StandardFields.solution});
             } catch (IOException e) {
                 e.printStackTrace();
