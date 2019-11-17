@@ -196,7 +196,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
         // Check if other plans are using this location after the agent arrived at goal
         for (int time : timeList) {
-            if( time >= timeLocation.time){
+            if( time > timeLocation.time){
                 Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(new TimeLocation(time,location));
 
                 // Adds if agent != agentAtTimeLocation
@@ -383,7 +383,11 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         agentsAtTimeLocation.remove(plan.agent);
         if (agentsAtTimeLocation.isEmpty()){
             this.timeLocation_Agents.remove(timeLocation);
-            this.location_timeList.remove(timeLocation.location); // No agents at this timeLocation
+            Set<Integer> timeList = this.location_timeList.get(timeLocation.location);
+            timeList.remove(timeLocation.time);
+            if ( timeList.isEmpty() ){
+                this.location_timeList.remove(timeLocation.location); // No agents at this timeLocation
+            }
         }
     }
 

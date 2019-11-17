@@ -22,9 +22,9 @@ public class Main {
     // testme
     // blocking
 
-//    public static final String resultsOutputDir = "";
-    public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
-                                                                                        "\\Reports default directory"});
+    public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{System.getProperty("user.home"), "CBS_Results"});
+//    public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
+//                                                                                        "\\Reports default directory"});
 
     public static void main(String[] args) {
 

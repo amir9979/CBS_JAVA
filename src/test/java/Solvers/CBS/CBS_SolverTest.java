@@ -16,8 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -187,8 +190,14 @@ class CBS_SolverTest {
         // load the pre-made benchmark
         try {
             Map<String, Map<String, String>> benchmarks = readResultsCSV(path + "\\Results.csv");
+            int numSolved = 0 ;
+            int numValid = 0 ;
+            int numOptimal = 0;
+            int numValidSuboptimal = 0;
+            int numInvalidOptimal = 0;
             // run all benchmark instances. this code is mostly copied from Experiment.
             while ((instance = instanceManager.getNextInstance()) != null) {
+                System.gc();
                 //build report
                 InstanceReport report = S_Metrics.newInstanceReport();
                 report.putStringValue(InstanceReport.StandardFields.experimentName, "TestingBenchmark");
@@ -209,8 +218,10 @@ class CBS_SolverTest {
                     continue;
                 }
 
-                System.out.println("Solved?: " + (solution != null ? "yes" : "no"));
+                boolean solved = solution != null;
+                System.out.println("Solved?: " + (solved ? "yes" : "no"));
                 //assertNotNull(solution);
+                if (solved) numSolved++;
 
                 if(solution != null){
                     boolean valid = solution.isValidSolution();
@@ -219,10 +230,44 @@ class CBS_SolverTest {
 
                     int optimalCost = Integer.parseInt(benchmarkForInstance.get("Plan Cost"));
                     int costWeGot = solution.sumIndividualCosts();
-                    System.out.println("cost is " + (optimalCost==costWeGot ? "optimal (" + costWeGot +")" :
+                    boolean optimal = optimalCost==costWeGot;
+                    System.out.println("cost is " + (optimal ? "optimal (" + costWeGot +")" :
                             ("not optimal (" + costWeGot + " instead of " + optimalCost + ")")));
                     //assertEquals(optimalCost, costWeGot);
+
+                    if(valid) numValid++;
+                    if(optimal) numOptimal++;
+                    if(valid && !optimal) numValidSuboptimal++;
+                    if(!valid && optimal) numInvalidOptimal++;
                 }
+            }
+
+            System.out.println("--- TOTALS: ---");
+            System.out.println("solved: " + numSolved);
+            System.out.println("valid: " + numValid);
+            System.out.println("optimal: " + numOptimal);
+            System.out.println("valid but not optimal: " + numValidSuboptimal);
+            System.out.println("not valid but optimal: " + numInvalidOptimal);
+
+            //save results
+            DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
+            String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
+                    "\\Reports default directory"});
+            String updatedPath = resultsOutputDir + "\\results "
+//                    + dateFormat.format(System.currentTimeMillis())
+                    + ".csv";
+            try {
+                S_Metrics.exportCSV(new FileOutputStream(updatedPath),
+                        new String[]{
+                                InstanceReport.StandardFields.mapName,
+                                InstanceReport.StandardFields.numAgents,
+                                InstanceReport.StandardFields.obstaclePercentage,
+                                InstanceReport.StandardFields.solved,
+                                InstanceReport.StandardFields.elapsedTimeMS,
+                                InstanceReport.StandardFields.solutionCost,
+                                InstanceReport.StandardFields.solution});
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         } catch (IOException ex) {
             ex.printStackTrace();

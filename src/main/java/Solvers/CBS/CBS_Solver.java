@@ -158,7 +158,7 @@ public class CBS_Solver extends A_Solver {
             I_ConflictAvoidanceTable cat = node.getConflictAvoidanceTable();
             // the agent that was constrained in this node is the agent who's plan has changed.
             SingleAgentPlan thePlanThatChangedInThisNode = node.solution.getPlanFor(node.addedConstraint.agent);
-            cat.add(thePlanThatChangedInThisNode);
+            cat.addPlan(thePlanThatChangedInThisNode);
         }
     }
 
@@ -384,7 +384,7 @@ public class CBS_Solver extends A_Solver {
             this.conflictAvoidanceTable = new ConflictAvoidanceTable();
             for (SingleAgentPlan plan:
                  solution) {
-                this.conflictAvoidanceTable.add(plan);
+                this.conflictAvoidanceTable.addPlan(plan);
             }
             this.parent = null;
         }
