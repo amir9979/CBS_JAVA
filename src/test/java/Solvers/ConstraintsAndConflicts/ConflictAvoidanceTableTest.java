@@ -97,7 +97,7 @@ public class ConflictAvoidanceTableTest {
         a1_moves.add(new Move(a1,5, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
 
         a1_plan = new SingleAgentPlan(a1,a1_moves);
-        conflictAvoidanceTable.add(a1_plan);
+        conflictAvoidanceTable.addPlan(a1_plan);
 
 
 
@@ -115,7 +115,7 @@ public class ConflictAvoidanceTableTest {
 
 
         a2_plan = new SingleAgentPlan(a2,a2_moves);
-        conflictAvoidanceTable.add(a2_plan);
+        conflictAvoidanceTable.addPlan(a2_plan);
 
 
         /*      == Expected conflicts ==     */
@@ -153,7 +153,7 @@ public class ConflictAvoidanceTableTest {
         a1_moves.add(new Move(a1,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1))));
 
         a1_plan = new SingleAgentPlan(a1,a1_moves);
-        conflictAvoidanceTable.add(a1_plan);
+        conflictAvoidanceTable.addPlan(a1_plan);
 
 
 
@@ -170,7 +170,7 @@ public class ConflictAvoidanceTableTest {
 
 
         a2_plan = new SingleAgentPlan(a2,a2_moves);
-        conflictAvoidanceTable.add(a2_plan);
+        conflictAvoidanceTable.addPlan(a2_plan);
 
 
         /*      == Expected conflicts ==     */
@@ -216,7 +216,7 @@ public class ConflictAvoidanceTableTest {
         a1_moves.add(new Move(a1,5, mapH.getMapCell(new Coordinate_2D(1,3)),mapH.getMapCell(new Coordinate_2D(0,3))));
 
         a1_plan = new SingleAgentPlan(a1,a1_moves);
-        conflictAvoidanceTable.add(a1_plan);
+        conflictAvoidanceTable.addPlan(a1_plan);
 
         /*  = Add a2 Plan =
             { EE, WW, WW, EE},
@@ -239,7 +239,7 @@ public class ConflictAvoidanceTableTest {
         a2_moves.add(new Move(a2,5, mapH.getMapCell(new Coordinate_2D(1,3)), mapH.getMapCell(new Coordinate_2D(2,3))));
 
         a2_plan = new SingleAgentPlan(a2,a2_moves);
-        conflictAvoidanceTable.add(a2_plan);
+        conflictAvoidanceTable.addPlan(a2_plan);
 
 
         System.out.println("TwoAgentsWith4VertexConflicts_graphH: Done - Initialized two plans");
@@ -340,7 +340,7 @@ public class ConflictAvoidanceTableTest {
         a1_newMoves.add(new Move(a1,6, mapH.getMapCell(new Coordinate_2D(1,3)),mapH.getMapCell(new Coordinate_2D(0,3))));
 
         a1_newPlan = new SingleAgentPlan(a1,a1_newMoves);
-        copiedTable.add(a1_newPlan);
+        copiedTable.addPlan(a1_newPlan);
 
 
         System.out.println("TwoAgentsWith4VertexConflicts_graphH: Done - Add agent1 new plan");
@@ -387,7 +387,7 @@ public class ConflictAvoidanceTableTest {
         a1_moves.add(new Move(a1,5, mapH.getMapCell(new Coordinate_2D(1,3)),mapH.getMapCell(new Coordinate_2D(0,3))));
 
         a1_plan = new SingleAgentPlan(a1,a1_moves);
-        conflictAvoidanceTable.add(a1_plan);
+        conflictAvoidanceTable.addPlan(a1_plan);
 
 
         /*  = Add a2 Plan =
@@ -411,7 +411,7 @@ public class ConflictAvoidanceTableTest {
         a2_moves.add(new Move(a2,5, mapH.getMapCell(new Coordinate_2D(1,0)), mapH.getMapCell(new Coordinate_2D(2,0))));
 
         a2_plan = new SingleAgentPlan(a2,a2_moves);
-        conflictAvoidanceTable.add(a2_plan);
+        conflictAvoidanceTable.addPlan(a2_plan);
 
 
         System.out.println("TwoAgentsWith1SwappingConflict_graphH: Done - Initialized two plans");
@@ -507,7 +507,7 @@ public class ConflictAvoidanceTableTest {
         a1_newMoves.add(new Move(a1,6, mapH.getMapCell(new Coordinate_2D(1,3)),mapH.getMapCell(new Coordinate_2D(0,3))));
 
         a1_newPlan = new SingleAgentPlan(a1,a1_newMoves);
-        copiedTable.add(a1_newPlan);
+        copiedTable.addPlan(a1_newPlan);
 
 
         System.out.println("TwoAgentsWith1SwappingConflict_graphH: Done - Add agent1 new plan");

@@ -12,7 +12,7 @@ public interface I_ConflictAvoidanceTable {
      * @param singleAgentPlan a new {@link SingleAgentPlan}. The {@link SingleAgentPlan#agent} may already have a plan
      *                        in the table.
      */
-    void add(SingleAgentPlan singleAgentPlan);
+    void addPlan(SingleAgentPlan singleAgentPlan);
 
     /**
      * Selects the next {@link A_Conflict} that should be resolved.

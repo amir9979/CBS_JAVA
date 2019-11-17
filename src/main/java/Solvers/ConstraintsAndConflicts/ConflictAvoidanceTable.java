@@ -12,14 +12,20 @@ import java.util.*;
 public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     // first commit
 
-    public final Set<A_Conflict> allConflicts;
-    public final Map<Agent, Set<A_Conflict>> agent_Conflicts;
+    /*  = Data structures =   */
+    public final Set<A_Conflict> allConflicts; // Keeps all conflicts
+    private final Map<Agent, Set<A_Conflict>> agent_Conflicts; // Maps from Agent to all related conflicts
+
+    // Maps from a time&location to all relevant agents
     public final Map<TimeLocation, Set<Agent>> timeLocation_Agents;
+
+    // Maps from a location to all time units where at least one agent is occupying the location
     private final Map<I_MapCell,Set<Integer>> location_timeList;
-    public final Map<Agent,SingleAgentPlan> agent_plan;
-    public final ConflictSelectionStrategy conflictSelectionStrategy;
-    public final Map<I_MapCell,AgentAtGoal> goal_agentTime;
-    // public final Comparator<A_Conflict> comparator = Comparator.comparing((A_Conflict conflict) -> conflict.time);
+
+    private final Map<Agent,SingleAgentPlan> agent_plan; // Maps from Agent to Agent's plan
+    private final Map<I_MapCell,AgentAtGoal> goal_agentTime; // Maps from GoalLocation to Agent&time
+    private final ConflictSelectionStrategy conflictSelectionStrategy; // Strategy for selecting conflicts
+
 
 
     /**
@@ -27,7 +33,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
      * @param conflictSelectionStrategy how to choose conflicts.
      */
     public ConflictAvoidanceTable(ConflictSelectionStrategy conflictSelectionStrategy) {
-        /* Changed allConflicts from a HashSet to a TreeSet to make MinTimeConflictSelectionStrategy more efficient.
+        /* Might want to changed allConflicts from a HashSet to a TreeSet to make MinTimeConflictSelectionStrategy more efficient.
          If we want to make this more generic, we should scrap ConflictSelectionStrategy and instead make this field
          an instance of some new class, thus combining storage and selection of conflicts. @Jonathan Morag 28/10/2019
          */
@@ -89,16 +95,18 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
      * 1. All of previous plan {@link TimeLocation} from 'this.timeLocation_agent'
      * 2. The {@link AgentAtGoal} of the plan.
      * 3. All {@link A_Conflict} for every other {@link Agent} that it conflicts with from 'this.agent_conflicts'
-     * 4. The {@link Agent} of the new plan from 'this.agent_conflicts'
+     * 4. The {@link Agent} of the new plan from 'this.agent_conflicts' , 'this.location_timeList'
      * = Adds =
      * 1. The {@link SingleAgentPlan} to 'this.agent_plan'
-     * 2. All of the new plan {@link TimeLocation} to 'this.timeLocation_agent'
+     * 2. All of the new plan {@link TimeLocation} to 'this.timeLocation_agent' , 'this.location_timeList'
      * 3. All {@link A_Conflict} for every other {@link Agent} that it conflicts with to 'this.agent_conflicts'
+     * 4. All Conflicts regarding the goal of {@link SingleAgentPlan}
      *
-     * @param singleAgentPlan a new {@link SingleAgentPlan}. The {@link SingleAgentPlan#agent} may already have a plan
+     * @param singleAgentPlan a new {@link SingleAgentPlan}.
+     *                        The {@link SingleAgentPlan#agent} may already have a plan
      */
     @Override
-    public void add(SingleAgentPlan singleAgentPlan) {
+    public void addPlan(SingleAgentPlan singleAgentPlan) {
 
         /*  = Remove methods =  */
         SingleAgentPlan previousPlan = this.agent_plan.get(singleAgentPlan.agent);
@@ -116,6 +124,13 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
     /*  = Add methods =  */
 
+    /**
+     * = Adds =
+     * 2. All of plan's {@link TimeLocation} to {@link #timeLocation_Agents}, {@link #location_timeList}
+     * 3. All {@link A_Conflict} for every other {@link Agent} that it conflicts with to 'this.agent_conflicts'
+     * 4. All Conflicts regarding the goal of {@link SingleAgentPlan}
+     * @param singleAgentPlan - {@inheritDoc}
+     */
     private void addAgentNewPlan(SingleAgentPlan singleAgentPlan) {
 
         if ( singleAgentPlan == null ){
@@ -123,21 +138,22 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         }
 
         int agentFirstMoveTime = singleAgentPlan.getFirstMoveTime();
+        int goalTime = singleAgentPlan.getEndTime();
 
-        for (int time = agentFirstMoveTime; time <= singleAgentPlan.getEndTime(); time++) {
+        /*  Add time locations */
+        for (int time = agentFirstMoveTime; time <= goalTime; time++) {
+            // Move's from location is 'prevLocation' , therefor timeLocation is time - 1
             I_MapCell location = singleAgentPlan.moveAt(time).prevLocation;
             TimeLocation timeLocation = new TimeLocation(time - 1, location);
             this.addTimeLocation(timeLocation, singleAgentPlan);
         }
 
-        // Add the plan's goal location
-        int goalTime = singleAgentPlan.getEndTime();
+        // Add the plan's goal location, that's the currentLocation at the goalTime
         I_MapCell goalLocation = singleAgentPlan.moveAt(goalTime).currLocation;
         this.addTimeLocation(new TimeLocation(goalTime, goalLocation), singleAgentPlan);
 
 
-
-        // Add to goal_agentTime
+        // Add to goal_agentTime, 'put' method will update it's value if already exists
         this.goal_agentTime.put(goalLocation, new AgentAtGoal(singleAgentPlan.agent,goalTime));
 
         /*  = Check if this agentAtGoal conflicts with other agents =   */
@@ -146,8 +162,13 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     }
 
 
+    /**
+     * Updates {@link #timeLocation_Agents}, {@link #location_timeList}
+     * Calls {@link #addConflictsByTimeLocation(TimeLocation, SingleAgentPlan)}
+     * @param timeLocation - {@inheritDoc}
+     * @param singleAgentPlan - {@inheritDoc}
+     */
     private void addTimeLocation(TimeLocation timeLocation , SingleAgentPlan singleAgentPlan){
-
 
         this.timeLocation_Agents.computeIfAbsent(timeLocation, k -> new HashSet<>());
         this.timeLocation_Agents.get(timeLocation).add(singleAgentPlan.agent);
@@ -156,19 +177,29 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
         // Add conflict of time location
         addConflictsByTimeLocation(timeLocation, singleAgentPlan);// Checks for conflicts
-
     }
 
 
+    /**
+     * Checks if agent's {@link TimeLocation} at goal conflicts with other agents plans
+     * Adds
+     * @param timeLocation - {@inheritDoc}
+     * @param singleAgentPlan - {@inheritDoc}
+     */
     private void addVertexConflictsWithGoal(TimeLocation timeLocation, SingleAgentPlan singleAgentPlan){
 
         I_MapCell location = timeLocation.location;
         this.location_timeList.computeIfAbsent(location,k -> new HashSet<>());
+        // A Set of time that at least one agent is occupying
         Set<Integer> timeList = this.location_timeList.get(location);
+        timeList.add(timeLocation.time); // add the plan's timeLocation at goal
 
+        // Check if other plans are using this location after the agent arrived at goal
         for (int time : timeList) {
             if( time >= timeLocation.time){
                 Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(new TimeLocation(time,location));
+
+                // Adds if agent != agentAtTimeLocation
                 addVertexConflicts(new TimeLocation(time, location), singleAgentPlan.agent, agentsAtTimeLocation);
             }
         }
@@ -176,13 +207,24 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     }
 
 
+    /**
+     * Adds {@link A_Conflict} to {@link #agent_Conflicts}, {@link #allConflicts}
+     * @param agent - {@inheritDoc}
+     * @param conflict - {@inheritDoc}
+     */
     private void addConflictToAgent(Agent agent, A_Conflict conflict) {
-        this.agent_Conflicts.computeIfAbsent(agent, k -> new HashSet<A_Conflict>());
+        this.agent_Conflicts.computeIfAbsent(agent, k -> new HashSet<>());
         this.agent_Conflicts.get(agent).add(conflict);
         this.allConflicts.add(conflict);
     }
 
 
+    /**
+     * Adds {@link VertexConflict},{@link SwappingConflict} with agents at a given {@link TimeLocation}
+     * Check for {@link VertexConflict} with agents at their goal
+     * @param timeLocation - {@inheritDoc}
+     * @param singleAgentPlan - {@inheritDoc}
+     */
     private void addConflictsByTimeLocation(TimeLocation timeLocation, SingleAgentPlan singleAgentPlan) {
 
         Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
@@ -204,9 +246,12 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
 
     /***
-     * Looks for Swapping conflicts and add if exists
+     * Looks for {@link SwappingConflict}
+     * If {@link SwappingConflict} is found:
+     *      1. Create two {@link SwappingConflict} for both direction.
+     *      2. Add conflicts to both agents in {@link #agent_Conflicts}
      * @param time - The move's time.
-     * @param singleAgentPlan - Agent's plan
+     * @param singleAgentPlan - {@inheritDoc}
      */
     private void addSwappingConflicts(int time, SingleAgentPlan singleAgentPlan) {
         if( time < 1 ){ return;}
@@ -228,31 +273,38 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             if ( this.agent_plan.get(agentMovingToPrevPosition).moveAt(time).prevLocation.equals(nextLocation)){
 
 
-                // Add conflicts to both of the agents
+                // Create two conflicts
                 SwappingConflict swappingConflict_addedAgentFirst = new SwappingConflict(   singleAgentPlan.agent,
                                                                                             agentMovingToPrevPosition,
                                                                                             time,
                                                                                             nextLocation,
                                                                                             previousLocation);
 
+                SwappingConflict swappingConflict_addedAgentSecond = new SwappingConflict(  agentMovingToPrevPosition,
+                        singleAgentPlan.agent,
+                        time,
+                        previousLocation,
+                        nextLocation);
+
+
+
+                // Add conflicts to both of the agents
                 addConflictToAgent(singleAgentPlan.agent, swappingConflict_addedAgentFirst);
                 addConflictToAgent(agentMovingToPrevPosition, swappingConflict_addedAgentFirst);
-
-                SwappingConflict swappingConflict_addedAgentSecond = new SwappingConflict(  agentMovingToPrevPosition,
-                                                                                            singleAgentPlan.agent,
-                                                                                            time,
-                                                                                            previousLocation,
-                                                                                            nextLocation);
 
                 addConflictToAgent(singleAgentPlan.agent, swappingConflict_addedAgentSecond);
                 addConflictToAgent(agentMovingToPrevPosition, swappingConflict_addedAgentSecond);
             }
         }
-
     }
 
 
-
+    /**
+     * Adds {@link VertexConflict} with other agents at a given {@link TimeLocation}
+     * @param timeLocation - {@inheritDoc}
+     * @param agent - {@inheritDoc}
+     * @param agentsAtTimeLocation - {@inheritDoc}
+     */
     private void addVertexConflicts(TimeLocation timeLocation, Agent agent, Set<Agent> agentsAtTimeLocation) {
 
         if( agentsAtTimeLocation == null ){
@@ -264,6 +316,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
                 continue; // Self Conflict
             }
             VertexConflict vertexConflict = new VertexConflict(agent,agentConflictsWith,timeLocation);
+
             // Add conflict to both of the agents
             addConflictToAgent(agent, vertexConflict);
             addConflictToAgent(agentConflictsWith, vertexConflict);
@@ -276,6 +329,14 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
 
     /*  = Remove methods =  */
 
+    /**
+     * Agent has a new plan, therefor the old plan needs to be removed.
+     * Removes the plan's goal location from:
+     *    1. this.timeLocation_Agents
+     *    2. this.location_timeList
+     *    3. this.goal_agentTime
+     * @param previousPlan - Agent's previous plan in {@link #agent_plan}
+     */
     private void removeAgentPreviousPlan(SingleAgentPlan previousPlan) {
         if ( previousPlan == null ){
             return; // Agent has no previous plan
@@ -285,21 +346,21 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
             Move prevMove = previousPlan.moveAt(time);
             if ( prevMove != null ){
                 TimeLocation timeLocation = new TimeLocation(time - 1, prevMove.prevLocation);
+                // 1. remove from this.timeLocation_Agents
+                // 2. remove from this.location_timeList
                 this.removeTimeLocation(timeLocation, previousPlan);
             }
         }
 
-
-        /* Remove the plan's goal location from:
-              1. this.timeLocation_Agents
-              2. this.location_timeList
-              3. this.goal_agentTime
-        */
+        /*  = Plan's goal =  */
         int goalTime = previousPlan.size();
         I_MapCell goalLocation = previousPlan.moveAt(goalTime).currLocation;
         TimeLocation timeLocation = new TimeLocation(goalTime, goalLocation);
+        // 1. remove from this.timeLocation_Agents
+        // 2. remove from this.location_timeList
         this.removeTimeLocation(timeLocation, previousPlan);
 
+        // 3. remove from this.goal_agentTime
         AgentAtGoal agentAtGoal = this.goal_agentTime.get(goalLocation);
         if ( agentAtGoal != null ){
             this.goal_agentTime.remove(goalLocation);
@@ -309,18 +370,30 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
     }
 
 
+    /**
+     * Removes {@link TimeLocation}
+     *      1. remove from {@link #timeLocation_Agents}
+     *      2. remove from {@link #location_timeList}
+     * @param timeLocation - agent's {@link TimeLocation} to remove
+     * @param plan - agent's {@link SingleAgentPlan} to remove
+     */
     private void removeTimeLocation(TimeLocation timeLocation, SingleAgentPlan plan){
 
         Set<Agent> agentsAtTimeLocation = this.timeLocation_Agents.get(timeLocation);
         agentsAtTimeLocation.remove(plan.agent);
         if (agentsAtTimeLocation.isEmpty()){
             this.timeLocation_Agents.remove(timeLocation);
-            this.location_timeList.remove(timeLocation.location);
+            this.location_timeList.remove(timeLocation.location); // No agents at this timeLocation
         }
-
     }
 
 
+    /**
+     * Removes all agent's conflicts:
+     *      1. Removes from {@link #agent_Conflicts}
+     *      2. Removes from {@link #allConflicts}
+     * @param agent
+     */
     private void removeAgentConflicts(Agent agent) {
 
         Set<A_Conflict> agent_conflict = this.agent_Conflicts.get(agent);
@@ -332,7 +405,7 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         for (A_Conflict conflictToRemove : agent_conflict) {
             Agent conflictsWith = (agent == conflictToRemove.agent1 ? conflictToRemove.agent2 : conflictToRemove.agent1);
             this.agent_Conflicts.get(conflictsWith).remove(conflictToRemove);
-            if ( this.agent_Conflicts.get(conflictsWith).size() == 0 ){
+            if ( this.agent_Conflicts.get(conflictsWith).isEmpty()){
                 this.agent_Conflicts.remove(conflictsWith); // Has no more conflicts
             }
             this.allConflicts.remove(conflictToRemove); // Remove conflicts
@@ -362,6 +435,12 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         public int time;
         public I_MapCell location;
 
+        /**
+         * This class Wraps up both time and location as one element.
+         * Class is used in timeLocation_agents data structure
+         * @param time - An int of the time unit in the solution
+         * @param location - {@inheritDoc}
+         */
         public TimeLocation(int time, I_MapCell location) {
             this.time = time;
             this.location = location;
@@ -387,6 +466,11 @@ public class ConflictAvoidanceTable implements I_ConflictAvoidanceTable {
         public final Agent agent;
         public final int time;
 
+        /**
+         *
+         * @param agent - {@inheritDoc}
+         * @param time - An int of the time unit in the solution
+         */
         public AgentAtGoal(Agent agent, int time) {
             this.agent = agent;
             this.time = time;
