@@ -140,8 +140,52 @@ public class ConstraintSet{
     }
 
     /**
+     * Given a {@link Move} which an {@link Instances.Agents.Agent agent} makes to occupy a {@link I_MapCell location}
+     * indefinitely starting after move's time, checks if there is a {@link Constraint} that would reject it eventually.
+     *
+     * In other words, we simulate this set being given an infinite number of "stay" moves after the given move.
+     *
+     * This method can be expensive in large sets, as it traverses all of {@link #constraints}.
+     * @param finalMove a move to occupy a location indefinitely.
+     * @return the first time when a constraint would eventually reject a "stay" move at the given move's location; -1 if never rejected.
+     */
+    public int rejectsEventually(Move finalMove){
+        int firstRejectionTime = Integer.MAX_VALUE;
+        // traverses the entire data structure. expensive.
+        for (ConstraintWrapper cw :
+                constraints.keySet()) {
+            //found constraint for this location, sometime in the future. Should be rare.
+            if(cw.time > finalMove.timeNow && cw.location.equals(finalMove.currLocation)){
+                for (Constraint constraint :
+                        cw.relevantConstraints) {
+                    // make an artificial "stay" move for the relevant time.
+                    // In practice, this should happen very rarely, so not very expensive.
+                    if(constraint.rejects(new Move(finalMove.agent, cw.time, finalMove.currLocation, finalMove.currLocation))
+                            && cw.time < firstRejectionTime){
+                        firstRejectionTime = cw.time;
+                    }
+                }
+            }
+        }
+
+        return firstRejectionTime == Integer.MAX_VALUE ? -1 : firstRejectionTime;
+    }
+
+    /**
+     * The opposite of {@link #rejectsEventually(Move)}.
+     * @param finalMove a move to occupy a location indefinitely.
+     * @return true if no constraint would eventually reject a "stay" move at the given move's location.
+     */
+    public boolean acceptsForever(Move finalMove){
+        return rejectsEventually(finalMove) == -1;
+    }
+
+    /**
      * Returns true iff any of the {@link Constraint}s that were {@link #add(Constraint) added} to this set conflict with
      * the given {@link Move}.
+     *
+     * Doesn't assume that the last move means stay at goal forever.
+     * @see #acceptsForever(Move)
      * @param moves a {@link Collection} of {@link Move}s to check if the are ejected or not.
      * @return true iff all of the given {@link Move}s conflict with any of the {@link Constraint}s that were
      *          {@link #add(Constraint) added} to this set.
@@ -156,7 +200,11 @@ public class ConstraintSet{
     }
 
     /**
+     * Returns true iff none of the {@link Constraint}s that were {@link #add(Constraint) added} to this set conflict with
+     * the given {@link Move}.
      *
+     * Doesn't assume that the last move means stay at goal forever.
+     * @see #acceptsForever(Move)
      * @param moves
      * @return the opposite of {@link #rejectsAll(Collection)}.
      */

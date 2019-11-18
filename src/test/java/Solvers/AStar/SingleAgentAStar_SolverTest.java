@@ -297,4 +297,76 @@ class SingleAgentAStar_SolverTest {
 
         assertNull(solved);
     }
+
+    @Test
+    void accountsForConstraintAfterReachingGoal() {
+        MAPF_Instance testInstance = instanceEmpty1;
+        Agent agent = testInstance.agents.get(0);
+        Constraint constraintAtTimeAfterReachingGoal = new Constraint(agent,9, null, instanceEmpty1.map.getMapCell(coor05));
+        ConstraintSet constraints = new ConstraintSet();
+        constraints.add(constraintAtTimeAfterReachingGoal);
+        RunParameters runParameters = new RunParameters(constraints);
+
+        Solution solved1 = aStar.solve(testInstance, runParameters);
+
+        //was made longer because it has to come back to goal after avoiding the constraint
+        assertEquals(10, solved1.getPlanFor(agent).size());
+    }
+
+    @Test
+    void accountsForMultipleConstraintsAfterReachingGoal() {
+        MAPF_Instance testInstance = instanceEmpty1;
+        Agent agent = testInstance.agents.get(0);
+        Constraint constraintAtTimeAfterReachingGoal1 = new Constraint(agent,9, null, instanceEmpty1.map.getMapCell(coor05));
+        Constraint constraintAtTimeAfterReachingGoal2 = new Constraint(agent,13, null, instanceEmpty1.map.getMapCell(coor05));
+        Constraint constraintAtTimeAfterReachingGoal3 = new Constraint(agent,14, null, instanceEmpty1.map.getMapCell(coor05));
+        ConstraintSet constraints = new ConstraintSet();
+        constraints.add(constraintAtTimeAfterReachingGoal1);
+        constraints.add(constraintAtTimeAfterReachingGoal2);
+        constraints.add(constraintAtTimeAfterReachingGoal3);
+        RunParameters runParameters = new RunParameters(constraints);
+
+        Solution solved1 = aStar.solve(testInstance, runParameters);
+
+        //was made longer because it has to come back to goal after avoiding the constraint
+        assertEquals(15, solved1.getPlanFor(agent).size());
+    }
+
+    @Test
+    void accountsForMultipleConstraintsAfterReachingGoal2() {
+        // now with an expected plan
+
+        MAPF_Instance testInstance = instanceCircle2;
+        Agent agent = testInstance.agents.get(0);
+
+        Constraint constraintAtTimeAfterReachingGoal1 = new Constraint(agent,5, null, cell33);
+        ConstraintSet constraints = new ConstraintSet();
+        constraints.add(constraintAtTimeAfterReachingGoal1);
+        RunParameters runParameters = new RunParameters(constraints);
+
+        Solution solved = aStar.solve(testInstance, runParameters);
+
+        SingleAgentPlan plan1 = new SingleAgentPlan(agent);
+        plan1.addMove(new Move(agent, 1, cell12, cell22));
+        plan1.addMove(new Move(agent, 2, cell22, cell32));
+        plan1.addMove(new Move(agent, 3, cell32, cell33));
+        plan1.addMove(new Move(agent, 4, cell33, cell33));
+        plan1.addMove(new Move(agent, 5, cell33, cell32));
+        plan1.addMove(new Move(agent, 6, cell32, cell33));
+        Solution expected1 = new Solution();
+        expected1.putPlan(plan1);
+
+        SingleAgentPlan plan2 = new SingleAgentPlan(agent);
+        plan2.addMove(new Move(agent, 1, cell12, cell22));
+        plan2.addMove(new Move(agent, 2, cell22, cell32));
+        plan2.addMove(new Move(agent, 3, cell32, cell33));
+        plan2.addMove(new Move(agent, 4, cell33, cell33));
+        plan2.addMove(new Move(agent, 5, cell33, cell34));
+        plan2.addMove(new Move(agent, 6, cell34, cell33));
+        Solution expected2 = new Solution();
+        expected2.putPlan(plan2);
+
+        assertEquals(6, solved.getPlanFor(agent).size());
+        assertTrue(expected1.equals(solved) || expected2.equals(solved));
+    }
 }

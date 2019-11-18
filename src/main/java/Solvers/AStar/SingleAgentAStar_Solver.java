@@ -104,23 +104,42 @@ public class SingleAgentAStar_Solver extends A_Solver {
         return solveAStar();
     }
 
+    /**
+     * Solves AStar for a single agent.
+     * Assumes only 1 goal state - otherwise there may be problems when accounting for constraints at goal that come after reaching goal.
+     * @return a solution that contains a plan for the {@link #agent} to its goal.
+     */
     protected Solution solveAStar() {
         // if failed to init OPEN then the problem cannot be solved as defined (bad constraints? bad existing plan?)
         if (!initOpen()) return null;
 
-        while (!openList.isEmpty() ){
+        AStarState currentState;
+        int firstRejectionAtGoalTime = -1;
+
+        while ((currentState = openList.poll()) != null){ //dequeu in the if
             if(checkTimeout()) {return null;}
-            //dequeu
-            AStarState currentState = openList.poll();
+            closed.add(currentState);
 
             // todo change to early goal test!
             if (isGoalState(currentState)){
-                currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
-                return this.existingSolution;
+                // check to see if a rejecting constraint on the goal exists at some point in the future.
+
+                // smaller means we have passed the current rejection (if one existed) and should check if another exists.
+                // shouldn't be equal because such a state would not be generated
+                if(firstRejectionAtGoalTime < currentState.move.timeNow) {
+                    // do the expensive update/check
+                    firstRejectionAtGoalTime = constraints.rejectsEventually(currentState.move);
+                }
+
+                if(firstRejectionAtGoalTime == -1){ // no rejections. done!
+                    currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
+                    return this.existingSolution; // the goal is good and we can return the plan.
+                }
+                else{ // we are rejected from the goal at some point in the future. expand.
+                    currentState.expand();
+                }
             }
             else{ //expand
-                closed.add(currentState);
-                this.expandedNodes++;
                 currentState.expand(); //doesn't generate closed or duplicate states
             }
         }
@@ -169,6 +188,42 @@ public class SingleAgentAStar_Solver extends A_Solver {
     private boolean isGoalState(AStarState state) {
         return state.move.currLocation.getCoordinate().equals(agent.target);
     }
+
+//    private boolean handleGoalFound(AStarState goalState) {
+//        /* also check that we can stay at goal forever. This check is somewhat expensive. */
+//        int firstRejectionTime = constraints.rejectsEventually(goalState.move);
+//        if(firstRejectionTime == -1){ // no rejections. done!
+//            goalState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
+//            return true; // the goal is good and we can return the plan.
+//        }
+//        else{
+//            /*
+//                We form a sequence of "stay" moves from the goal we found, until just before being rejected. We
+//                then solve a smaller problem around that problematic time. This continues recursively until all
+//                rejecting constraints at the goal are handled.
+//             */
+//
+//            // clear OPEN in preparation
+//            openList.clear();
+//
+//            // stay at goal until before we are rejected
+//            AStarState currentState = goalState;
+//            int time = goalState.move.timeNow + 1;
+//            while (time < firstRejectionTime){
+//                Move stayMove = new Move(this.agent, time, goalState.move.currLocation, goalState.move.currLocation);
+//                AStarState nextState = new AStarState(stayMove, currentState, currentState.g + 1);
+//
+//                currentState = nextState;
+//                time++;
+//            }
+//
+//            // expand the latest state that is not rejected
+//            currentState.expand();
+//
+//            // there is a future problem and we must continue the search to overcome that problem.
+//            return false;
+//        }
+//    }
 
     /*  = wind down =  */
 
@@ -237,6 +292,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
         }
 
         public void expand() {
+            expandedNodes++;
             // can move to neighboring cells or stay put
             List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(this.move.currLocation.getNeighbors());
             neighborCellsIncludingCurrent.add(this.move.currLocation);

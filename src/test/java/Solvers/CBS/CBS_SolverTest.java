@@ -189,14 +189,17 @@ class CBS_SolverTest {
         MAPF_Instance instance = null;
         // load the pre-made benchmark
         try {
+            long timeout = 20*1000L;
             Map<String, Map<String, String>> benchmarks = readResultsCSV(path + "\\Results.csv");
-            int numSolved = 0 ;
-            int numValid = 0 ;
+            int numSolved = 0;
+            int numFailed = 0;
+            int numValid = 0;
             int numOptimal = 0;
             int numValidSuboptimal = 0;
             int numInvalidOptimal = 0;
             // run all benchmark instances. this code is mostly copied from Experiment.
             while ((instance = instanceManager.getNextInstance()) != null) {
+//                if(!instance.name.equals("Instance-32-20-20-6")) continue;
                 System.gc();
                 //build report
                 InstanceReport report = S_Metrics.newInstanceReport();
@@ -205,7 +208,7 @@ class CBS_SolverTest {
                 report.putIntegerValue(InstanceReport.StandardFields.numAgents, instance.agents.size());
                 report.putStringValue(InstanceReport.StandardFields.solver, solver.getClass().getSimpleName());
 
-                RunParameters runParameters = new RunParameters(20*1000L, null, report, null);
+                RunParameters runParameters = new RunParameters(timeout, null, report, null);
 
                 //solve
                 System.out.println("---------- solving "  + instance.name + " ----------");
@@ -222,6 +225,7 @@ class CBS_SolverTest {
                 System.out.println("Solved?: " + (solved ? "yes" : "no"));
                 //assertNotNull(solution);
                 if (solved) numSolved++;
+                else numFailed++;
 
                 if(solution != null){
                     boolean valid = solution.isValidSolution();
@@ -243,7 +247,9 @@ class CBS_SolverTest {
             }
 
             System.out.println("--- TOTALS: ---");
+            System.out.println("timeout for each (seconds): " + (timeout/1000));
             System.out.println("solved: " + numSolved);
+            System.out.println("failed: " + numFailed);
             System.out.println("valid: " + numValid);
             System.out.println("optimal: " + numOptimal);
             System.out.println("valid but not optimal: " + numValidSuboptimal);
@@ -267,8 +273,7 @@ class CBS_SolverTest {
                                 InstanceReport.StandardFields.elapsedTimeMS,
                                 InstanceReport.StandardFields.solutionCost,
                                 InstanceReport.StandardFields.generatedNodes,
-                                InstanceReport.StandardFields.expandedNodes,
-                                InstanceReport.StandardFields.solution});
+                                InstanceReport.StandardFields.expandedNodes});
             } catch (IOException e) {
                 e.printStackTrace();
             }
