@@ -37,7 +37,7 @@ public class InstanceReport {
         public final static String startDateTime = "Start Date";
         public final static String endDateTime = "End Date";
         public final static String elapsedTimeMS = "Elapsed Time (ms)";
-        public final static String TotalLowLevelTimeMS = "Total Low Level Time (ms)";
+        public final static String totalLowLevelTimeMS = "Total Low Level Time (ms)";
         public final static String timeoutThresholdMS = "Timeout Threshold";
         public final static String solved = "Solved";
         public final static String solutionCost = "Solution Cost";

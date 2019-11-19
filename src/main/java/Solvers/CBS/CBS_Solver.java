@@ -268,7 +268,7 @@ public class CBS_Solver extends A_Solver {
         Integer statesExpanded = subproblemReport.getIntegerValue(InstanceReport.StandardFields.expandedNodesLowLevel);
         super.totalLowLevelStatesExpanded += statesExpanded==null ? 0 : statesExpanded;
         Integer lowLevelRuntime = subproblemReport.getIntegerValue(InstanceReport.StandardFields.elapsedTimeMS);
-        super.instanceReport.integerAddition(InstanceReport.StandardFields.TotalLowLevelTimeMS, lowLevelRuntime);
+        super.instanceReport.integerAddition(InstanceReport.StandardFields.totalLowLevelTimeMS, lowLevelRuntime);
         //we consolidate the subproblem report into the main report, and remove the subproblem report.
         S_Metrics.removeReport(subproblemReport);
     }

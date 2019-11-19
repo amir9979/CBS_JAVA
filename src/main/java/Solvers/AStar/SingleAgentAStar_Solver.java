@@ -106,7 +106,8 @@ public class SingleAgentAStar_Solver extends A_Solver {
 
     /**
      * Solves AStar for a single agent.
-     * Assumes only 1 goal state - otherwise there may be problems when accounting for constraints at goal that come after reaching goal.
+     * Assumes just 1 goal {@link I_MapCell location} - otherwise there may be problems when accounting for constraints
+     * at goal, that come after reaching goal.
      * @return a solution that contains a plan for the {@link #agent} to its goal.
      */
     protected Solution solveAStar() {
@@ -135,7 +136,13 @@ public class SingleAgentAStar_Solver extends A_Solver {
                     currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
                     return this.existingSolution; // the goal is good and we can return the plan.
                 }
-                else{ // we are rejected from the goal at some point in the future. expand.
+                else{ // we are rejected from the goal at some point in the future.
+                    // We clear OPEN because we have already found an optimal plan to the goal.
+                    openList.clear();
+                    /*
+                    We then solve a smaller search problem where we make a plan from the goal at time t[x], to the goal
+                    at time t[y+1], where y is the time of the future constraint.
+                     */
                     currentState.expand();
                 }
             }

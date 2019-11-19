@@ -189,7 +189,7 @@ class CBS_SolverTest {
         MAPF_Instance instance = null;
         // load the pre-made benchmark
         try {
-            long timeout = 20*1000L;
+            long timeout = 30*1000L;
             Map<String, Map<String, String>> benchmarks = readResultsCSV(path + "\\Results.csv");
             int numSolved = 0;
             int numFailed = 0;
@@ -199,7 +199,10 @@ class CBS_SolverTest {
             int numInvalidOptimal = 0;
             // run all benchmark instances. this code is mostly copied from Experiment.
             while ((instance = instanceManager.getNextInstance()) != null) {
-//                if(!instance.name.equals("Instance-32-20-20-6")) continue;
+//                if(!instance.name.equals("kiva-5-9")) continue;
+
+                if(instance.name.equals("Instance-32-20-20-8")) continue;
+                if(instance.name.equals("Instance-32-20-10-8")) continue;
                 System.gc();
                 //build report
                 InstanceReport report = S_Metrics.newInstanceReport();
@@ -237,7 +240,11 @@ class CBS_SolverTest {
                     boolean optimal = optimalCost==costWeGot;
                     System.out.println("cost is " + (optimal ? "optimal (" + costWeGot +")" :
                             ("not optimal (" + costWeGot + " instead of " + optimalCost + ")")));
+                    report.putIntegerValue("Cost Delta", costWeGot - optimalCost);
                     //assertEquals(optimalCost, costWeGot);
+
+                    report.putIntegerValue("Runtime Delta",
+                            report.getIntegerValue(InstanceReport.StandardFields.elapsedTimeMS) - (int)Float.parseFloat(benchmarkForInstance.get("Plan time")));
 
                     if(valid) numValid++;
                     if(optimal) numOptimal++;
@@ -257,21 +264,24 @@ class CBS_SolverTest {
 
             //save results
             DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
-            String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
-                    "\\Reports default directory"});
+//            String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
+//                    "\\Reports default directory"});
+            String resultsOutputDir = IO_Manager.buildPath(new String[]{   System.getProperty("user.home"), "desktop" , "tests"});
             String updatedPath = resultsOutputDir + "\\results "
-//                    + dateFormat.format(System.currentTimeMillis())
+                    + dateFormat.format(System.currentTimeMillis())
                     + ".csv";
             try {
                 S_Metrics.exportCSV(new FileOutputStream(updatedPath),
                         new String[]{
                                 InstanceReport.StandardFields.mapName,
                                 InstanceReport.StandardFields.numAgents,
-                                InstanceReport.StandardFields.obstaclePercentage,
                                 InstanceReport.StandardFields.timeoutThresholdMS,
                                 InstanceReport.StandardFields.solved,
                                 InstanceReport.StandardFields.elapsedTimeMS,
+                                "Runtime Delta",
                                 InstanceReport.StandardFields.solutionCost,
+                                "Cost Delta",
+                                InstanceReport.StandardFields.totalLowLevelTimeMS,
                                 InstanceReport.StandardFields.generatedNodes,
                                 InstanceReport.StandardFields.expandedNodes});
             } catch (IOException e) {
