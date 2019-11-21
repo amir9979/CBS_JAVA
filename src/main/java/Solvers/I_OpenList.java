@@ -17,15 +17,6 @@ public interface I_OpenList<E> extends Queue<E> {
     E get(E e);
 
     /**
-     * Replaces the first element with the second element. These elements can be equal. If e1 is not in the open list,
-     * calling this method is the same as calling {@link #add(Object)} on e2.
-     * @param e1 the element to remove. @NotNull
-     * @param e2 the element to keep. @NotNull
-     * @return the element that was removed if any element was removed, otherwise returns null.
-     */
-    E replace(E e1, E e2);
-
-    /**
      * Keeps the "smaller" element as determined by the given {@link Comparator}. Meaning, if
      * criteria.compare(e1, e2) <= 0 , e1 will be kept, otherwise e2 will be kept.
      * These elements can be equal by other criteria, including their natural ordering and {@link #equals(Object)} method.

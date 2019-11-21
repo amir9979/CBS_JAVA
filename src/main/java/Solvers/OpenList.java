@@ -53,8 +53,7 @@ public class OpenList<E> implements I_OpenList<E> {
         return this.map.get(e);
     }
 
-    @Override
-    public E replace(E e1, E e2) {
+    private E replace(E e1, E e2) {
         boolean removed = this.remove(e1);
         this.add(e2);
         return removed ? e1 : null;
@@ -98,10 +97,17 @@ public class OpenList<E> implements I_OpenList<E> {
         return queue.toArray(a);
     }
 
-
+    /**
+     * If an element already exists so that e.equals(existing), it will be removed.
+     * @param e {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public boolean add(E e) {
-        map.put(e, e);
+        E removed = map.put(e, e);
+        if(removed != null && !removed.equals(e)){ // existing equal element was replaced
+            queue.remove(removed);
+        }
         return queue.add(e);
     }
 
