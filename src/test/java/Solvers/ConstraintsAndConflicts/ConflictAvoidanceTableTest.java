@@ -175,7 +175,7 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected conflicts ==     */
 
-        SwappingConflict expectedConflict_time1 = new SwappingConflict(a1,a2,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)));
+        SwappingConflict expectedConflict_time1 = new SwappingConflict(a1,a2,1, this.mapTwoCells.getMapCell(new Coordinate_2D(0,1)), this.mapTwoCells.getMapCell(new Coordinate_2D(0,0)));
 
         HashSet<A_Conflict> expectedSet = new HashSet<>();
         expectedSet.add(expectedConflict_time1);
@@ -473,7 +473,7 @@ public class ConflictAvoidanceTableTest {
 
         /*      == Expected conflicts ==     */
 
-        SwappingConflict expectedConflict_time3 = new SwappingConflict(a1,a2,3,mapH.getMapCell(new Coordinate_2D(1,1)),mapH.getMapCell(new Coordinate_2D(1,2)));
+        SwappingConflict expectedConflict_time3 = new SwappingConflict(a1,a2,3,mapH.getMapCell(new Coordinate_2D(1,2)),mapH.getMapCell(new Coordinate_2D(1,1)));
 
         HashSet<A_Conflict> expectedSet = new HashSet<>();
         expectedSet.add(expectedConflict_time3);

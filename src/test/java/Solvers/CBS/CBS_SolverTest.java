@@ -189,7 +189,8 @@ class CBS_SolverTest {
         MAPF_Instance instance = null;
         // load the pre-made benchmark
         try {
-            long timeout = 30*1000L;
+            long timeout = 90 /*seconds*/
+                    *1000L;
             Map<String, Map<String, String>> benchmarks = readResultsCSV(path + "\\Results.csv");
             int numSolved = 0;
             int numFailed = 0;
@@ -199,10 +200,9 @@ class CBS_SolverTest {
             int numInvalidOptimal = 0;
             // run all benchmark instances. this code is mostly copied from Experiment.
             while ((instance = instanceManager.getNextInstance()) != null) {
-//                if(!instance.name.equals("kiva-5-9")) continue;
 
-                if(instance.name.equals("Instance-32-20-20-8")) continue;
-                if(instance.name.equals("Instance-32-20-10-8")) continue;
+//                if(!instance.name.equals("Instance-32-20-20-8")) continue;
+//                if(!instance.name.equals("Instance-32-20-10-8")) continue;
                 System.gc();
                 //build report
                 InstanceReport report = S_Metrics.newInstanceReport();

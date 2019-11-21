@@ -9,6 +9,10 @@ import java.util.Objects;
 /**
  * Represents a conflict between 2 {@link Agent}s which are swapping their {@link I_MapCell locations} at a certain time.
  * This is known as s Swapping Conflict or an Edge Conflict.
+ *
+ * The order of agents is not unimportant, but the destinations must correctly correspond to their agents - {@link #location}
+ * for {@link #agent1}'s destination, and {@link #agent2_destination} for {@link #agent2}'s destination.
+ * An equivalent conflict would have both agents and destinations reversed.
  */
 public class SwappingConflict extends A_Conflict{
     /**
@@ -52,18 +56,35 @@ public class SwappingConflict extends A_Conflict{
                 && move2.prevLocation.equals(move1.currLocation);
     }
 
-
+    /**
+     * Two {@link SwappingConflict}s are equal if all of their fields are equal, or if they are a mirror image, meaning
+     * both their agent order and destination order are reversed.
+     * @param o {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SwappingConflict)) return false;
-        if (!super.equals(o)) return false;
         SwappingConflict that = (SwappingConflict) o;
-        return Objects.equals(agent2_destination, that.agent2_destination);
+        return time == that.time &&
+                ( // all equals
+                    Objects.equals(agent1, that.agent1) &&
+                    Objects.equals(agent2, that.agent2) &&
+                    Objects.equals(location, that.location) &&
+                    Objects.equals(agent2_destination, that.agent2_destination)
+                )
+                ||
+                ( // mirror image
+                    Objects.equals(agent1, that.agent2) &&
+                    Objects.equals(agent2, that.agent1) &&
+                    Objects.equals(location, that.agent2_destination) &&
+                    Objects.equals(agent2_destination, that.location)
+                );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), agent2_destination);
+        return Objects.hash(time, (Objects.hash(agent2, agent2_destination) + Objects.hash(agent1, location)) );
     }
 }
