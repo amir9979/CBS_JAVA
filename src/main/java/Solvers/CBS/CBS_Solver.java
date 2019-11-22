@@ -18,7 +18,7 @@ public class CBS_Solver extends A_Solver {
 
     /*  = Fields =  */
 
-    private static Comparator<? super CBS_Node> nodeComparator = Comparator.comparing(CBS_Node::getSolutionCost);
+    private static Comparator<? super CBS_Node> nodeCostFunction = Comparator.comparing(CBS_Node::getSolutionCost);
 
     /*  =  = Fields related to the MAPF instance  =  */
 
@@ -111,7 +111,7 @@ public class CBS_Solver extends A_Solver {
     private void initOpen(ConstraintSet initialConstraints) {
         if(this.openListManagementMode == OpenListManagementMode.AUTOMATIC ||
                 this.openListManagementMode == OpenListManagementMode.AUTO_INIT_MANUAL_CLEAR){
-            openList.add(generateRoot(initialConstraints));
+            addToOpen(generateRoot(initialConstraints));
         }
     }
 
@@ -188,8 +188,26 @@ public class CBS_Solver extends A_Solver {
         if(node.leftChild == null || node.rightChild == null){
             return; //probably a timeout in the low level. should abort.
         }
-        openList.add(node.leftChild);
-        openList.add(node.rightChild);
+        addToOpen(node.leftChild);
+        addToOpen(node.rightChild);
+    }
+
+    /**
+     * Adds a node to {@link #openList OPEN}. If a duplicate node exists, keeps the one with less cost.
+     * @param node a node to insert into {@link #openList OPEN}
+     * @return true if {@link #openList OPEN} changed as a result of the call.
+     */
+    private boolean addToOpen(CBS_Node node) {
+        return openList.add(node);
+        // for duplicate detection, if needed:
+//        if(!openList.contains(node)){
+//            return openList.add(node);
+//        }
+//        else{ //keep the one with least cost
+//            CBS_Node existingNode = openList.get(node);
+//            CBS_Node keptNode = openList.keepOne(existingNode, node, CBS_Node::compareTo);
+//            return keptNode.equals(node);
+//        }
     }
 
     /**
@@ -482,8 +500,34 @@ public class CBS_Solver extends A_Solver {
 
         @Override
         public int compareTo(CBS_Node o) {
-            return Objects.compare(this, o, CBS_Solver.nodeComparator);
+            return Objects.compare(this, o, CBS_Solver.nodeCostFunction);
         }
+
+        // for duplicate detection, if needed:
+//        /**
+//         * Determined by {@link #constraints} only.
+//         * @param o {@inheritDoc}
+//         * @return {@inheritDoc}
+//         */
+//        @Override
+//        public boolean equals(Object o) {
+//            if (this == o) return true;
+//            if (!(o instanceof CBS_Node)) return false;
+//
+//            CBS_Node cbs_node = (CBS_Node) o;
+//
+//            return constraints.equals(cbs_node.constraints);
+//
+//        }
+//
+//        /**
+//         * Determined by {@link #constraints} only.
+//         * @return {@inheritDoc}
+//         */
+//        @Override
+//        public int hashCode() {
+//            return constraints.hashCode();
+//        }
     }
 
 

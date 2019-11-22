@@ -236,6 +236,22 @@ public class ConstraintSet{
         this.constraints.keySet().removeIf(constraintWrapper -> constraintWrapper.time < minTime || constraintWrapper.time >= maxTime);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConstraintSet)) return false;
+
+        ConstraintSet that = (ConstraintSet) o;
+
+        return originalConstraints.equals(that.originalConstraints);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return originalConstraints.hashCode();
+    }
+
     /**
      * replaces the constraint with a simple wrapper that is quick to find in a set.
      */

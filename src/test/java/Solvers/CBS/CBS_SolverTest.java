@@ -15,10 +15,7 @@ import Solvers.Solution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -189,7 +186,7 @@ class CBS_SolverTest {
         MAPF_Instance instance = null;
         // load the pre-made benchmark
         try {
-            long timeout = 90 /*seconds*/
+            long timeout = 30 /*seconds*/
                     *1000L;
             Map<String, Map<String, String>> benchmarks = readResultsCSV(path + "\\Results.csv");
             int numSolved = 0;
@@ -264,12 +261,14 @@ class CBS_SolverTest {
 
             //save results
             DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
+            String resultsOutputDir = IO_Manager.buildPath(new String[]{   System.getProperty("user.home"), "desktop" , "cbs_tests"});
+            File directory = new File(resultsOutputDir);
+            if (! directory.exists()){
+                directory.mkdir();
+            }
 //            String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
 //                    "\\Reports default directory"});
-            String resultsOutputDir = IO_Manager.buildPath(new String[]{   System.getProperty("user.home"), "desktop" , "tests"});
-            String updatedPath = resultsOutputDir + "\\results "
-                    + dateFormat.format(System.currentTimeMillis())
-                    + ".csv";
+            String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
             try {
                 S_Metrics.exportCSV(new FileOutputStream(updatedPath),
                         new String[]{
