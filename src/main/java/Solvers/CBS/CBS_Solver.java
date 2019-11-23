@@ -155,13 +155,13 @@ public class CBS_Solver extends A_Solver {
     }
 
     /**
-     * When a node is first generated, it is given the same {@link ConflictAvoidanceTable} as its parent. Only when that
+     * When a node is first generated, it is given the same {@link ConflictManager} as its parent. Only when that
      * node is later dequeued from {@link #openList}, will we update the table.
-     * @param node a {@link CBS_Node node} that contains an out of date {@link ConflictAvoidanceTable}.
+     * @param node a {@link CBS_Node node} that contains an out of date {@link ConflictManager}.
      */
     private void updateConflictAvoidanceTableIn(CBS_Node node) {
         if(node.parent != null){ // isn't root
-            I_ConflictAvoidanceTable cat = node.getConflictAvoidanceTable();
+            I_ConflictManager cat = node.getConflictAvoidanceTable();
             // the agent that was constrained in this node is the agent who's plan has changed.
             SingleAgentPlan thePlanThatChangedInThisNode = node.solution.getPlanFor(node.addedConstraint.agent);
             cat.addPlan(thePlanThatChangedInThisNode);
@@ -205,7 +205,7 @@ public class CBS_Solver extends A_Solver {
         Agent agent = constraint.agent;
 
         Solution solution = parent.solution;
-        I_ConflictAvoidanceTable cat = parent.getConflictAvoidanceTable();
+        I_ConflictManager cat = parent.getConflictAvoidanceTable();
         ConstraintSet constraints = parent.getConstraints();
 
         // replace with copies if required
@@ -359,7 +359,7 @@ public class CBS_Solver extends A_Solver {
          * identical to {@link #parent}'s conflictAvoidanceTable (copy or same object). When expanding the node, this is
          * updated, and a conflict is chosen.
          */
-        private I_ConflictAvoidanceTable conflictAvoidanceTable;
+        private I_ConflictManager conflictAvoidanceTable;
         /**
          * A {@link A_Conflict conflict}, selected from {@link #conflictAvoidanceTable}, to be solved by new constraints
          * in child nodes.
@@ -393,7 +393,7 @@ public class CBS_Solver extends A_Solver {
             this.solution = solution;
             this.solutionCost = solutionCost;
             this.constraints = constraints;
-            this.conflictAvoidanceTable = new ConflictAvoidanceTable();
+            this.conflictAvoidanceTable = new ConflictManager();
             for (SingleAgentPlan plan:
                  solution) {
                 this.conflictAvoidanceTable.addPlan(plan);
@@ -404,7 +404,7 @@ public class CBS_Solver extends A_Solver {
         /**
          * Non-root constructor.
          */
-        public CBS_Node(Solution solution, float solutionCost, Constraint addedConstraint, ConstraintSet constraints, I_ConflictAvoidanceTable conflictAvoidanceTable, CBS_Node parent) {
+        public CBS_Node(Solution solution, float solutionCost, Constraint addedConstraint, ConstraintSet constraints, I_ConflictManager conflictAvoidanceTable, CBS_Node parent) {
             this.solution = solution;
             this.solutionCost = solutionCost;
             this.addedConstraint = addedConstraint;
@@ -416,14 +416,14 @@ public class CBS_Solver extends A_Solver {
         /*  =  = when expanding a node =  */
 
         /**
-         * Get the {@link I_ConflictAvoidanceTable} in this node, and modify it in-place.
+         * Get the {@link I_ConflictManager} in this node, and modify it in-place.
          */
-        public I_ConflictAvoidanceTable getConflictAvoidanceTable() {
+        public I_ConflictManager getConflictAvoidanceTable() {
             return conflictAvoidanceTable;
         }
 
         /**
-         * Set the selected conflict. Typically done through delegation to {@link I_ConflictAvoidanceTable#selectConflict()}.
+         * Set the selected conflict. Typically done through delegation to {@link I_ConflictManager#selectConflict()}.
          * @param selectedConflict
          */
         public void setSelectedConflict(A_Conflict selectedConflict) {

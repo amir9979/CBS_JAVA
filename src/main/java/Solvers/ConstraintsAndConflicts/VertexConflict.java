@@ -2,6 +2,7 @@ package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
+import Solvers.ConstraintsAndConflicts.DataStructures.TimeLocation;
 import Solvers.Move;
 
 import java.util.Objects;
@@ -18,7 +19,7 @@ public class VertexConflict extends A_Conflict {
     }
 
 
-    public VertexConflict(Agent agent1, Agent agent2, ConflictAvoidanceTable.TimeLocation timeLocation){
+    public VertexConflict(Agent agent1, Agent agent2, TimeLocation timeLocation){
         super(agent1,agent2,timeLocation.time,timeLocation.location);
     }
 

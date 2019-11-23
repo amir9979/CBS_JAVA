@@ -2,9 +2,7 @@ package Solvers.ConstraintsAndConflicts;
 
 import Solvers.SingleAgentPlan;
 
-import java.util.Set;
-
-public interface I_ConflictAvoidanceTable {
+public interface I_ConflictManager {
 
     /**
      * Removes current conflicts and other information related to the agent in the given {@link SingleAgentPlan}.
@@ -23,6 +21,6 @@ public interface I_ConflictAvoidanceTable {
     /**
      * @return a deep copy of this class.
      */
-    I_ConflictAvoidanceTable copy();
+    I_ConflictManager copy();
 
 }
