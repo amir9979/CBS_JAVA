@@ -29,6 +29,8 @@ public class SingleAgentAStar_Solver extends A_Solver {
     private static final Comparator<AStarState> stateFComparator = Comparator.comparing(AStarState::getF);
     private static final Comparator<AStarState> stateGComparator = Comparator.comparing(AStarState::getG);
 
+    public boolean agentsStayAtGoal = true;
+
     private ConstraintSet constraints;
     private AStarHeuristic heuristicFunction;
     private I_OpenList<AStarState> openList;
@@ -48,6 +50,9 @@ public class SingleAgentAStar_Solver extends A_Solver {
         super.DEFAULT_TIMEOUT = SingleAgentAStar_Solver.DEFAULT_TIMEOUT;
     }
 
+    public SingleAgentAStar_Solver(boolean agentsStayAtGoal) {
+        this.agentsStayAtGoal = agentsStayAtGoal;
+    }
     /*  = set up =  */
 
     protected void init(MAPF_Instance instance, RunParameters runParameters){
@@ -127,7 +132,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
 
                 // smaller means we have passed the current rejection (if one existed) and should check if another exists.
                 // shouldn't be equal because such a state would not be generated
-                if(firstRejectionAtGoalTime < currentState.move.timeNow) {
+                if(agentsStayAtGoal && firstRejectionAtGoalTime < currentState.move.timeNow) {
                     // do the expensive update/check
                     firstRejectionAtGoalTime = constraints.rejectsEventually(currentState.move);
                 }
@@ -195,42 +200,6 @@ public class SingleAgentAStar_Solver extends A_Solver {
     private boolean isGoalState(AStarState state) {
         return state.move.currLocation.getCoordinate().equals(agent.target);
     }
-
-//    private boolean handleGoalFound(AStarState goalState) {
-//        /* also check that we can stay at goal forever. This check is somewhat expensive. */
-//        int firstRejectionTime = constraints.rejectsEventually(goalState.move);
-//        if(firstRejectionTime == -1){ // no rejections. done!
-//            goalState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
-//            return true; // the goal is good and we can return the plan.
-//        }
-//        else{
-//            /*
-//                We form a sequence of "stay" moves from the goal we found, until just before being rejected. We
-//                then solve a smaller problem around that problematic time. This continues recursively until all
-//                rejecting constraints at the goal are handled.
-//             */
-//
-//            // clear OPEN in preparation
-//            openList.clear();
-//
-//            // stay at goal until before we are rejected
-//            AStarState currentState = goalState;
-//            int time = goalState.move.timeNow + 1;
-//            while (time < firstRejectionTime){
-//                Move stayMove = new Move(this.agent, time, goalState.move.currLocation, goalState.move.currLocation);
-//                AStarState nextState = new AStarState(stayMove, currentState, currentState.g + 1);
-//
-//                currentState = nextState;
-//                time++;
-//            }
-//
-//            // expand the latest state that is not rejected
-//            currentState.expand();
-//
-//            // there is a future problem and we must continue the search to overcome that problem.
-//            return false;
-//        }
-//    }
 
     /*  = wind down =  */
 
