@@ -298,9 +298,9 @@ public class ConflictManager implements I_ConflictManager {
     /**
      * Agent has a new plan, therefor the old plan needs to be removed.
      * Removes the plan's goal location from:
-     *    1. this.timeLocation_Agents
-     *    2. this.location_timeList
-     *    3. this.goal_agentTime
+     *    1. {@link TimeLocationTables#timeLocation_Agents}
+     *    2. {@link TimeLocationTables#location_timeList}
+     *    3. {@link TimeLocationTables#goal_plan}
      * @param previousPlan - Agent's previous plan in {@link #agent_plan}
      */
     private void removeAgentPreviousPlan(SingleAgentPlan previousPlan) {
@@ -312,8 +312,8 @@ public class ConflictManager implements I_ConflictManager {
             Move prevMove = previousPlan.moveAt(time);
             if ( prevMove != null ){
                 TimeLocation timeLocation = new TimeLocation(time - 1, prevMove.prevLocation);
-                // 1. remove from this.timeLocation_Agents
-                // 2. remove from this.location_timeList
+                // 1. remove from {@link TimeLocationTables#timeLocation_Agents}
+                // 2. remove from {@link TimeLocationTables#location_timeList}
                 this.removeTimeLocation(timeLocation, previousPlan);
             }
         }
@@ -321,16 +321,13 @@ public class ConflictManager implements I_ConflictManager {
         /*  = Plan's goal =  */
         int goalTime = previousPlan.size();
         I_MapCell goalLocation = previousPlan.moveAt(goalTime).currLocation;
-        TimeLocation timeLocation = new TimeLocation(goalTime, goalLocation);
+        TimeLocation goalTimeLocation = new TimeLocation(goalTime, goalLocation);
         // 1. remove from this.timeLocation_Agents
         // 2. remove from this.location_timeList
-        this.removeTimeLocation(timeLocation, previousPlan);
+        this.removeTimeLocation(goalTimeLocation, previousPlan);
 
         // 3. remove from this.goal_agentTime
-        AgentAtGoal agentAtGoal = this.timeLocationTables.getAgentAtGoalTime(goalLocation);
-        if ( agentAtGoal != null ){
-            this.timeLocationTables.removeGoalLocation(goalLocation);
-        }
+        this.timeLocationTables.removeGoalLocation(goalLocation);
     }
 
 
