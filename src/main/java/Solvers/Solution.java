@@ -56,14 +56,13 @@ public class Solution implements Iterable<SingleAgentPlan>{
      * @return true if the solution is valid (contains no vertex or swapping conflicts).
      */
     public boolean isValidSolution(){
-        for (SingleAgentPlan plan :
-                agentPlans.values()) {
-            for (SingleAgentPlan otherPlan :
-                    agentPlans.values()) {
-                if(plan != otherPlan){ //don't compare plan with self
-                    if(plan.conflictsWith(otherPlan)) {
-                        return false;
-                    }
+        List<SingleAgentPlan> allPlans = new ArrayList<>(agentPlans.values());
+        for (int i = 0; i < allPlans.size(); i++) {
+            SingleAgentPlan plan1 = allPlans.get(i);
+            for (int j = i+1; j < allPlans.size(); j++) {
+                SingleAgentPlan plan2 = allPlans.get(j);
+                if(plan1.conflictsWith(plan2)) {
+                    return false;
                 }
             }
         }
