@@ -17,13 +17,14 @@ public class ConstraintSet{
      * Basically a dictionary from [time,location] to agents who can't go there at that time, and locations from which
      * they can't go there at that time.
      */
-    private Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
+    private final Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
 
     public ConstraintSet() {
     }
 
     public ConstraintSet(ConstraintSet toCopy){
         if(toCopy == null) {throw new IllegalArgumentException();}
+        this.addAll(toCopy);
     }
 
     public ConstraintSet(Collection<? extends Constraint> seedConstraints) {
@@ -69,6 +70,23 @@ public class ConstraintSet{
         for (Constraint cons :
                 constraints) {
             changed |= this.add(cons);
+        }
+        return changed;
+    }
+
+    /**
+     *
+     * @param other a constraint set whose constraints we would like to copy.
+     * @return true if this caused the set to change.
+     */
+    public boolean addAll(ConstraintSet other) {
+        boolean changed = false;
+        for (ConstraintWrapper cw :
+                other.constraints.keySet()) {
+            for (Constraint cons :
+                    cw.relevantConstraints) {
+                changed |= this.add(cons);
+            }
         }
         return changed;
     }
