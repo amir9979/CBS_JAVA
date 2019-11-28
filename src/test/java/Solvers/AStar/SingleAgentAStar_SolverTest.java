@@ -369,4 +369,33 @@ class SingleAgentAStar_SolverTest {
         assertEquals(6, solved.getPlanFor(agent).size());
         assertTrue(expected1.equals(solved) || expected2.equals(solved));
     }
+
+    @Test
+    void continuingFromExistingPlan() {
+        // modified from circleOptimality1()
+
+        MAPF_Instance testInstance = instanceCircle1;
+        Agent agent = testInstance.agents.get(0);
+
+        SingleAgentPlan existingPlan = new SingleAgentPlan(agent);
+        existingPlan.addMove(new Move(agent, 1, cell33, cell34));
+        existingPlan.addMove(new Move(agent, 2, cell34, cell24));
+        Solution existingSolution = new Solution();
+        existingSolution.putPlan(existingPlan);
+
+        // give the solver a plan to continue from
+        Solution solved = aStar.solve(testInstance, new RunParameters(existingSolution));
+
+        SingleAgentPlan plan = new SingleAgentPlan(agent);
+        plan.addMove(new Move(agent, 1, cell33, cell34));
+        plan.addMove(new Move(agent, 2, cell34, cell24));
+        plan.addMove(new Move(agent, 3, cell24, cell14));
+        plan.addMove(new Move(agent, 4, cell14, cell13));
+        plan.addMove(new Move(agent, 5, cell13, cell12));
+        Solution expected = new Solution();
+        expected.putPlan(plan);
+
+        assertEquals(5, solved.getPlanFor(agent).size());
+        assertEquals(expected, solved);
+    }
 }
