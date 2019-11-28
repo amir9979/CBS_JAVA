@@ -182,12 +182,11 @@ public class SingleAgentPlan implements Iterable<Move> {
     }
 
     /**
-     * Compares with another {@link SingleAgentPlan}, looking for vertex conflicts ({@link VertexConflict}) or
-     * swapping conflicts ({@link SwappingConflict}). Runtime is O(the number of moves in this plan).
-     * @param other
-     * @return true if a conflict exists between the plans.
+     * Returns the first (lowest time) conflict between this and the other plan. If they don't conflict, returns null.
+     * @param other another {@link SingleAgentPlan}.
+     * @return the first (lowest time) conflict between this and the other plan. If they don't conflict, returns null.
      */
-    public boolean conflictsWith(SingleAgentPlan other){
+    public A_Conflict firstConflict(SingleAgentPlan other){
         // find lower and upper bound for time, and check only in that range
         //the min time to check is the max first move time
         int minTime = Math.max(this.getFirstMoveTime(), other.getFirstMoveTime());
@@ -198,23 +197,34 @@ public class SingleAgentPlan implements Iterable<Move> {
             Move localMove = this.moveAt(time);
             Move otherMoveAtTime = other.moveAt(time);
 
-            if(A_Conflict.haveConflicts(localMove, otherMoveAtTime)){
-                return true;
+            A_Conflict firstConflict = A_Conflict.conflictBetween(localMove, otherMoveAtTime);
+            if(firstConflict != null){
+                return firstConflict;
             }
         }
 
         // if we've made it all the way here, the plans don't conflict in their shared timespan.
         // now check if one plan ended and then the other plan had a move that conflicts with the first plan's last position (goal)
-        return checkForConflictAtGoal(other, maxTime);
+        return firstConflictAtGoal(other, maxTime);
     }
 
     /**
-     * helper function for {@link #conflictsWith(SingleAgentPlan)}.
+     * Compares with another {@link SingleAgentPlan}, looking for vertex conflicts ({@link VertexConflict}) or
+     * swapping conflicts ({@link SwappingConflict}). Runtime is O(the number of moves in this plan).
+     * @param other
+     * @return true if a conflict exists between the plans.
+     */
+    public boolean conflictsWith(SingleAgentPlan other){
+        return firstConflict(other) != null;
+    }
+
+    /**
+     * helper function for {@link #firstConflict(SingleAgentPlan)}.
      * @param other another plan.
      * @param maxTime the maximum time at which both plans have moves.
-     * @return true if one of the plans ends, and then the other plan makes a move that conflicts with the ended plan's agent staying at its goal.
+     * @return a conflict if one of the plans ends, and then the other plan makes a move that conflicts with the ended plan's agent staying at its goal. else null.
      */
-    private boolean checkForConflictAtGoal(SingleAgentPlan other, int maxTime) {
+    private A_Conflict firstConflictAtGoal(SingleAgentPlan other, int maxTime) {
         if(this.getEndTime() != other.getEndTime()){
             SingleAgentPlan lateEndingPlan = this.getEndTime() > maxTime ? this : other;
             SingleAgentPlan earlyEndingPlan = this.getEndTime() <= maxTime ? this : other;
@@ -222,12 +232,13 @@ public class SingleAgentPlan implements Iterable<Move> {
 
             for (int time = maxTime+1; time <= lateEndingPlan.getEndTime(); time++) {
                 Move stayMove = new Move(earlyEndingPlan.agent, time, goalLocation, goalLocation);
-                if(A_Conflict.haveConflicts(lateEndingPlan.moveAt(time), stayMove)){
-                    return true;
+                A_Conflict goalConflict = A_Conflict.conflictBetween(lateEndingPlan.moveAt(time), stayMove);
+                if(goalConflict != null){
+                    return goalConflict;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     @Override

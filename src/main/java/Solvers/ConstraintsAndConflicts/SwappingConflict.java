@@ -57,6 +57,19 @@ public class SwappingConflict extends A_Conflict{
     }
 
     /**
+     * assumes both moves have the same {@link Move#timeNow}.
+     * @return true if these moves have a swapping conflict.
+     */
+    public static A_Conflict conflictBetween(Move move1, Move move2){
+        if(SwappingConflict.haveConflicts(move1, move2)){
+            return new SwappingConflict(move1.agent, move2.agent, move1.timeNow, move1.currLocation, move2.currLocation);
+        }
+        else{
+            return null;
+        }
+    }
+
+    /**
      * Two {@link SwappingConflict}s are equal if all of their fields are equal, or if they are a mirror image, meaning
      * both their agent order and destination order are reversed.
      * @param o {@inheritDoc}
