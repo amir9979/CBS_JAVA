@@ -31,7 +31,8 @@ public class NaiveConflictDetection implements I_ConflictManager {
             for (int j = i+1; j < l_plans.size(); j++) {
                 SingleAgentPlan plan2 = l_plans.get(j);
                 A_Conflict firstConflict = plan1.firstConflict(plan2);
-                if(minTimeConflict == null || firstConflict.time < minTimeConflict.time){
+                if(minTimeConflict == null ||
+                        (firstConflict != null && firstConflict.time < minTimeConflict.time)){
                     minTimeConflict = firstConflict;
                 }
             }
