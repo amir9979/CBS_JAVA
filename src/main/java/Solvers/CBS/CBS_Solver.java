@@ -27,6 +27,7 @@ public class CBS_Solver extends A_Solver {
     /*  =  = Fields related to the run =  */
 
     private DistanceTableAStarHeuristic aStarHeuristic;
+    private ConstraintSet initialConstraints;
     private int generatedNodes;
     private int expandedNodes;
 
@@ -80,8 +81,9 @@ public class CBS_Solver extends A_Solver {
     @Override
     protected void init(MAPF_Instance instance, RunParameters runParameters) {
         super.init(instance, runParameters);
-        generatedNodes = 0;
-        expandedNodes = 0;
+        this.initialConstraints = Objects.requireNonNullElseGet(runParameters.constraints, ConstraintSet::new);
+        this.generatedNodes = 0;
+        this.expandedNodes = 0;
         this.instance = instance;
         this.aStarHeuristic = this.lowLevelSolver instanceof SingleAgentAStar_Solver ?
                 new DistanceTableAStarHeuristic(new ArrayList<>(this.instance.agents), this.instance.map) :
@@ -128,7 +130,7 @@ public class CBS_Solver extends A_Solver {
             solution = solveSubproblem(agent, solution, initialConstraints);
         }
 
-        return new CBS_Node(solution, costFunction.solutionCost(solution, this), initialConstraints);
+        return new CBS_Node(solution, costFunction.solutionCost(solution, this));
     }
 
     /**
@@ -224,13 +226,11 @@ public class CBS_Solver extends A_Solver {
 
         Solution solution = parent.solution;
         I_ConflictManager cat = parent.getConflictAvoidanceTable();
-        ConstraintSet constraints = parent.getConstraints();
 
         // replace with copies if required
         if(copyDatastructures) {
             solution = new Solution(solution);
             cat = cat.copy();
-            constraints = new ConstraintSet(constraints);
         }
 
         // modify for this node
@@ -240,11 +240,10 @@ public class CBS_Solver extends A_Solver {
             we don't want to modify.
          */
         solution.putPlan(new SingleAgentPlan(agent));
-        constraints.add(constraint);
 
         //the low-level should update the solution, so this is a reference to the same object as solution. We do this to
         //reuse Solution objects instead of creating extra ones.
-        Solution agentSolution = solveSubproblem(agent, solution, constraints);
+        Solution agentSolution = solveSubproblem(agent, solution, buildConstraintSet(parent, constraint));
         if(agentSolution == null) {
             return null; //probably a timeout
         }
@@ -252,8 +251,28 @@ public class CBS_Solver extends A_Solver {
         // plans, and add the re-planned agent's new plan.
         solution.putPlan(agentSolution.getPlanFor(agent));
 
-        return new CBS_Node(solution, costFunction.solutionCost(solution, this), constraint, constraints,
+        return new CBS_Node(solution, costFunction.solutionCost(solution, this), constraint,
                 cat /*as is. will be updated if needed when popping from open*/, parent);
+    }
+
+    /**
+     * When solving a new node, you want a set of constraints that apply to it. To save on memory, this set is created
+     * on the spot, by climbing up the CT and collecting all the constraints that were added
+     * @param parentNode the new node's parent.
+     * @param newConstraint the constraint that this new node adds.
+     * @return a {@link ConstraintSet} of all the constraints from parentNode to the root, plus newConstraint.
+     */
+    private ConstraintSet buildConstraintSet(CBS_Node parentNode, Constraint newConstraint) {
+        // start by adding all the constraints that we were asked to start the solver with (and are therefore not in the CT)
+        ConstraintSet constraintSet = new ConstraintSet(this.initialConstraints);
+
+        CBS_Node currentNode = parentNode;
+        while (currentNode.addedConstraint != null){ // will skip the root (it has no constraints)
+            constraintSet.add(currentNode.addedConstraint);
+            currentNode = currentNode.parent;
+        }
+        constraintSet.add(newConstraint);
+        return constraintSet;
     }
 
     /**
@@ -365,13 +384,9 @@ public class CBS_Solver extends A_Solver {
          */
         private float solutionCost;
         /**
-         * The constraint that was added in this node (missing from {@link #parent}). Contained in {@link #constraints}.
+         * The constraint that was added in this node (missing from {@link #parent}).
          */
         private Constraint addedConstraint;
-        /**
-         * constraints to abide by in this node.
-         */
-        private ConstraintSet constraints;
         /**
          * All conflicts between {@link Instances.Agents.Agent agents} in {@link #solution}. For OPEN nodes, this is
          * identical to {@link #parent}'s conflictAvoidanceTable (copy or same object). When expanding the node, this is
@@ -405,12 +420,10 @@ public class CBS_Solver extends A_Solver {
          * Root constructor.
          * @param solution an initial solution for all agents.
          * @param solutionCost the cost of the solution.
-         * @param constraints constraints to abide by in this node.
          */
-        public CBS_Node(Solution solution, float solutionCost, ConstraintSet constraints) {
+        public CBS_Node(Solution solution, float solutionCost) {
             this.solution = solution;
             this.solutionCost = solutionCost;
-            this.constraints = constraints;
             this.conflictAvoidanceTable = new ConflictManager();
             for (SingleAgentPlan plan:
                  solution) {
@@ -422,11 +435,10 @@ public class CBS_Solver extends A_Solver {
         /**
          * Non-root constructor.
          */
-        public CBS_Node(Solution solution, float solutionCost, Constraint addedConstraint, ConstraintSet constraints, I_ConflictManager conflictAvoidanceTable, CBS_Node parent) {
+        public CBS_Node(Solution solution, float solutionCost, Constraint addedConstraint, I_ConflictManager conflictAvoidanceTable, CBS_Node parent) {
             this.solution = solution;
             this.solutionCost = solutionCost;
             this.addedConstraint = addedConstraint;
-            this.constraints = constraints;
             this.conflictAvoidanceTable = conflictAvoidanceTable;
             this.parent = parent;
         }
@@ -476,10 +488,6 @@ public class CBS_Solver extends A_Solver {
 
         public Constraint getAddedConstraint() {
             return addedConstraint;
-        }
-
-        public ConstraintSet getConstraints() {
-            return constraints;
         }
 
         public A_Conflict getSelectedConflict() {
