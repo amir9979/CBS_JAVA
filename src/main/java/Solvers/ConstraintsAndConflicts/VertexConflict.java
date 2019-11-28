@@ -41,7 +41,16 @@ public class VertexConflict extends A_Conflict {
         return move1.currLocation.equals(move2.currLocation);
     }
 
-
+    /**
+     * assumes both moves have the same {@link Move#timeNow}.
+     * @return a vertex conflict between the agents, if the have one. else returns null
+     */
+    public static A_Conflict conflictBetween(Move move1, Move move2){
+        if(VertexConflict.haveConflicts(move1, move2)){
+            return new VertexConflict(move1.agent, move2.agent, move1.timeNow, move1.currLocation);
+        }
+        else return null;
+    }
 
 
     /**
