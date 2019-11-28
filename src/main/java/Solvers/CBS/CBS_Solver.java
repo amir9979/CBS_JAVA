@@ -28,6 +28,7 @@ public class CBS_Solver extends A_Solver {
 
     private DistanceTableAStarHeuristic aStarHeuristic;
     private ConstraintSet initialConstraints;
+    private ConstraintSet currentConstraints;
     private int generatedNodes;
     private int expandedNodes;
 
@@ -82,6 +83,7 @@ public class CBS_Solver extends A_Solver {
     protected void init(MAPF_Instance instance, RunParameters runParameters) {
         super.init(instance, runParameters);
         this.initialConstraints = Objects.requireNonNullElseGet(runParameters.constraints, ConstraintSet::new);
+        this.currentConstraints = new ConstraintSet();
         this.generatedNodes = 0;
         this.expandedNodes = 0;
         this.instance = instance;
@@ -263,8 +265,11 @@ public class CBS_Solver extends A_Solver {
      * @return a {@link ConstraintSet} of all the constraints from parentNode to the root, plus newConstraint.
      */
     private ConstraintSet buildConstraintSet(CBS_Node parentNode, Constraint newConstraint) {
+        // clear currentConstraints. we reuse this object every time.
+        this.currentConstraints.clear();
+        ConstraintSet constraintSet = this.currentConstraints;
         // start by adding all the constraints that we were asked to start the solver with (and are therefore not in the CT)
-        ConstraintSet constraintSet = new ConstraintSet(this.initialConstraints);
+        constraintSet.addAll(initialConstraints);
 
         CBS_Node currentNode = parentNode;
         while (currentNode.addedConstraint != null){ // will skip the root (it has no constraints)
@@ -350,6 +355,8 @@ public class CBS_Solver extends A_Solver {
     @Override
     protected void releaseMemory() {
         clearOPEN();
+        this.initialConstraints = null;
+        this.currentConstraints = null;
         this.instance = null;
         this.aStarHeuristic = null;
     }
