@@ -18,14 +18,12 @@ public class ConstraintSet{
      * they can't go there at that time.
      */
     private Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
-    private Set<Constraint> originalConstraints = new HashSet<>();
 
     public ConstraintSet() {
     }
 
     public ConstraintSet(ConstraintSet toCopy){
         if(toCopy == null) {throw new IllegalArgumentException();}
-        this.addAll(toCopy.originalConstraints);
     }
 
     public ConstraintSet(Collection<? extends Constraint> seedConstraints) {
@@ -35,9 +33,10 @@ public class ConstraintSet{
 
     /*  = Set Interface =  */
 
-    public int size() {
-        return constraints.size();
-    }
+    //nicetohave - removed for now because the size of constraints isn't the number of constraints in the set. if we need this, add size field to class.
+//    public int size() {
+//        return constraints.size();
+//    }
 
     public boolean isEmpty() {
         return constraints.isEmpty();
@@ -57,10 +56,7 @@ public class ConstraintSet{
             this.constraints.put(dummy, dummy);
         }
 
-        boolean added = this.constraints.get(dummy).add(constraint);
-        if(added) {this.originalConstraints.add(constraint);}
-
-        return added;
+        return this.constraints.get(dummy).add(constraint);
     }
 
     /**
@@ -91,8 +87,13 @@ public class ConstraintSet{
             return false;
         }
         else{
-            this.originalConstraints.remove(constraint);
-            return this.constraints.get(dummy).remove(constraint);
+            ConstraintWrapper constraintWrapper = this.constraints.get(dummy);
+            boolean changed = constraintWrapper.remove(constraint);
+            if(constraintWrapper.isEmpty()){
+                // if we've emptied the constraint wrapper, there is no more reason to keep it.
+                this.constraints.remove(constraintWrapper);
+            }
+            return changed;
         }
     }
 
@@ -112,7 +113,6 @@ public class ConstraintSet{
 
     public void clear() {
         this.constraints.clear();
-        this.originalConstraints.clear();
     }
 
     /**
@@ -218,21 +218,11 @@ public class ConstraintSet{
     }
 
     /**
-     * Returns a list of the constraints in this set. It is not a view of this set. Changes to the list will not affect
-     * this set.
-     * @return a list of the constraints in this set.
-     */
-    public List<Constraint> getOriginalConstraints() {
-        return new ArrayList<>(originalConstraints);
-    }
-
-    /**
      * Removes constraints for times that are not in the given range.
      * @param minTime the minimum time (inclusive).
      * @param maxTime the maximum time (exclusive).
      */
     public void trimToTimeRange(int minTime, int maxTime){
-        this.originalConstraints.removeIf(constraint -> constraint.time < minTime || constraint.time >= maxTime);
         this.constraints.keySet().removeIf(constraintWrapper -> constraintWrapper.time < minTime || constraintWrapper.time >= maxTime);
     }
 
@@ -243,13 +233,13 @@ public class ConstraintSet{
 
         ConstraintSet that = (ConstraintSet) o;
 
-        return originalConstraints.equals(that.originalConstraints);
+        return constraints.equals(that.constraints);
 
     }
 
     @Override
     public int hashCode() {
-        return originalConstraints.hashCode();
+        return constraints.hashCode();
     }
 
     /**
@@ -333,6 +323,8 @@ public class ConstraintSet{
             return !this.rejects(move);
         }
 
-
+        public boolean isEmpty(){
+            return this.relevantConstraints == null || this.relevantConstraints.isEmpty();
+        }
     }
 }
