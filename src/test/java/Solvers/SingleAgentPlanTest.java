@@ -244,4 +244,31 @@ class SingleAgentPlanTest {
         assertEquals(move3agent1, emptyPlanAgent1.moveAt(3));
         assertEquals(move4agent1, emptyPlanAgent1.moveAt(4));
     }
+
+    @Test
+    void conflictsBecauseAgentStaysAtGoal() {
+        Agent agent1 = new Agent(0, coor13, coor12);
+        Agent agent2 = new Agent(1, coor33, coor13);
+
+        SingleAgentPlan planAgent1 = new SingleAgentPlan(agent1);
+        planAgent1.addMove(new Move(agent1, 1, cell13, cell12));
+
+        SingleAgentPlan planAgent2 = new SingleAgentPlan(agent2);
+        planAgent2.addMove(new Move(agent2, 1, cell33, cell32));
+        planAgent2.addMove(new Move(agent2, 2, cell32, cell22));
+        planAgent2.addMove(new Move(agent2, 3, cell22, cell12));
+        planAgent2.addMove(new Move(agent2, 4, cell12, cell13));
+
+        assertTrue(planAgent1.conflictsWith(planAgent2));
+        assertTrue(planAgent2.conflictsWith(planAgent1));
+
+        SingleAgentPlan alternateAgent2 = new SingleAgentPlan(agent2);
+        alternateAgent2.addMove(new Move(agent2, 1, cell33, cell34));
+        alternateAgent2.addMove(new Move(agent2, 2, cell34, cell24));
+        alternateAgent2.addMove(new Move(agent2, 3, cell24, cell14));
+        alternateAgent2.addMove(new Move(agent2, 4, cell14, cell13));
+
+        assertFalse(planAgent1.conflictsWith(alternateAgent2));
+        assertFalse(alternateAgent2.conflictsWith(planAgent1));
+    }
 }

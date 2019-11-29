@@ -21,7 +21,7 @@ public class TestingBenchmarkRunManager extends A_RunManager {
     void setExperiments() {
 
         this.addExperimentInstance_32_20();
-        this.addAllInstancesExperiment();
+        // this.addAllInstancesExperiment();
 
 
 

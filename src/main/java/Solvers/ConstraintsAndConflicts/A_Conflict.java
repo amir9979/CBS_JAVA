@@ -24,30 +24,6 @@ public abstract class A_Conflict {
      */
     public abstract Constraint[] getPreventingConstraints();
 
-//    public static boolean hasConflicts(Solution solution) {
-//        return false; //imp
-//    }
-//
-//    public static A_Conflict firstConflict(Solution solution){
-//        return null; //imp
-//    }
-//
-//    public static A_Conflict[] allConflicts(Solution solution){
-//        return null; //imp
-//    }
-//
-//    public static boolean haveConflicts(SingleAgentPlan plan1, SingleAgentPlan plan2){
-//        return true; //imp
-//    }
-//
-//    public static A_Conflict firstConflict(SingleAgentPlan plan1, SingleAgentPlan plan2){
-//        return null; //imp
-//    }
-//
-//    public static A_Conflict[] allConflicts(SingleAgentPlan plan1, SingleAgentPlan plan2){
-//        return null; //imp
-//    }
-
     /**
      * Checks that both moves have the same time.
      * @param move1 @NotNull
@@ -61,19 +37,39 @@ public abstract class A_Conflict {
                 && (SwappingConflict.haveConflicts(move1, move2) || VertexConflict.haveConflicts(move1, move2));
     }
 
+    /**
+     * Returns a conflict between the moves if there is one, else it returns null.
+     * @param move1 @NotNull
+     * @param move2 @NotNull
+     * @return a conflict between the moves if there is one, else it returns null.
+     */
+    public static A_Conflict conflictBetween(Move move1, Move move2){
+        if(move1 == null || move2 == null){throw new IllegalArgumentException("can't compare null moves");}
+        if(move1.timeNow == move2.timeNow){
+            A_Conflict conflict = VertexConflict.conflictBetween(move1, move2);
+            if(conflict != null) return conflict;
+            else {
+                conflict = SwappingConflict.conflictBetween(move1, move2);
+                return conflict;
+            }
+        }
+        return null;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof A_Conflict)) return false;
         A_Conflict conflict = (A_Conflict) o;
-        return time == conflict.time &&
-                (( Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2)) ||
-                 ( Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1))  ) &&
-                  Objects.equals(location, conflict.location);
+        return  time == conflict.time &&
+                agent1.equals(conflict.agent1) &&
+                agent2.equals(conflict.agent2) &&
+                location.equals(conflict.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash( agent1 ) * Objects.hash( agent2 ) * Objects.hash( time, location );
+        return Objects.hash(agent1, agent2, time, location);
     }
 }

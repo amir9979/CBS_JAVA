@@ -17,15 +17,14 @@ public class ConstraintSet{
      * Basically a dictionary from [time,location] to agents who can't go there at that time, and locations from which
      * they can't go there at that time.
      */
-    private Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
-    private Set<Constraint> originalConstraints = new HashSet<>();
+    private final Map<ConstraintWrapper, ConstraintWrapper> constraints = new HashMap<>();
 
     public ConstraintSet() {
     }
 
     public ConstraintSet(ConstraintSet toCopy){
         if(toCopy == null) {throw new IllegalArgumentException();}
-        this.addAll(toCopy.originalConstraints);
+        this.addAll(toCopy);
     }
 
     public ConstraintSet(Collection<? extends Constraint> seedConstraints) {
@@ -35,9 +34,10 @@ public class ConstraintSet{
 
     /*  = Set Interface =  */
 
-    public int size() {
-        return constraints.size();
-    }
+    //nicetohave - removed for now because the size of constraints isn't the number of constraints in the set. if we need this, add size field to class.
+//    public int size() {
+//        return constraints.size();
+//    }
 
     public boolean isEmpty() {
         return constraints.isEmpty();
@@ -57,10 +57,7 @@ public class ConstraintSet{
             this.constraints.put(dummy, dummy);
         }
 
-        boolean added = this.constraints.get(dummy).add(constraint);
-        if(added) {this.originalConstraints.add(constraint);}
-
-        return added;
+        return this.constraints.get(dummy).add(constraint);
     }
 
     /**
@@ -79,6 +76,23 @@ public class ConstraintSet{
 
     /**
      *
+     * @param other a constraint set whose constraints we would like to copy.
+     * @return true if this caused the set to change.
+     */
+    public boolean addAll(ConstraintSet other) {
+        boolean changed = false;
+        for (ConstraintWrapper cw :
+                other.constraints.keySet()) {
+            for (Constraint cons :
+                    cw.relevantConstraints) {
+                changed |= this.add(cons);
+            }
+        }
+        return changed;
+    }
+
+    /**
+     *
      * @param constraint
      * @return true if this caused the set to change.
      */
@@ -91,8 +105,13 @@ public class ConstraintSet{
             return false;
         }
         else{
-            this.originalConstraints.remove(constraint);
-            return this.constraints.get(dummy).remove(constraint);
+            ConstraintWrapper constraintWrapper = this.constraints.get(dummy);
+            boolean changed = constraintWrapper.remove(constraint);
+            if(constraintWrapper.isEmpty()){
+                // if we've emptied the constraint wrapper, there is no more reason to keep it.
+                this.constraints.remove(constraintWrapper);
+            }
+            return changed;
         }
     }
 
@@ -112,7 +131,6 @@ public class ConstraintSet{
 
     public void clear() {
         this.constraints.clear();
-        this.originalConstraints.clear();
     }
 
     /**
@@ -140,8 +158,52 @@ public class ConstraintSet{
     }
 
     /**
+     * Given a {@link Move} which an {@link Instances.Agents.Agent agent} makes to occupy a {@link I_MapCell location}
+     * indefinitely starting after move's time, checks if there is a {@link Constraint} that would reject it eventually.
+     *
+     * In other words, we simulate this set being given an infinite number of "stay" moves after the given move.
+     *
+     * This method can be expensive in large sets, as it traverses all of {@link #constraints}.
+     * @param finalMove a move to occupy a location indefinitely.
+     * @return the first time when a constraint would eventually reject a "stay" move at the given move's location; -1 if never rejected.
+     */
+    public int rejectsEventually(Move finalMove){
+        int firstRejectionTime = Integer.MAX_VALUE;
+        // traverses the entire data structure. expensive.
+        for (ConstraintWrapper cw :
+                constraints.keySet()) {
+            //found constraint for this location, sometime in the future. Should be rare.
+            if(cw.time > finalMove.timeNow && cw.location.equals(finalMove.currLocation)){
+                for (Constraint constraint :
+                        cw.relevantConstraints) {
+                    // make an artificial "stay" move for the relevant time.
+                    // In practice, this should happen very rarely, so not very expensive.
+                    if(constraint.rejects(new Move(finalMove.agent, cw.time, finalMove.currLocation, finalMove.currLocation))
+                            && cw.time < firstRejectionTime){
+                        firstRejectionTime = cw.time;
+                    }
+                }
+            }
+        }
+
+        return firstRejectionTime == Integer.MAX_VALUE ? -1 : firstRejectionTime;
+    }
+
+    /**
+     * The opposite of {@link #rejectsEventually(Move)}.
+     * @param finalMove a move to occupy a location indefinitely.
+     * @return true if no constraint would eventually reject a "stay" move at the given move's location.
+     */
+    public boolean acceptsForever(Move finalMove){
+        return rejectsEventually(finalMove) == -1;
+    }
+
+    /**
      * Returns true iff any of the {@link Constraint}s that were {@link #add(Constraint) added} to this set conflict with
      * the given {@link Move}.
+     *
+     * Doesn't assume that the last move means stay at goal forever.
+     * @see #acceptsForever(Move)
      * @param moves a {@link Collection} of {@link Move}s to check if the are ejected or not.
      * @return true iff all of the given {@link Move}s conflict with any of the {@link Constraint}s that were
      *          {@link #add(Constraint) added} to this set.
@@ -156,7 +218,11 @@ public class ConstraintSet{
     }
 
     /**
+     * Returns true iff none of the {@link Constraint}s that were {@link #add(Constraint) added} to this set conflict with
+     * the given {@link Move}.
      *
+     * Doesn't assume that the last move means stay at goal forever.
+     * @see #acceptsForever(Move)
      * @param moves
      * @return the opposite of {@link #rejectsAll(Collection)}.
      */
@@ -170,22 +236,28 @@ public class ConstraintSet{
     }
 
     /**
-     * Returns a list of the constraints in this set. It is not a view of this set. Changes to the list will not affect
-     * this set.
-     * @return a list of the constraints in this set.
-     */
-    public List<Constraint> getOriginalConstraints() {
-        return new ArrayList<>(originalConstraints);
-    }
-
-    /**
      * Removes constraints for times that are not in the given range.
      * @param minTime the minimum time (inclusive).
      * @param maxTime the maximum time (exclusive).
      */
     public void trimToTimeRange(int minTime, int maxTime){
-        this.originalConstraints.removeIf(constraint -> constraint.time < minTime || constraint.time >= maxTime);
         this.constraints.keySet().removeIf(constraintWrapper -> constraintWrapper.time < minTime || constraintWrapper.time >= maxTime);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConstraintSet)) return false;
+
+        ConstraintSet that = (ConstraintSet) o;
+
+        return constraints.equals(that.constraints);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return constraints.hashCode();
     }
 
     /**
@@ -269,6 +341,8 @@ public class ConstraintSet{
             return !this.rejects(move);
         }
 
-
+        public boolean isEmpty(){
+            return this.relevantConstraints == null || this.relevantConstraints.isEmpty();
+        }
     }
 }

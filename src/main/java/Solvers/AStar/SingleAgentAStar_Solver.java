@@ -25,8 +25,11 @@ public class SingleAgentAStar_Solver extends A_Solver {
      * would continue to be generated ad infinitum. This would eventually result in a heap overflow.
      */
     protected static final long DEFAULT_TIMEOUT = 3 * 1000;
+    protected static final int DEFAULT_PROBLEM_START_TIME = 0;
     private static final Comparator<AStarState> stateFComparator = Comparator.comparing(AStarState::getF);
     private static final Comparator<AStarState> stateGComparator = Comparator.comparing(AStarState::getG);
+
+    public boolean agentsStayAtGoal = true;
 
     private ConstraintSet constraints;
     private AStarHeuristic heuristicFunction;
@@ -36,6 +39,10 @@ public class SingleAgentAStar_Solver extends A_Solver {
     private I_Map map;
     private SingleAgentPlan existingPlan;
     private Solution existingSolution;
+    /**
+     * Not real-world time. The problem's start time.
+     */
+    private int problemStartTime;
     private int expandedNodes;
     private int generatedNodes;
 
@@ -43,6 +50,9 @@ public class SingleAgentAStar_Solver extends A_Solver {
         super.DEFAULT_TIMEOUT = SingleAgentAStar_Solver.DEFAULT_TIMEOUT;
     }
 
+    public SingleAgentAStar_Solver(boolean agentsStayAtGoal) {
+        this.agentsStayAtGoal = agentsStayAtGoal;
+    }
     /*  = set up =  */
 
     protected void init(MAPF_Instance instance, RunParameters runParameters){
@@ -51,38 +61,45 @@ public class SingleAgentAStar_Solver extends A_Solver {
         this.constraints = runParameters.constraints == null ? new ConstraintSet(): runParameters.constraints;
         this.agent = instance.agents.get(0);
         this.map = instance.map;
-        if(runParameters.existingSolution != null && runParameters.existingSolution.getPlanFor(this.agent) != null){
-            this.existingPlan = runParameters.existingSolution.getPlanFor(this.agent);
+
+        if(runParameters.existingSolution != null){
             this.existingSolution = runParameters.existingSolution;
+            if(runParameters.existingSolution.getPlanFor(this.agent) != null){
+                this.existingPlan = runParameters.existingSolution.getPlanFor(this.agent);
+                this.problemStartTime = this.existingPlan.getEndTime();
+            }
+            else {
+                this.existingPlan = new SingleAgentPlan(this.agent);
+                this.existingSolution.putPlan(this.existingPlan);
+                this.problemStartTime = DEFAULT_PROBLEM_START_TIME;
+            }
         }
         else{
-            //make a new solution and plan and initialize it with a default first move
+            // make a new, empty solution, with a new, empty, plan
             this.existingSolution = new Solution();
             this.existingPlan = new SingleAgentPlan(this.agent);
-            this.existingPlan.addMove(getFirstMove());
             this.existingSolution.putPlan(this.existingPlan);
         }
-        if(runParameters instanceof  RunParameters_SAAStar){
+
+        if(runParameters instanceof  RunParameters_SAAStar
+                && ((RunParameters_SAAStar) runParameters).heuristicFunction != null){
             RunParameters_SAAStar parameters = ((RunParameters_SAAStar) runParameters);
             this.heuristicFunction = parameters.heuristicFunction;
         }
         else{
             this.heuristicFunction = new defaultHeuristic();
         }
+        if(runParameters instanceof  RunParameters_SAAStar
+                && ((RunParameters_SAAStar) runParameters).problemStartTime >= 0){
+            RunParameters_SAAStar parameters = ((RunParameters_SAAStar) runParameters);
+            this.problemStartTime = parameters.problemStartTime;
+        }
+        // else keep the value that it has already been initialised with (above)
 
         this.openList = new OpenList<>(stateFComparator);
         this.expandedNodes = 0;
         this.closed = new HashSet<>();
         this.generatedNodes = 0;
-    }
-
-    private Move getFirstMove() {
-        //first time is the time of the agent, or 1.
-        int moveTime =
-//                this.agent instanceof OnlineAgent ? ((OnlineAgent)this.agent).arrivalTime + 1 :
-                        1;
-        // first move is always to stay at current location (thus the minimal solution length is 1).
-        return new Move(this.agent, moveTime, this.map.getMapCell(this.agent.source), this.map.getMapCell(this.agent.source));
     }
 
     /*  = A* algorithm =  */
@@ -92,41 +109,96 @@ public class SingleAgentAStar_Solver extends A_Solver {
         return solveAStar();
     }
 
+    /**
+     * Solves AStar for a single agent.
+     * Assumes just 1 goal {@link I_MapCell location} - otherwise there may be problems when accounting for constraints
+     * at goal, that come after reaching goal.
+     * @return a solution that contains a plan for the {@link #agent} to its goal.
+     */
     protected Solution solveAStar() {
-        AStarState rootState = generateRootState();
-        // root can't be generated (first move is rejected by constraints
-        if (rootState == null){ return null;}
+        // if failed to init OPEN then the problem cannot be solved as defined (bad constraints? bad existing plan?)
+        if (!initOpen()) return null;
 
-        openList.add(rootState);
-        while (!openList.isEmpty() ){
+        AStarState currentState;
+        int firstRejectionAtGoalTime = -1;
+
+        while ((currentState = openList.poll()) != null){ //dequeu in the if
             if(checkTimeout()) {return null;}
-            //dequeu
-            AStarState currentState = openList.poll();
+            closed.add(currentState);
 
             // todo change to early goal test!
             if (isGoalState(currentState)){
-                currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
-                return this.existingSolution;
+                // check to see if a rejecting constraint on the goal exists at some point in the future.
+
+                // smaller means we have passed the current rejection (if one existed) and should check if another exists.
+                // shouldn't be equal because such a state would not be generated
+                if(agentsStayAtGoal && firstRejectionAtGoalTime < currentState.move.timeNow) {
+                    // do the expensive update/check
+                    firstRejectionAtGoalTime = constraints.rejectsEventually(currentState.move);
+                }
+
+                if(firstRejectionAtGoalTime == -1){ // no rejections. done!
+                    currentState.backTracePlan(); // updates this.existingPlan which is contained in this.existingSolution
+                    return this.existingSolution; // the goal is good and we can return the plan.
+                }
+                else{ // we are rejected from the goal at some point in the future.
+                    // We clear OPEN because we have already found an optimal plan to the goal.
+                    openList.clear();
+                    /*
+                    We then solve a smaller search problem where we make a plan from the goal at time t[x], to the goal
+                    at time t[y+1], where y is the time of the future constraint.
+                     */
+                    currentState.expand();
+                }
             }
             else{ //expand
-                closed.add(currentState);
-                this.expandedNodes++;
                 currentState.expand(); //doesn't generate closed or duplicate states
             }
         }
         return null; //no goal state found (problem unsolvable)
     }
 
-    private boolean isGoalState(AStarState state) {
-        return state.move.currLocation.getCoordinate().equals(agent.target);
+    /**
+     * Initialises {@link #openList OPEN}.
+     *
+     * OPEN is not initialised with a single root state as is common. This is because states in this solver represent
+     * {@link Move moves} (classically - operators) rather than {@link I_MapCell map cells} (classically - states).
+     * Instead, OPEN is initialised with all possible moves from the starting position.
+     * @return true if OPEN was successfully initialised, else false.
+     */
+    protected boolean initOpen() {
+        // if the existing plan isn't empty, we start from the last move of the existing plan.
+        if(existingPlan.size() > 0){
+            Move lastExistingMove = existingPlan.moveAt(existingPlan.getEndTime());
+            // We assume that we cannot change the existing plan, so if it is rejected by constraints, we can't initialise OPEN.
+            if(constraints.rejects(lastExistingMove)) {return false;}
+
+            openList.add(new AStarState(existingPlan.moveAt(existingPlan.getEndTime()),null, /*g=number of moves*/existingPlan.size()));
+        }
+        else { // the existing plan is empty (no existing plan)
+
+            I_MapCell sourceCell = map.getMapCell(agent.source);
+            // can move to neighboring cells or stay put
+            List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(sourceCell.getNeighbors());
+            neighborCellsIncludingCurrent.add(sourceCell);
+
+            for (I_MapCell destination: neighborCellsIncludingCurrent) {
+                Move possibleMove = new Move(agent, problemStartTime + 1, sourceCell, destination);
+                if (constraints.accepts(possibleMove)) { //move not prohibited by existing constraint
+                    AStarState rootState = new AStarState(possibleMove, null, 1);
+                    openList.add(rootState);
+                    generatedNodes++;
+                }
+            }
+
+        }
+
+        // if none of the root nodes was valid, OPEN will be empty, and thus uninitialised.
+        return !openList.isEmpty();
     }
 
-    /**
-     * @return a root state based on the last move in the existing plan, or null if it is rejected by constraints.
-     */
-    private AStarState generateRootState() {
-        if(constraints.rejects(existingPlan.moveAt(existingPlan.getEndTime()))) {return null;}
-        return new AStarState(existingPlan.moveAt(existingPlan.getEndTime()),null, /*g=number of moves*/existingPlan.size());
+    private boolean isGoalState(AStarState state) {
+        return state.move.currLocation.getCoordinate().equals(agent.target);
     }
 
     /*  = wind down =  */
@@ -196,6 +268,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
         }
 
         public void expand() {
+            expandedNodes++;
             // can move to neighboring cells or stay put
             List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(this.move.currLocation.getNeighbors());
             neighborCellsIncludingCurrent.add(this.move.currLocation);

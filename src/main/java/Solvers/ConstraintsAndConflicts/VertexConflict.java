@@ -2,7 +2,10 @@ package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
 import Instances.Maps.I_MapCell;
+import Solvers.ConstraintsAndConflicts.DataStructures.TimeLocation;
 import Solvers.Move;
+
+import java.util.Objects;
 
 /**
  * Represents a conflict between 2 {@link Agent}s, at a certain time, in a certain {@link I_MapCell location}.
@@ -16,7 +19,7 @@ public class VertexConflict extends A_Conflict {
     }
 
 
-    public VertexConflict(Agent agent1, Agent agent2, ConflictAvoidanceTable.TimeLocation timeLocation){
+    public VertexConflict(Agent agent1, Agent agent2, TimeLocation timeLocation){
         super(agent1,agent2,timeLocation.time,timeLocation.location);
     }
 
@@ -38,7 +41,41 @@ public class VertexConflict extends A_Conflict {
         return move1.currLocation.equals(move2.currLocation);
     }
 
+    /**
+     * assumes both moves have the same {@link Move#timeNow}.
+     * @return a vertex conflict between the agents, if the have one. else returns null
+     */
+    public static A_Conflict conflictBetween(Move move1, Move move2){
+        if(VertexConflict.haveConflicts(move1, move2)){
+            return new VertexConflict(move1.agent, move2.agent, move1.timeNow, move1.currLocation);
+        }
+        else return null;
+    }
 
+
+    /**
+     * Override A_Conflict equals and hashcode, because we don't differ between:
+     *     1. < agent1, agent2 >
+     *     2. < agent2, agent1 >
+     * @param o {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof A_Conflict)) return false;
+        A_Conflict conflict = (A_Conflict) o;
+        return time == conflict.time &&
+                ((  Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2)) ||
+                (   Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1))  ) &&
+                    Objects.equals(location, conflict.location);
+    }
+
+
+    @Override
+    public int hashCode() {
+        return agent1.hashCode() + agent2.hashCode() + Objects.hash( time, location );
+    }
 
 
 }

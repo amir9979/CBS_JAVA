@@ -22,9 +22,9 @@ public class Main {
     // testme
     // blocking
 
-//    public static final String resultsOutputPath = "";
-    public static final String resultsOutputPath = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
-                                                                                        "\\Reports default directory"});
+    public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{System.getProperty("user.home"), "CBS_Results"});
+//    public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
+//                                                                                        "\\Reports default directory"});
 
     public static void main(String[] args) {
 
@@ -88,7 +88,7 @@ public class Main {
      */
     private static void outputResults() {
         DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
-        String updatedPath = resultsOutputPath + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
+        String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
         try {
             S_Metrics.exportCSV(new FileOutputStream(updatedPath),
                     new String[]{   InstanceReport.StandardFields.experimentName,

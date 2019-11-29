@@ -57,8 +57,10 @@ public  class Experiment {
 
       System.out.println("solving "  + instance.name);
       Solution solution = solver.solve(instance, runParameters);
-      // System.out.println("Solution: " + solution);
-      System.out.println("Solution is " + (solution.isValidSolution() ? "valid!" : "invalid!!!"));
+      System.out.println("Solved?: " + (solution != null ? "yes" : "no"));
+      if(solution != null){
+        System.out.println("Solution is " + (solution.isValidSolution() ? "valid!" : "invalid!!!"));
+      }
     }
 
 

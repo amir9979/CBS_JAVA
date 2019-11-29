@@ -8,7 +8,7 @@ import java.util.SortedSet;
 /**
  * Selects a {@link A_Conflict} with the minimum time.
  */
-public class MinTimeConflictSelectionStrategy implements ConflictAvoidanceTable.ConflictSelectionStrategy {
+public class MinTimeConflictSelectionStrategy implements ConflictManager.ConflictSelectionStrategy {
     @Override
     public A_Conflict selectConflict(Collection<A_Conflict> conflicts) {
         if(conflicts == null || conflicts.isEmpty()) {return null;}

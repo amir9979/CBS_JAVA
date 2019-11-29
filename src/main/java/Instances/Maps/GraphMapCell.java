@@ -78,4 +78,10 @@ public class GraphMapCell implements I_MapCell{
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "GraphMapCell{" +
+                "coordinate=" + coordinate +
+                '}';
+    }
 }

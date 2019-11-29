@@ -9,6 +9,10 @@ import java.util.Objects;
 /**
  * Represents a conflict between 2 {@link Agent}s which are swapping their {@link I_MapCell locations} at a certain time.
  * This is known as s Swapping Conflict or an Edge Conflict.
+ *
+ * The order of agents is not unimportant, but the destinations must correctly correspond to their agents - {@link #location}
+ * for {@link #agent1}'s destination, and {@link #agent2_destination} for {@link #agent2}'s destination.
+ * An equivalent conflict would have both agents and destinations reversed.
  */
 public class SwappingConflict extends A_Conflict{
     /**
@@ -52,22 +56,48 @@ public class SwappingConflict extends A_Conflict{
                 && move2.prevLocation.equals(move1.currLocation);
     }
 
+    /**
+     * assumes both moves have the same {@link Move#timeNow}.
+     * @return true if these moves have a swapping conflict.
+     */
+    public static A_Conflict conflictBetween(Move move1, Move move2){
+        if(SwappingConflict.haveConflicts(move1, move2)){
+            return new SwappingConflict(move1.agent, move2.agent, move1.timeNow, move1.currLocation, move2.currLocation);
+        }
+        else{
+            return null;
+        }
+    }
 
-
+    /**
+     * Two {@link SwappingConflict}s are equal if all of their fields are equal, or if they are a mirror image, meaning
+     * both their agent order and destination order are reversed.
+     * @param o {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SwappingConflict)) return false;
-        SwappingConflict conflict = (SwappingConflict) o;
-        return time == conflict.time &&
-                (Objects.equals(agent1, conflict.agent1) && Objects.equals(agent2, conflict.agent2) && Objects.equals(this.location, ((SwappingConflict) o).location) && Objects.equals(this.agent2_destination, ((SwappingConflict) o).agent2_destination)) ||
-                (Objects.equals(agent1, conflict.agent2) && Objects.equals(agent2, conflict.agent1) && Objects.equals(this.location, ((SwappingConflict) o).agent2_destination) && Objects.equals(this.agent2_destination, ((SwappingConflict) o).location));
-
+        SwappingConflict that = (SwappingConflict) o;
+        return time == that.time &&
+                ( // all equals
+                    Objects.equals(agent1, that.agent1) &&
+                    Objects.equals(agent2, that.agent2) &&
+                    Objects.equals(location, that.location) &&
+                    Objects.equals(agent2_destination, that.agent2_destination)
+                )
+                ||
+                ( // mirror image
+                    Objects.equals(agent1, that.agent2) &&
+                    Objects.equals(agent2, that.agent1) &&
+                    Objects.equals(location, that.agent2_destination) &&
+                    Objects.equals(agent2_destination, that.location)
+                );
     }
 
     @Override
     public int hashCode() {
-        return  Objects.hash( this.agent1 ) * Objects.hash( this.agent2 ) * Objects.hash( this.time ) *
-                Objects.hash( this.location ) * Objects.hash( this.agent2_destination );
+        return Objects.hash(time, (Objects.hash(agent2, agent2_destination) + Objects.hash(agent1, location)) );
     }
 }

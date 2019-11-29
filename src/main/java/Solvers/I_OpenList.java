@@ -4,26 +4,20 @@ import java.util.Comparator;
 import java.util.Queue;
 
 /**
- * Inherits contract from {@link Queue}, and extends it by supporting {@link #get(E)}, {@link #replace(Object, Object)},
+ * Inherits contract from {@link Queue}, and extends it by supporting {@link #get(E)},
  * and {@link #keepOne(Object, Object, Comparator)}.
  * @param <E> a class which preferably, but not necessarily, implements the {@link Comparable} interface.
  */
 public interface I_OpenList<E> extends Queue<E> {
+    //todo - maybe this is more of a sorted set than a queue?
+
+
     /**
      * @param e an element to search for and retrieve. @NotNull
      * @return the element contained in the open list, which is equal to the given element. If there is no such element,
      *          returns null.
      */
     E get(E e);
-
-    /**
-     * Replaces the first element with the second element. These elements can be equal. If e1 is not in the open list,
-     * calling this method is the same as calling {@link #add(Object)} on e2.
-     * @param e1 the element to remove. @NotNull
-     * @param e2 the element to keep. @NotNull
-     * @return the element that was removed if any element was removed, otherwise returns null.
-     */
-    E replace(E e1, E e2);
 
     /**
      * Keeps the "smaller" element as determined by the given {@link Comparator}. Meaning, if
