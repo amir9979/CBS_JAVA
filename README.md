@@ -30,22 +30,24 @@
             Example: solvers.add(new CBS_Solver())
             
         2.  abstract void setExperiments(); // choose experiments
-            Add an Experiment class that extents A_Experiment and implement the following
-            abstract InstanceReport setReport();
-            public A_Experiment(InstanceManager instanceManager, int numOfInstances)
-            2.1 numOfInstances - you can choose how many instances you want for the experiment
-            2.2 An InstanceManager       
-                public InstanceManager(String sourceDirectory,
-                                           I_InstanceBuilder instanceBuilder,
-                                           InstanceProperties properties)
-                2.2.1   sourceDirectory - A path to the directory with the instances
-                2.2.2   Instance Builders are the parsering classes
-                        examples: 'InstanceBuilder_MovingAI', 'InstanceBuilder_BGU'
-                2.2.3   Instance Properties - In case you want to filter instances by criterias
-                        Constructor
-                        @param mapSize - {@link MapDimensions} indicates the Axis lengths , zero for unknown
-                        @param obstacles - For unknown obstacles enter (float)-1
-                        @param numOfAgents - An array of different num of agents. 
-        
-        
+            
+            * You can view the default report fields in method 'setReport' and modify it 
+            Add an Experiment class
+            public Experiment(String experimentName, InstanceManager instanceManager, int numOfInstances)
+                2.1 Experiment name: set any name you like to differ between experiment
+                2.2 An InstanceManager       
+                    public InstanceManager(String sourceDirectory,
+                                               I_InstanceBuilder instanceBuilder,
+                                               InstanceProperties properties)
+                    2.2.1   sourceDirectory - A path to the directory with the instances
+                    2.2.2   Instance Builders are the parsering classes
+                            examples: 'InstanceBuilder_MovingAI', 'InstanceBuilder_BGU'
+                    2.2.3   Instance Properties - In case you want to filter instances by criterias
+                            Constructor
+                            @param mapSize - {@link MapDimensions} indicates the Axis lengths , zero for unknown
+                            @param obstacles - For unknown obstacles enter (float)-1
+                            @param numOfAgents - An array of different num of agents. 
+            
+                2.3 numOfInstances - You can choose how many instances you want for the experiment
+                                     Note: there is a default number of instances, Integer.MAX_VALUE
                                 
