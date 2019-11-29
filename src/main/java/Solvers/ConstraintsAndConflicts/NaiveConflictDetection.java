@@ -1,8 +1,6 @@
-package Solvers.ConstraintsAndConflicts.DataStructures;
+package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
-import Solvers.ConstraintsAndConflicts.A_Conflict;
-import Solvers.ConstraintsAndConflicts.I_ConflictManager;
 import Solvers.SingleAgentPlan;
 
 import java.util.ArrayList;
