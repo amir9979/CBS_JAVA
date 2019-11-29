@@ -1,13 +1,13 @@
 package Solvers.ConstraintsAndConflicts.DataStructures;
 
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 
 import java.util.Objects;
 
 public class TimeLocation {
 
     public int time;
-    public I_MapCell location;
+    public I_Location location;
 
     /**
      * This class Wraps up both time and location as one element.
@@ -15,7 +15,7 @@ public class TimeLocation {
      * @param time - An int of the time unit in the solution
      * @param location - {@inheritDoc}
      */
-    public TimeLocation(int time, I_MapCell location) {
+    public TimeLocation(int time, I_Location location) {
         this.time = time;
         this.location = location;
     }

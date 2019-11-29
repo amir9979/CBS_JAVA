@@ -1,7 +1,7 @@
 package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.ConstraintsAndConflicts.DataStructures.AgentAtGoal;
 import Solvers.ConstraintsAndConflicts.DataStructures.ConflictAvoidance;
 import Solvers.ConstraintsAndConflicts.DataStructures.TimeLocation;
@@ -119,7 +119,7 @@ public class ConflictManager implements I_ConflictManager {
         /*  Check for conflicts and Add timeLocations */
         for (int time = agentFirstMoveTime; time <= goalTime; time++) {
             // Move's from location is 'prevLocation' , therefor timeLocation is time - 1
-            I_MapCell location = singleAgentPlan.moveAt(time).prevLocation;
+            I_Location location = singleAgentPlan.moveAt(time).prevLocation;
             TimeLocation timeLocation = new TimeLocation(time - 1, location);
 
             this.checkAddConflictsByTimeLocation(timeLocation, singleAgentPlan); // Checks for conflicts
@@ -141,7 +141,7 @@ public class ConflictManager implements I_ConflictManager {
      */
     private void manageGoalLocationFromPlan(int goalTime, SingleAgentPlan singleAgentPlan) {
 
-        I_MapCell goalLocation = singleAgentPlan.moveAt(goalTime).currLocation;
+        I_Location goalLocation = singleAgentPlan.moveAt(goalTime).currLocation;
 
         TimeLocation goalTimeLocation = new TimeLocation(goalTime, goalLocation);
 
@@ -163,7 +163,7 @@ public class ConflictManager implements I_ConflictManager {
      */
     private void checkAddVertexConflictsWithGoal(TimeLocation timeLocation, SingleAgentPlan singleAgentPlan){
 
-        I_MapCell location = timeLocation.location;
+        I_Location location = timeLocation.location;
         // A Set of time that at least one agent is occupying
         Set<Integer> timeList = this.timeLocationTables.getTimeListAtLocation(location);
 
@@ -220,8 +220,8 @@ public class ConflictManager implements I_ConflictManager {
      */
     private void checkAddSwappingConflicts(int time, SingleAgentPlan singleAgentPlan) {
         if( time < 1 ){ return;}
-        I_MapCell previousLocation = singleAgentPlan.moveAt(time).prevLocation;
-        I_MapCell nextLocation = singleAgentPlan.moveAt(time).currLocation;
+        I_Location previousLocation = singleAgentPlan.moveAt(time).prevLocation;
+        I_Location nextLocation = singleAgentPlan.moveAt(time).currLocation;
         Set<Agent> agentsMovingToPrevLocations = this.timeLocationTables.timeLocation_Agents.get(new TimeLocation(time,previousLocation));
         if ( agentsMovingToPrevLocations == null ){
             return;
@@ -320,7 +320,7 @@ public class ConflictManager implements I_ConflictManager {
 
         /*  = Plan's goal =  */
         int goalTime = previousPlan.size();
-        I_MapCell goalLocation = previousPlan.moveAt(goalTime).currLocation;
+        I_Location goalLocation = previousPlan.moveAt(goalTime).currLocation;
         TimeLocation goalTimeLocation = new TimeLocation(goalTime, goalLocation);
         // 1. remove from this.timeLocation_Agents
         // 2. remove from this.location_timeList

@@ -265,14 +265,14 @@ class MapFactoryTest {
     }
 
     static void assertAreNeighbors(I_Map map, I_Coordinate coor1, I_Coordinate coor2){
-        I_MapCell cell1 = map.getMapCell(coor1);
-        I_MapCell cell2 = map.getMapCell(coor2);
+        I_Location cell1 = map.getMapCell(coor1);
+        I_Location cell2 = map.getMapCell(coor2);
         assertTrue(cell1.isNeighbor(cell2) && cell2.isNeighbor(cell1));
     }
 
     static void assertNotNeighbors(I_Map map, I_Coordinate coor1, I_Coordinate coor2){
-        I_MapCell cell1 = map.getMapCell(coor1);
-        I_MapCell cell2 = map.getMapCell(coor2);
+        I_Location cell1 = map.getMapCell(coor1);
+        I_Location cell2 = map.getMapCell(coor2);
         assertFalse(cell1.isNeighbor(cell2) && cell2.isNeighbor(cell1));
     }
 

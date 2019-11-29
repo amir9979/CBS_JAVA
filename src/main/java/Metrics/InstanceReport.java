@@ -13,7 +13,7 @@ public class InstanceReport {
 
     //max cell size of excel, plus room for wrapping with "" plus some safety
     private static final int MAX_STRING_SIZE = 32767 - 12;
-    public static final String EXTENTION_STRING = " - Extended ";
+    public static final String EXTENSION_STRING = " - Extended ";
 
     private Map<String, String> stringFields = new HashMap<String, String>(8);
     private Map<String, Integer> integerFields = new HashMap<String, Integer>(8);
@@ -28,7 +28,7 @@ public class InstanceReport {
         public final static String experimentName = "Experiment Name";
         public final static String mapName = "Map Name";
         public final static String numAgents = "# Agents";
-        public final static String obstaclePercentage = "Obstacles (%)";
+        public final static String numObstacles = "# Obstacles";
         public final static String solver = "Solver";
         public final static String expandedNodesLowLevel = "Expanded Nodes (Low Level)";
         public final static String expandedNodes = "Expanded Nodes (High Level)";
@@ -48,18 +48,18 @@ public class InstanceReport {
     /**
      * Stores the value to the given field. If the field (fieldName) already exists, but with a different type,
      * does nothing.
-     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. Can't contain {@link #EXTENTION_STRING}. @NotNull
+     * @param fieldName the name of the field. If intended for CSV output, can't contain ','. Can't contain {@link #EXTENSION_STRING}. @NotNull
      * @param fieldValue the value to associate with the field. If intended for CSV output, can't contain ','. @NotNull
      * @return the old value of the field (first part if the field was too large and split into multiple fields). Returns
      * null if it didn't exist. also returns null if the field (fieldName) already exists, but with a different type, or
-     * it the fieldName contains {@link #EXTENTION_STRING}.
+     * it the fieldName contains {@link #EXTENSION_STRING}.
      */
     public String putStringValue(String fieldName, String fieldValue){
         if(!canPutToMap(fieldName, stringFields)) {return null;}
-        if(fieldName.contains(EXTENTION_STRING)) {return null;}
+        if(fieldName.contains(EXTENSION_STRING)) {return null;}
         removeExtensions(fieldName);
         if(fieldValue.length() > MAX_STRING_SIZE){ //split if too large, to display properly in excel
-            //todo this wasn't displaying properly so for now I just made it keep only the first part of the solution. Should fix it later. @Jonathan Morag
+            //nicetohave -  this wasn't displaying properly so I just made it keep only the first part of the solution. May fix to keep entire solution
 //            return putStringInParts(fieldName, fieldValue);
             return this.stringFields.put(fieldName, fieldValue.substring(0, MAX_STRING_SIZE - 9) + "...");
         }
@@ -105,7 +105,7 @@ public class InstanceReport {
     }
 
     private String extensionFieldName(String originalFieldName, int extensionIndex){
-        return originalFieldName + EXTENTION_STRING + extensionIndex;
+        return originalFieldName + EXTENSION_STRING + extensionIndex;
     }
 
     /**

@@ -24,21 +24,21 @@ public class MapFactory {
     public static GraphMap newSimple4Connected2D_GraphMap(Enum_MapCellType[][] rectangle_2D_Map){
         int xAxis_length = rectangle_2D_Map.length;
         int yAxis_length = rectangle_2D_Map[0].length;
-        GraphMapCell[][] cells = new GraphMapCell[xAxis_length][yAxis_length]; //rectangle map
+        GraphMapVertex[][] cells = new GraphMapVertex[xAxis_length][yAxis_length]; //rectangle map
         //generate all cells
         for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
             for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
                 if(rectangle_2D_Map[xIndex][yIndex] == Enum_MapCellType.EMPTY){
-                    cells[xIndex][yIndex] = new GraphMapCell(rectangle_2D_Map[xIndex][yIndex], new Coordinate_2D(xIndex, yIndex));
+                    cells[xIndex][yIndex] = new GraphMapVertex(rectangle_2D_Map[xIndex][yIndex], new Coordinate_2D(xIndex, yIndex));
                 }
             }
         }
-        HashMap<I_Coordinate, GraphMapCell> allCells = new HashMap<>(); //to be used for GraphMap constructor
+        HashMap<I_Coordinate, GraphMapVertex> allCells = new HashMap<>(); //to be used for GraphMap constructor
         //connect cells to their neighbors (4-connected)
-        ArrayList<GraphMapCell> neighbors = new ArrayList<>(4);
+        ArrayList<GraphMapVertex> neighbors = new ArrayList<>(4);
         for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
             for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
-                GraphMapCell currentCell = cells[xIndex][yIndex];
+                GraphMapVertex currentCell = cells[xIndex][yIndex];
                 if(cells[xIndex][yIndex] != null){
                     neighbors.clear();
                     //look for WEST neighbor
@@ -50,7 +50,7 @@ public class MapFactory {
                     //look for SOUTH neighbor
                     if(yIndex+1 < yAxis_length && cells[xIndex][yIndex+1] != null){neighbors.add(cells[xIndex][yIndex+1]);}
                     // set cell neighbors
-                    currentCell.setNeighbors(neighbors.toArray(new GraphMapCell[0]));
+                    currentCell.setNeighbors(neighbors.toArray(new GraphMapVertex[0]));
                     // add to allCells
                     allCells.put(currentCell.coordinate, currentCell);
                 }
@@ -59,13 +59,13 @@ public class MapFactory {
         return new GraphMap(allCells);
     }
 
-    /* nicetohave
+    /* nicetohave - 8 connected 2D map
     public static GraphMap newSimple8Connected2D_GraphMap(Enum_MapCellType[][] map_2D){
         return null;
     }
     */
 
-    /* nicetohave
+    /* nicetohave - 3D map
     public static GraphMap newSimple6Connected3D_GraphMap(Enum_MapCellType[][] map_2D){
         return null;
     }

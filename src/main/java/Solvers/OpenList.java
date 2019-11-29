@@ -81,10 +81,26 @@ public class OpenList<E> implements I_OpenList<E> {
         return this.map.containsKey(o);
     }
 
+    /**
+     * Doesn't support remove().
+     * @return an iterator over this collection.
+     */
     @Override
     public Iterator<E> iterator() {
-        // todo - probably wrong, as calling Iterator.remove() would not remove from both collections. replace with internal.
-        return queue.iterator();
+        return new Iterator<E>() {
+            Iterator<E> queueIter = queue.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return queueIter.hasNext();
+            }
+
+            @Override
+            public E next() {
+                return queueIter.next();
+            }
+
+        };
     }
 
     @Override
@@ -98,7 +114,7 @@ public class OpenList<E> implements I_OpenList<E> {
     }
 
     /**
-     * If an element already exists so that e.equals(existing), it will be removed.
+     * Doesn't allow duplicates. If an element already exists so that e.equals(existing), it will be removed.
      * @param e {@inheritDoc}
      * @return {@inheritDoc}
      */
@@ -115,7 +131,7 @@ public class OpenList<E> implements I_OpenList<E> {
     public boolean remove(Object o) {
         //did the element even exist
         boolean existed = map.remove(o) != null;
-        //if it didn't then there is no need for a somewhat expensive remove operation on #queue
+        //if it didn't exist, there is no need for a somewhat expensive remove operation on #queue
         if(existed) {queue.remove(o);}
         return existed;
     }

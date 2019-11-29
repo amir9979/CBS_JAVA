@@ -13,9 +13,7 @@ import Solvers.ConstraintsAndConflicts.ConstraintSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,22 +69,22 @@ class SingleAgentAStar_SolverTest {
     private I_Coordinate coor04 = new Coordinate_2D(0,4);
     private I_Coordinate coor00 = new Coordinate_2D(0,0);
 
-    private I_MapCell cell12 = mapCircle.getMapCell(coor12);
-    private I_MapCell cell13 = mapCircle.getMapCell(coor13);
-    private I_MapCell cell14 = mapCircle.getMapCell(coor14);
-    private I_MapCell cell22 = mapCircle.getMapCell(coor22);
-    private I_MapCell cell24 = mapCircle.getMapCell(coor24);
-    private I_MapCell cell32 = mapCircle.getMapCell(coor32);
-    private I_MapCell cell33 = mapCircle.getMapCell(coor33);
-    private I_MapCell cell34 = mapCircle.getMapCell(coor34);
+    private I_Location cell12 = mapCircle.getMapCell(coor12);
+    private I_Location cell13 = mapCircle.getMapCell(coor13);
+    private I_Location cell14 = mapCircle.getMapCell(coor14);
+    private I_Location cell22 = mapCircle.getMapCell(coor22);
+    private I_Location cell24 = mapCircle.getMapCell(coor24);
+    private I_Location cell32 = mapCircle.getMapCell(coor32);
+    private I_Location cell33 = mapCircle.getMapCell(coor33);
+    private I_Location cell34 = mapCircle.getMapCell(coor34);
 
-    private I_MapCell cell11 = mapCircle.getMapCell(coor11);
-    private I_MapCell cell43 = mapCircle.getMapCell(coor43);
-    private I_MapCell cell53 = mapCircle.getMapCell(coor53);
-    private I_MapCell cell05 = mapCircle.getMapCell(coor05);
+    private I_Location cell11 = mapCircle.getMapCell(coor11);
+    private I_Location cell43 = mapCircle.getMapCell(coor43);
+    private I_Location cell53 = mapCircle.getMapCell(coor53);
+    private I_Location cell05 = mapCircle.getMapCell(coor05);
 
-    private I_MapCell cell04 = mapCircle.getMapCell(coor04);
-    private I_MapCell cell00 = mapCircle.getMapCell(coor00);
+    private I_Location cell04 = mapCircle.getMapCell(coor04);
+    private I_Location cell00 = mapCircle.getMapCell(coor00);
 
     private Agent agent33to12 = new Agent(0, coor33, coor12);
     private Agent agent12to33 = new Agent(1, coor12, coor33);
@@ -119,7 +117,7 @@ class SingleAgentAStar_SolverTest {
 
         Map<Agent, SingleAgentPlan> plans = new HashMap<>();
         SingleAgentPlan plan = new SingleAgentPlan(testInstance.agents.get(0));
-        I_MapCell cell = testInstance.map.getMapCell(new Coordinate_2D(4,5));
+        I_Location cell = testInstance.map.getMapCell(new Coordinate_2D(4,5));
         plan.addMove(new Move(testInstance.agents.get(0), 1, cell, cell));
         plans.put(testInstance.agents.get(0), plan);
         Solution expected = new Solution(plans);

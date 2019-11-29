@@ -95,23 +95,27 @@ public class Solution implements Iterable<SingleAgentPlan>{
         return maxCost;
     }
 
-    //todo add String serialization and deserialization
-
     @Override
     public String toString() {
         return agentPlans.values().toString();
-        //nicetohave JSON string or something
     }
 
+    //nicetohave JSON toString
+
+    /**
+     * A string output that is easier for humans to read.
+     * @return a string output that is easier for humans to read.
+     */
     public String readableToString(){
         StringBuilder sb = new StringBuilder();
         List<Agent> agents = new ArrayList<>(this.agentPlans.keySet());
         Collections.sort(agents, Comparator.comparing(agent -> agent.iD));
         for(Agent agent : agents){
-            sb.append("\nPlan for agent ").append(agent.iD);
+            sb.append("Plan for agent ").append(agent.iD);
             for(Move move : this.agentPlans.get(agent)){
                 sb.append('\n').append(move.timeNow).append(": ").append(move.prevLocation.getCoordinate()).append(" -> ").append(move.currLocation.getCoordinate());
             }
+            sb.append("\n");
         }
         sb.append('\n');
         return sb.toString();

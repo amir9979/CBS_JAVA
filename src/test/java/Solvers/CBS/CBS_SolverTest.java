@@ -87,24 +87,24 @@ class CBS_SolverTest {
     private I_Coordinate coor01 = new Coordinate_2D(0,1);
     private I_Coordinate coor10 = new Coordinate_2D(1,0);
 
-    private I_MapCell cell12 = mapCircle.getMapCell(coor12);
-    private I_MapCell cell13 = mapCircle.getMapCell(coor13);
-    private I_MapCell cell14 = mapCircle.getMapCell(coor14);
-    private I_MapCell cell22 = mapCircle.getMapCell(coor22);
-    private I_MapCell cell24 = mapCircle.getMapCell(coor24);
-    private I_MapCell cell32 = mapCircle.getMapCell(coor32);
-    private I_MapCell cell33 = mapCircle.getMapCell(coor33);
-    private I_MapCell cell34 = mapCircle.getMapCell(coor34);
+    private I_Location cell12 = mapCircle.getMapCell(coor12);
+    private I_Location cell13 = mapCircle.getMapCell(coor13);
+    private I_Location cell14 = mapCircle.getMapCell(coor14);
+    private I_Location cell22 = mapCircle.getMapCell(coor22);
+    private I_Location cell24 = mapCircle.getMapCell(coor24);
+    private I_Location cell32 = mapCircle.getMapCell(coor32);
+    private I_Location cell33 = mapCircle.getMapCell(coor33);
+    private I_Location cell34 = mapCircle.getMapCell(coor34);
 
-    private I_MapCell cell11 = mapCircle.getMapCell(coor11);
-    private I_MapCell cell43 = mapCircle.getMapCell(coor43);
-    private I_MapCell cell53 = mapCircle.getMapCell(coor53);
-    private I_MapCell cell05 = mapCircle.getMapCell(coor05);
+    private I_Location cell11 = mapCircle.getMapCell(coor11);
+    private I_Location cell43 = mapCircle.getMapCell(coor43);
+    private I_Location cell53 = mapCircle.getMapCell(coor53);
+    private I_Location cell05 = mapCircle.getMapCell(coor05);
 
-    private I_MapCell cell04 = mapCircle.getMapCell(coor04);
-    private I_MapCell cell00 = mapCircle.getMapCell(coor00);
-    private I_MapCell cell01 = mapCircle.getMapCell(coor01);
-    private I_MapCell cell10 = mapCircle.getMapCell(coor10);
+    private I_Location cell04 = mapCircle.getMapCell(coor04);
+    private I_Location cell00 = mapCircle.getMapCell(coor00);
+    private I_Location cell01 = mapCircle.getMapCell(coor01);
+    private I_Location cell10 = mapCircle.getMapCell(coor10);
 
     private Agent agent33to12 = new Agent(0, coor33, coor12);
     private Agent agent12to33 = new Agent(1, coor12, coor33);

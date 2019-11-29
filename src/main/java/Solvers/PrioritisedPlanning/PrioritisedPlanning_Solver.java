@@ -2,7 +2,6 @@ package Solvers.PrioritisedPlanning;
 
 import Instances.Agents.Agent;
 import Instances.MAPF_Instance;
-import Instances.Maps.I_MapCell;
 import Metrics.InstanceReport;
 import Metrics.S_Metrics;
 import Solvers.*;
@@ -10,7 +9,6 @@ import Solvers.AStar.SingleAgentAStar_Solver;
 import Solvers.ConstraintsAndConflicts.Constraint;
 import Solvers.ConstraintsAndConflicts.ConstraintSet;
 
-import java.io.IOException;
 import java.util.*;
 
 /**

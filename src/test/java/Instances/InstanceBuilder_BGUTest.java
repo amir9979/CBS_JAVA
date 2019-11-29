@@ -30,7 +30,7 @@ public class InstanceBuilder_BGUTest {
                 // Create coordinate
                 I_Coordinate coordinate = new Coordinate_2D(xAxis_value, yAxis_value);
                 // Get the relevant mapCell
-                I_MapCell actualMapCell = actualMap.getMapCell(coordinate);
+                I_Location actualMapCell = actualMap.getMapCell(coordinate);
 
                 // Check that wall doesnt exists in actualMap
                 if( actualMapCell == null && expectedCellTypeMap[xAxis_value][yAxis_value] == w){ continue; }

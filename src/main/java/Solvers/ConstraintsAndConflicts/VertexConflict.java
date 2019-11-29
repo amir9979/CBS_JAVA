@@ -1,20 +1,20 @@
 package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.ConstraintsAndConflicts.DataStructures.TimeLocation;
 import Solvers.Move;
 
 import java.util.Objects;
 
 /**
- * Represents a conflict between 2 {@link Agent}s, at a certain time, in a certain {@link I_MapCell location}.
+ * Represents a conflict between 2 {@link Agent}s, at a certain time, in a certain {@link I_Location location}.
  * This is known as a Vertex Conflict.
  */
 public class VertexConflict extends A_Conflict {
 
 
-    public VertexConflict(Agent agent1, Agent agent2, int time, I_MapCell location) {
+    public VertexConflict(Agent agent1, Agent agent2, int time, I_Location location) {
         super(agent1, agent2, time, location);
     }
 

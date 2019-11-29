@@ -1,7 +1,7 @@
 package Solvers;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.ConstraintsAndConflicts.A_Conflict;
 import Solvers.ConstraintsAndConflicts.SwappingConflict;
 import Solvers.ConstraintsAndConflicts.VertexConflict;
@@ -228,7 +228,7 @@ public class SingleAgentPlan implements Iterable<Move> {
         if(this.getEndTime() != other.getEndTime()){
             SingleAgentPlan lateEndingPlan = this.getEndTime() > maxTime ? this : other;
             SingleAgentPlan earlyEndingPlan = this.getEndTime() <= maxTime ? this : other;
-            I_MapCell goalLocation = earlyEndingPlan.moveAt(maxTime).currLocation;
+            I_Location goalLocation = earlyEndingPlan.moveAt(maxTime).currLocation;
 
             for (int time = maxTime+1; time <= lateEndingPlan.getEndTime(); time++) {
                 Move stayMove = new Move(earlyEndingPlan.agent, time, goalLocation, goalLocation);

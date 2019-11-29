@@ -32,14 +32,14 @@ class SingleAgentPlanTest {
     private I_Coordinate coor32 = new Coordinate_2D(3,2);
     private I_Coordinate coor33 = new Coordinate_2D(3,3);
     private I_Coordinate coor34 = new Coordinate_2D(3,4);
-    private I_MapCell cell12 = map1.getMapCell(coor12);
-    private I_MapCell cell13 = map1.getMapCell(coor13);
-    private I_MapCell cell14 = map1.getMapCell(coor14);
-    private I_MapCell cell22 = map1.getMapCell(coor22);
-    private I_MapCell cell24 = map1.getMapCell(coor24);
-    private I_MapCell cell32 = map1.getMapCell(coor32);
-    private I_MapCell cell33 = map1.getMapCell(coor33);
-    private I_MapCell cell34 = map1.getMapCell(coor34);
+    private I_Location cell12 = map1.getMapCell(coor12);
+    private I_Location cell13 = map1.getMapCell(coor13);
+    private I_Location cell14 = map1.getMapCell(coor14);
+    private I_Location cell22 = map1.getMapCell(coor22);
+    private I_Location cell24 = map1.getMapCell(coor24);
+    private I_Location cell32 = map1.getMapCell(coor32);
+    private I_Location cell33 = map1.getMapCell(coor33);
+    private I_Location cell34 = map1.getMapCell(coor34);
     private Agent agent1 = new Agent(0, coor13, coor14);
     private Agent agent2 = new Agent(1, coor24, coor24);
 

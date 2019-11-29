@@ -4,21 +4,21 @@ import java.util.List;
 
 /**
  * A single cell in a {@link GraphMap}. Represents a unique location in the graph.
- * Immutable beyond first initialization (First with a constructor, and then with {@link #setNeighbors(GraphMapCell[])}.
+ * Immutable beyond first initialization (First with a constructor, and then with {@link #setNeighbors(GraphMapVertex[])}.
  * Equals and HashCode are not overridden, because the implementation of {@link GraphMap} and this class does not allow
- * duplicate instances of the same {@link GraphMapCell}. If an extending class wished to override these, it would be
+ * duplicate instances of the same {@link GraphMapVertex}. If an extending class wished to override these, it would be
  * best to use all fields, not just the {@link #coordinate}.
  */
-public class GraphMapCell implements I_MapCell{
+public class GraphMapVertex implements I_Location {
 
     /**
      * The type of the cell. The type could determine whether or not an agent can traverse or occupy a cell.
      */
     public final Enum_MapCellType cellType;
-    public List<I_MapCell>  neighbors;
+    public List<I_Location>  neighbors;
     public final I_Coordinate coordinate;
 
-    GraphMapCell(Enum_MapCellType cellType, I_Coordinate coordinate) {
+    GraphMapVertex(Enum_MapCellType cellType, I_Coordinate coordinate) {
         this.cellType = cellType;
         this.coordinate = coordinate;
         this.neighbors = null;
@@ -30,7 +30,7 @@ public class GraphMapCell implements I_MapCell{
      * @param neighbors the cell's neighbors.
      * @throws NullPointerException if an element is null or the given array is null.
      */
-    void setNeighbors(GraphMapCell[] neighbors) {
+    void setNeighbors(GraphMapVertex[] neighbors) {
         this.neighbors = (this.neighbors == null ? List.of(neighbors) : this.neighbors);
     }
 
@@ -59,19 +59,19 @@ public class GraphMapCell implements I_MapCell{
      * @return an UnmodifiableList of this cell's neighbors.
      */
     @Override
-    public List<I_MapCell> getNeighbors() {
+    public List<I_Location> getNeighbors() {
         return this.neighbors;
     }
 
     /**
      * Returns true iff other is contained in {@link #neighbors}. In particular, returns false if other==this.
-     * @param other another {@link I_MapCell}.
+     * @param other another {@link I_Location}.
      * @return true iff other is contained in {@link #neighbors}.
      */
     @Override
-    public boolean isNeighbor(I_MapCell other) {
+    public boolean isNeighbor(I_Location other) {
         boolean result = false;
-        for (I_MapCell neighbor :
+        for (I_Location neighbor :
                 neighbors) {
             result = result || (neighbor.equals(other));
         }

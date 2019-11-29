@@ -1,6 +1,6 @@
 package Solvers.ConstraintsAndConflicts;
 
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.Move;
 
 import java.util.*;
@@ -34,7 +34,7 @@ public class ConstraintSet{
 
     /*  = Set Interface =  */
 
-    //nicetohave - removed for now because the size of constraints isn't the number of constraints in the set. if we need this, add size field to class.
+    //removed, because the size of constraints field isn't the number of constraints in the set. if we need this, add size field to class.
 //    public int size() {
 //        return constraints.size();
 //    }
@@ -158,7 +158,7 @@ public class ConstraintSet{
     }
 
     /**
-     * Given a {@link Move} which an {@link Instances.Agents.Agent agent} makes to occupy a {@link I_MapCell location}
+     * Given a {@link Move} which an {@link Instances.Agents.Agent agent} makes to occupy a {@link I_Location location}
      * indefinitely starting after move's time, checks if there is a {@link Constraint} that would reject it eventually.
      *
      * In other words, we simulate this set being given an infinite number of "stay" moves after the given move.
@@ -264,11 +264,11 @@ public class ConstraintSet{
      * replaces the constraint with a simple wrapper that is quick to find in a set.
      */
     private static class ConstraintWrapper{
-        private I_MapCell location;
+        private I_Location location;
         private int time;
         private Set<Constraint> relevantConstraints;
 
-        public ConstraintWrapper(I_MapCell location, int time) {
+        public ConstraintWrapper(I_Location location, int time) {
             this.location = location;
             this.time = time;
         }

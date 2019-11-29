@@ -1,13 +1,13 @@
 package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.Move;
 
 /**
- * A constraint on a {@link I_MapCell location}, at a specific time. It may or may not apply to all agents.
+ * A constraint on a {@link I_Location location}, at a specific time. It may or may not apply to all agents.
  * This class is useful for preventing a vertex conflict by setting {@link #prevLocation} to null.
- * This class is useful for preventing a swapping conflict by setting {@link #prevLocation} to a valid {@link I_MapCell}.
+ * This class is useful for preventing a swapping conflict by setting {@link #prevLocation} to a valid {@link I_Location}.
  */
 public class Constraint {
     /**
@@ -22,11 +22,11 @@ public class Constraint {
      * The location from which the constraint forbids entry to {@link #location}. @Nullable
      * This is meant to prevent swapping conflicts. If it is null, then this constraint prevents vertex conflicts.
      */
-    public final I_MapCell prevLocation;
+    public final I_Location prevLocation;
     /**
      * The location the constraint applies to.
      */
-    public final I_MapCell location;
+    public final I_Location location;
 
 
     /**
@@ -35,7 +35,7 @@ public class Constraint {
      * @param prevLocation the location from which the constraint forbids entry to {@link #location}. @Nullable
      * @param location the location the constraint applies to.
      */
-    public Constraint(Agent agent, int time, I_MapCell prevLocation, I_MapCell location) {
+    public Constraint(Agent agent, int time, I_Location prevLocation, I_Location location) {
         if(time<0 || location == null) throw new IllegalArgumentException();
         this.agent = agent;
         this.time = time;
@@ -49,7 +49,7 @@ public class Constraint {
      * @param prevLocation the location from which the constraint forbids entry to {@link #location}. @Nullable
      * @param location the location the constraint applies to.
      */
-    public Constraint(int time, I_MapCell prevLocation, I_MapCell location) {
+    public Constraint(int time, I_Location prevLocation, I_Location location) {
         this(null, time, prevLocation, location);
     }
 
@@ -59,7 +59,7 @@ public class Constraint {
      * @param time the time the constraint applies to.
      * @param location the location the constraint applies to.
      */
-    public Constraint(Agent agent, int time, I_MapCell location) {
+    public Constraint(Agent agent, int time, I_Location location) {
         this(agent, time,null, location);
     }
 
@@ -68,7 +68,7 @@ public class Constraint {
      * @param time the time the constraint applies to.
      * @param location the location the constraint applies to.
      */
-    public Constraint(int time, I_MapCell location) {
+    public Constraint(int time, I_Location location) {
         this(null, time,null, location);
     }
 

@@ -4,7 +4,7 @@ import Instances.Agents.Agent;
 import Instances.MAPF_Instance;
 import Instances.Maps.I_Coordinate;
 import Instances.Maps.I_Map;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Metrics.InstanceReport;
 import Solvers.*;
 import Solvers.ConstraintsAndConflicts.ConstraintSet;
@@ -111,7 +111,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
 
     /**
      * Solves AStar for a single agent.
-     * Assumes just 1 goal {@link I_MapCell location} - otherwise there may be problems when accounting for constraints
+     * Assumes just 1 goal {@link I_Location location} - otherwise there may be problems when accounting for constraints
      * at goal, that come after reaching goal.
      * @return a solution that contains a plan for the {@link #agent} to its goal.
      */
@@ -126,7 +126,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
             if(checkTimeout()) {return null;}
             closed.add(currentState);
 
-            // todo change to early goal test!
+            // nicetohave -  change to early goal test
             if (isGoalState(currentState)){
                 // check to see if a rejecting constraint on the goal exists at some point in the future.
 
@@ -162,7 +162,7 @@ public class SingleAgentAStar_Solver extends A_Solver {
      * Initialises {@link #openList OPEN}.
      *
      * OPEN is not initialised with a single root state as is common. This is because states in this solver represent
-     * {@link Move moves} (classically - operators) rather than {@link I_MapCell map cells} (classically - states).
+     * {@link Move moves} (classically - operators) rather than {@link I_Location map cells} (classically - states).
      * Instead, OPEN is initialised with all possible moves from the starting position.
      * @return true if OPEN was successfully initialised, else false.
      */
@@ -177,12 +177,12 @@ public class SingleAgentAStar_Solver extends A_Solver {
         }
         else { // the existing plan is empty (no existing plan)
 
-            I_MapCell sourceCell = map.getMapCell(agent.source);
+            I_Location sourceCell = map.getMapCell(agent.source);
             // can move to neighboring cells or stay put
-            List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(sourceCell.getNeighbors());
+            List<I_Location> neighborCellsIncludingCurrent = new ArrayList<>(sourceCell.getNeighbors());
             neighborCellsIncludingCurrent.add(sourceCell);
 
-            for (I_MapCell destination: neighborCellsIncludingCurrent) {
+            for (I_Location destination: neighborCellsIncludingCurrent) {
                 Move possibleMove = new Move(agent, problemStartTime + 1, sourceCell, destination);
                 if (constraints.accepts(possibleMove)) { //move not prohibited by existing constraint
                     AStarState rootState = new AStarState(possibleMove, null, 1);
@@ -270,10 +270,10 @@ public class SingleAgentAStar_Solver extends A_Solver {
         public void expand() {
             expandedNodes++;
             // can move to neighboring cells or stay put
-            List<I_MapCell> neighborCellsIncludingCurrent = new ArrayList<>(this.move.currLocation.getNeighbors());
+            List<I_Location> neighborCellsIncludingCurrent = new ArrayList<>(this.move.currLocation.getNeighbors());
             neighborCellsIncludingCurrent.add(this.move.currLocation);
 
-            for (I_MapCell destination: neighborCellsIncludingCurrent){
+            for (I_Location destination: neighborCellsIncludingCurrent){
                 Move possibleMove = new Move(this.move.agent, this.move.timeNow+1, this.move.currLocation, destination);
                 if(constraints.accepts(possibleMove)){ //move not prohibited by existing constraint
                     AStarState child = new AStarState(possibleMove, this, this.g + 1);

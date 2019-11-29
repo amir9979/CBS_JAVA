@@ -1,5 +1,6 @@
 package Metrics;
 
+import IO_Package.IO_Manager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ import java.nio.file.Paths;
 
 class S_MetricsTest {
 
-    private static final String outputFile = "C:\\Users\\John\\Desktop\\test.csv";
+    private static final String outputFile = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory, "S_MetricsTest.csv"});
 
     @BeforeEach
     void setUp() {

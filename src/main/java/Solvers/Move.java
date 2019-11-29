@@ -1,7 +1,7 @@
 package Solvers;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 
 /**
  * A single move for a single agent. Immutable.
@@ -23,13 +23,13 @@ public class Move {
     /**
      * The agent's location before the move. Can equal {@link #currLocation}.
      */
-    public final I_MapCell prevLocation;
+    public final I_Location prevLocation;
     /**
      * The {@link #agent}'s location at the end of the move
      */
-    public final I_MapCell currLocation;
+    public final I_Location currLocation;
 
-    public Move(Agent agent, int timeNow, I_MapCell prevLocation, I_MapCell currLocation) {
+    public Move(Agent agent, int timeNow, I_Location prevLocation, I_Location currLocation) {
         if(agent == null || timeNow<1 || prevLocation == null || currLocation == null){
             throw new IllegalArgumentException();
         }

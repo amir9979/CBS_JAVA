@@ -2,7 +2,7 @@ package Instances.Maps;
 
 import java.util.List;
 
-public interface I_MapCell {
+public interface I_Location {
 
     /**
      * Returns the type of the cell.
@@ -15,7 +15,7 @@ public interface I_MapCell {
      * The amount of neighbors varies by map and connectivity.
      * @return an array that contains references to this cell's neighbors. Should not include this.
      */
-    List<I_MapCell> getNeighbors();
+    List<I_Location> getNeighbors();
 
     /**
      * returns the cell's coordinate.
@@ -25,9 +25,9 @@ public interface I_MapCell {
 
     /**
      * Return true iff other is a neighbor of this.
-     * @param other another {@link I_MapCell}.
+     * @param other another {@link I_Location}.
      * @return true iff other is a neighbor of this.
      */
-    boolean isNeighbor(I_MapCell other);
+    boolean isNeighbor(I_Location other);
 
 }

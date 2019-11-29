@@ -24,10 +24,9 @@ public class Main {
     public static void main(String[] args) {
         verifyOutputPath();
 
-        runTestingBenchmarkExperiment();
-
-        // solveOneInstanceExample();
-        // runMultipleExperimentsExample();
+         solveOneInstanceExample();
+//         runMultipleExperimentsExample();
+        // runTestingBenchmarkExperiment();
     }
 
     private static void verifyOutputPath() {
@@ -79,7 +78,7 @@ public class Main {
         Solution solution = solver.solve(instance, runParameters);
 
         //print
-        System.out.println(solution);
+        System.out.println(solution.readableToString());
 
         //output results
         outputResults();
@@ -97,7 +96,7 @@ public class Main {
                     new String[]{   InstanceReport.StandardFields.experimentName,
                                     InstanceReport.StandardFields.mapName,
                                     InstanceReport.StandardFields.numAgents,
-                                    InstanceReport.StandardFields.obstaclePercentage,
+                                    InstanceReport.StandardFields.numObstacles,
                                     InstanceReport.StandardFields.solved,
                                     InstanceReport.StandardFields.elapsedTimeMS,
                                     InstanceReport.StandardFields.solutionCost,

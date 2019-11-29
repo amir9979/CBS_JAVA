@@ -1,7 +1,7 @@
 package Solvers.ConstraintsAndConflicts;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.Move;
 
 import java.util.Objects;
@@ -10,9 +10,9 @@ public abstract class A_Conflict {
     public final Agent agent1;
     public final Agent agent2;
     public final int time;
-    public final I_MapCell location;
+    public final I_Location location;
 
-    public A_Conflict(Agent agent1, Agent agent2, int time, I_MapCell location) {
+    public A_Conflict(Agent agent1, Agent agent2, int time, I_Location location) {
         this.agent1 = agent1;
         this.agent2 = agent2;
         this.time = time;

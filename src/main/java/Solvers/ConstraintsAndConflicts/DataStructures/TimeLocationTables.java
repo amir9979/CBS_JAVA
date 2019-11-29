@@ -1,7 +1,7 @@
 package Solvers.ConstraintsAndConflicts.DataStructures;
 
 import Instances.Agents.Agent;
-import Instances.Maps.I_MapCell;
+import Instances.Maps.I_Location;
 import Solvers.SingleAgentPlan;
 
 import java.util.*;
@@ -13,10 +13,10 @@ public class TimeLocationTables {
     public final Map<TimeLocation, Set<Agent>> timeLocation_Agents;
 
     // Maps from a location to all time units where at least one agent is occupying the location
-    public final Map<I_MapCell,Set<Integer>> location_timeList;
+    public final Map<I_Location,Set<Integer>> location_timeList;
 
     // Maps from GoalLocation to Agent&time
-    public final Map<I_MapCell, SingleAgentPlan> goal_plan;
+    public final Map<I_Location, SingleAgentPlan> goal_plan;
 
 
 
@@ -34,12 +34,12 @@ public class TimeLocationTables {
         }
 
         this.location_timeList = new HashMap<>();
-        for ( Map.Entry<I_MapCell,Set<Integer>> location_timeListFromOther: other.location_timeList.entrySet()){
+        for ( Map.Entry<I_Location,Set<Integer>> location_timeListFromOther: other.location_timeList.entrySet()){
             this.location_timeList.put(location_timeListFromOther.getKey(), new HashSet<>(location_timeListFromOther.getValue()));
         }
 
         this.goal_plan = new HashMap<>();
-        for ( Map.Entry<I_MapCell,SingleAgentPlan> goalPlanFromOther : other.goal_plan.entrySet()){
+        for ( Map.Entry<I_Location,SingleAgentPlan> goalPlanFromOther : other.goal_plan.entrySet()){
             this.goal_plan.put(goalPlanFromOther.getKey(),goalPlanFromOther.getValue());
         }
     }
@@ -84,7 +84,7 @@ public class TimeLocationTables {
         return this.timeLocation_Agents.get(timeLocation);
     }
 
-    public AgentAtGoal getAgentAtGoalTime(I_MapCell goalLocation){
+    public AgentAtGoal getAgentAtGoalTime(I_Location goalLocation){
         SingleAgentPlan plan = this.goal_plan.get(goalLocation);
         if( plan == null ){
             return null;
@@ -93,7 +93,7 @@ public class TimeLocationTables {
         return agentAtGoal;
     }
 
-    public Set<Integer> getTimeListAtLocation(I_MapCell location){
+    public Set<Integer> getTimeListAtLocation(I_Location location){
         return this.location_timeList.get(location);
     }
 
@@ -101,11 +101,11 @@ public class TimeLocationTables {
         this.timeLocation_Agents.remove(timeLocation);
     }
 
-    public void removeGoalLocation(I_MapCell goalLocation){
+    public void removeGoalLocation(I_Location goalLocation){
         this.goal_plan.remove(goalLocation);
     }
 
-    public void removeLocationFromTimeList(I_MapCell location){
+    public void removeLocationFromTimeList(I_Location location){
         this.location_timeList.remove(location);
     }
 

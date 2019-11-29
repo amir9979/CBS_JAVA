@@ -1,7 +1,6 @@
 package Instances.Maps;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * Represents a {@link I_Map map} as an abstract graph. This implementation can, in principle, support any domain -
@@ -14,23 +13,23 @@ import java.util.Objects;
  */
 public class GraphMap implements I_Map {
 
-    private HashMap<I_Coordinate, GraphMapCell> allGraphCells;
+    private HashMap<I_Coordinate, GraphMapVertex> allGraphCells;
 
     /**
      * Initialization is done through {@link MapFactory}.
      * @param allGraphCells a {@link HashMap} containing all cells in the graph.
      */
-    GraphMap(HashMap<I_Coordinate, GraphMapCell> allGraphCells) {
+    GraphMap(HashMap<I_Coordinate, GraphMapVertex> allGraphCells) {
         this.allGraphCells = allGraphCells;
     }
 
     /**
-     * Returns the {@link GraphMapCell} for the given {@link I_Coordinate}.
-     * @param coordinate the {@link I_Coordinate} of the {@link GraphMapCell}.
-     * @return the {@link GraphMapCell} for the given {@link I_Coordinate}.
+     * Returns the {@link GraphMapVertex} for the given {@link I_Coordinate}.
+     * @param coordinate the {@link I_Coordinate} of the {@link GraphMapVertex}.
+     * @return the {@link GraphMapVertex} for the given {@link I_Coordinate}.
      */
     @Override
-    public GraphMapCell getMapCell(I_Coordinate coordinate) {
+    public GraphMapVertex getMapCell(I_Coordinate coordinate) {
         return allGraphCells.get(coordinate);
     }
 
