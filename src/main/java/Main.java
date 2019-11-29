@@ -9,6 +9,7 @@ import Solvers.CBS.CBS_Solver;
 import Solvers.RunParameters;
 import Solvers.Solution;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -16,22 +17,24 @@ import java.text.SimpleDateFormat;
 
 public class Main {
 
-    // Todo - set notes in all projects
-    // imp
-    // done
-    // testme
-    // blocking
-
     public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{System.getProperty("user.home"), "CBS_Results"});
 //    public static final String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
 //                                                                                        "\\Reports default directory"});
 
     public static void main(String[] args) {
+        verifyOutputPath();
 
         runTestingBenchmarkExperiment();
 
         // solveOneInstanceExample();
         // runMultipleExperimentsExample();
+    }
+
+    private static void verifyOutputPath() {
+        File directory = new File(resultsOutputDir);
+        if (! directory.exists()){
+            directory.mkdir();
+        }
     }
 
     public static void runTestingBenchmarkExperiment(){
@@ -88,7 +91,7 @@ public class Main {
      */
     private static void outputResults() {
         DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd-HH-mm-ss");
-        String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
+        String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + " .csv";
         try {
             S_Metrics.exportCSV(new FileOutputStream(updatedPath),
                     new String[]{   InstanceReport.StandardFields.experimentName,

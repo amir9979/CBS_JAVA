@@ -177,6 +177,7 @@ class CBS_SolverTest {
 
     @Test
     void TestingBenchmark(){
+        boolean useAsserts = true;
 
         I_Solver solver = cbsSolver;
         String path = IO_Manager.buildPath( new String[]{   IO_Manager.testResources_Directory,
@@ -198,9 +199,10 @@ class CBS_SolverTest {
             // run all benchmark instances. this code is mostly copied from Experiment.
             while ((instance = instanceManager.getNextInstance()) != null) {
 
+                // these 2 instances are too difficult for the basic CBS solver
                 if(instance.name.equals("Instance-32-20-20-8")) continue;
                 if(instance.name.equals("Instance-32-20-10-8")) continue;
-                System.gc();
+
                 //build report
                 InstanceReport report = S_Metrics.newInstanceReport();
                 report.putStringValue(InstanceReport.StandardFields.experimentName, "TestingBenchmark");
@@ -223,14 +225,14 @@ class CBS_SolverTest {
 
                 boolean solved = solution != null;
                 System.out.println("Solved?: " + (solved ? "yes" : "no"));
-                //assertNotNull(solution);
+                if (useAsserts) assertNotNull(solution);
                 if (solved) numSolved++;
                 else numFailed++;
 
                 if(solution != null){
                     boolean valid = solution.isValidSolution();
                     System.out.println("Valid?: " + (valid ? "yes" : "no"));
-                    //assertTrue(valid);
+                    if (useAsserts) assertTrue(valid);
 
                     int optimalCost = Integer.parseInt(benchmarkForInstance.get("Plan Cost"));
                     int costWeGot = solution.sumIndividualCosts();
@@ -238,7 +240,7 @@ class CBS_SolverTest {
                     System.out.println("cost is " + (optimal ? "optimal (" + costWeGot +")" :
                             ("not optimal (" + costWeGot + " instead of " + optimalCost + ")")));
                     report.putIntegerValue("Cost Delta", costWeGot - optimalCost);
-                    //assertEquals(optimalCost, costWeGot);
+                    if (useAsserts) assertEquals(optimalCost, costWeGot);
 
                     report.putIntegerValue("Runtime Delta",
                             report.getIntegerValue(InstanceReport.StandardFields.elapsedTimeMS) - (int)Float.parseFloat(benchmarkForInstance.get("Plan time")));
@@ -266,8 +268,6 @@ class CBS_SolverTest {
             if (! directory.exists()){
                 directory.mkdir();
             }
-//            String resultsOutputDir = IO_Manager.buildPath(new String[]{   IO_Manager.testResources_Directory +
-//                    "\\Reports default directory"});
             String updatedPath = resultsOutputDir + "\\results " + dateFormat.format(System.currentTimeMillis()) + ".csv";
             try {
                 S_Metrics.exportCSV(new FileOutputStream(updatedPath),
