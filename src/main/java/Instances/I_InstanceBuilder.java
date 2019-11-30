@@ -20,8 +20,8 @@ public interface I_InstanceBuilder {
     /*  Returns the next existing instance from the prepareInstances structure  */
     MAPF_Instance getNextExistingInstance();
 
-
-    MapDimensions.MapOrientation getMapOrientation();
+    /* Determent the map's orientation, which axis is horizontal or vertical */
+    MapDimensions.Enum_mapOrientation getMapOrientation();
 
 
 
@@ -30,12 +30,18 @@ public interface I_InstanceBuilder {
 
     /*  ==Build maps==  */
 
+    /**
+     * Reads map's lines from file into a String[]
+     * @param reader the current file reader
+     * @param mapDimensions Holds the dimensions sizes and orientation
+     * @return Map lines as String array
+     */
     static String[] buildMapAsStringArray(Reader reader, MapDimensions mapDimensions){
 
         int axis_length = 0;// Indicates num of lines
-        if(mapDimensions.mapOrientation.equals(MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL)){
+        if(mapDimensions.mapOrientation.equals(MapDimensions.Enum_mapOrientation.Y_HORIZONTAL_X_VERTICAL)){
             axis_length = mapDimensions.xAxis_length;
-        }else if( mapDimensions.mapOrientation.equals(MapDimensions.MapOrientation.X_HORIZONTAL_Y_VERTICAL)){
+        }else if( mapDimensions.mapOrientation.equals(MapDimensions.Enum_mapOrientation.X_HORIZONTAL_Y_VERTICAL)){
             axis_length = mapDimensions.yAxis_length;
         }
 
@@ -85,59 +91,70 @@ public interface I_InstanceBuilder {
     }
 
 
+    /**
+     * Builds Character 2D array from String array, split by separator
+     * @param mapAsStrings Map lines as string array
+     * @param mapDimensions Holds the dimensions sizes and orientation
+     * @param mapSeparator Indicates how to split the map lines
+     * @return Character 2d array of map cells
+     */
     static Character[][] build2D_CharacterMap(String[] mapAsStrings, MapDimensions mapDimensions, String mapSeparator){
 
         int xAxis_length = mapDimensions.xAxis_length;
         int yAxis_length = mapDimensions.yAxis_length;
 
-
         Character[][] mapAsCharacters_2d = new Character[xAxis_length][yAxis_length];
         for (int yAxis_oldValue = 0; yAxis_oldValue < mapAsStrings.length; yAxis_oldValue++) {
-            String[] yAxisLine = mapAsStrings[yAxis_oldValue].split(mapSeparator);
+            String[] yAxisLine = mapAsStrings[yAxis_oldValue].split(mapSeparator); // split line
 
+            // set array's value a char in line
             for (int yAxis_newValue = 0; yAxis_newValue < yAxisLine.length ; yAxis_newValue++) {
                 mapAsCharacters_2d[yAxis_oldValue][yAxis_newValue] = yAxisLine[yAxis_newValue].charAt(0);
             }
-
         }
-
         return mapAsCharacters_2d;
     }
 
 
-    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, MapDimensions.MapOrientation mapOrientation, InstanceProperties.ObstacleWrapper obstacle) {
+    /**
+     * Builds {@link Enum_MapCellType} array by converting chars.
+     * Also checks that obstacles in map are valid
+     * @param mapAsCharacters The map as Character array
+     * @param cellTypeHashMap Mapping from char to {@link Enum_MapCellType}
+     * @param mapOrientation Holds the dimensions sizes and orientation
+     * @param obstacle A {@link Instances.InstanceProperties.ObstacleWrapper} from {@link InstanceProperties}
+     * @return An obstacle valid array of {@link Enum_MapCellType}
+     */
+    static Enum_MapCellType[][] build_2D_cellTypeMap(Character[][] mapAsCharacters , HashMap<Character,Enum_MapCellType> cellTypeHashMap, MapDimensions.Enum_mapOrientation mapOrientation, InstanceProperties.ObstacleWrapper obstacle) {
         // done - convert String[] to Enum_MapCellType[][] using this.cellTypeHashMap
 
-        if(mapAsCharacters == null){
-            return null;
-        }
+        if(mapAsCharacters == null){ return null; }
 
         int xAxis_length = mapAsCharacters.length;
         int yAxis_length = mapAsCharacters[0].length;
 
         // used to check obstacle percentage
-        int numOfObstacles = 0;
+        int actualNumOfObstacles = 0;
         int numOfNonObstacles = 0;
 
-
+        // init array
         Enum_MapCellType[][] cellTypeMap = new Enum_MapCellType[xAxis_length][yAxis_length];
 
         for (int xIndex = 0; xIndex < xAxis_length; xIndex++) {
             for (int yIndex = 0; yIndex < yAxis_length; yIndex++) {
 
-                // done - convert using this.cellTypeHashMap
-
                 Character character = null;
-                if( mapOrientation.equals(MapDimensions.MapOrientation.X_HORIZONTAL_Y_VERTICAL)){
+                // Checking the map's orientation
+                if( mapOrientation.equals(MapDimensions.Enum_mapOrientation.X_HORIZONTAL_Y_VERTICAL)){
                     character = mapAsCharacters[yIndex][xIndex];
-                }else if( mapOrientation.equals(MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL)){
+                }else if( mapOrientation.equals(MapDimensions.Enum_mapOrientation.Y_HORIZONTAL_X_VERTICAL)){
                     character = mapAsCharacters[xIndex][yIndex];
                 }
 
                 Enum_MapCellType cellType = cellTypeHashMap.get(character);
 
                 if ( cellType.equals(Enum_MapCellType.WALL)){
-                    numOfObstacles++; // add one wall to counter
+                    actualNumOfObstacles++; // add one wall to counter
                 }else{
                     numOfNonObstacles++; // add one to non obstacle counter
                 }
@@ -145,18 +162,15 @@ public interface I_InstanceBuilder {
             }
         }
 
-        // If obstacle rate is not -1,
+        int boardSize = (numOfNonObstacles + actualNumOfObstacles);
+
         // check that it matches the value from properties
-        // Formula: floor( obstaclesRate * BoardSize) = numOfObstacles
-        int boardSize = (numOfNonObstacles + numOfObstacles);
-        int computedNumOfObstacles = (int) Math.floor((obstacle.getAsRate() * boardSize));
-        if ( obstacle.getAsRate() != -1 && computedNumOfObstacles != numOfObstacles ){
-            // done - check with Dor that this is correct
+        if( ! obstacle.isValidNumOfObstacle(boardSize, actualNumOfObstacles)){
             return null; // Invalid obstacle rate
         }
 
         // Set Obstacle for future use in MAPF_Instance
-        int obstaclePercentage = (int) Math.ceil( ((double) numOfObstacles / (double) boardSize) * 100 );
+        int obstaclePercentage = (int) Math.ceil( ((double) actualNumOfObstacles / (double) boardSize) * 100 );
         obstacle.setWithPercentage(obstaclePercentage);
 
         return cellTypeMap;
@@ -169,45 +183,27 @@ public interface I_InstanceBuilder {
 
 
 
-
     /*  =Utils= */
 
-
     static boolean equalsAll(int[] arr1, int[] arr2){
-        if( arr1 == null || arr2 == null){
-            return false;
-        }
+        if( arr1 == null || arr2 == null){ return false; }
 
-        if( arr1.length != arr2.length ){
-            return false;
-        }
-
+        if( arr1.length != arr2.length ){ return false; }
 
         for (int i = 0; i < arr1.length; i++) {
-            if( arr1[i] != arr2[i] ){
-                return false;
-            }
+            if( arr1[i] != arr2[i] ){ return false; }
         }
-
         return true;
     }
 
 
-
     static int equalsAny(int lookFor, int[] values){
-
-        if( values == null){
-            return -1;
-        }
+        if( values == null){ return -1; }
 
         for (int i = 0; i < values.length ; i++) {
-            if( lookFor == values[i] ){
-                return i;
-            }
+            if( lookFor == values[i] ){ return i; }
         }
-
         return -1;
-
     }
 
 }

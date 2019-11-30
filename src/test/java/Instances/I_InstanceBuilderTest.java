@@ -2,9 +2,7 @@ package Instances;
 
 import Instances.Maps.Enum_MapCellType;
 import Instances.Maps.MapDimensions;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -68,11 +66,12 @@ public class I_InstanceBuilderTest {
 
         InstanceProperties properties = new InstanceProperties();
         InstanceProperties.ObstacleWrapper obstacle = properties.obstacles;
+        obstacle.setMinRate(0.15);
+        obstacle.setMaxRate(0.15);
 
-        I_InstanceBuilder.build_2D_cellTypeMap( this.charMap_Instance_8_15_5, this.cellTypeHashMap, MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL, obstacle);
+        I_InstanceBuilder.build_2D_cellTypeMap( this.charMap_Instance_8_15_5, this.cellTypeHashMap, MapDimensions.Enum_mapOrientation.Y_HORIZONTAL_X_VERTICAL, obstacle);
 
         Assert.assertEquals( 15, obstacle.getAsPercentage());
-
 
     }
 }

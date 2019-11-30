@@ -13,7 +13,7 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
 
     // done - check properties ( continue if properties = null )
 
-    public static final MapDimensions.MapOrientation mapOrientation = MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL;
+    public static final MapDimensions.Enum_mapOrientation ENUMMAP_ORIENTATION = MapDimensions.Enum_mapOrientation.Y_HORIZONTAL_X_VERTICAL;
 
     private final String INDICATOR_AGENTS = "Agents:";
     private final String SEPARATOR_AGENTS = ",";
@@ -156,8 +156,8 @@ public class InstanceBuilder_BGU implements I_InstanceBuilder {
     }
 
     @Override
-    public MapDimensions.MapOrientation getMapOrientation() {
-        return mapOrientation;
+    public MapDimensions.Enum_mapOrientation getMapOrientation() {
+        return ENUMMAP_ORIENTATION;
     }
 
 

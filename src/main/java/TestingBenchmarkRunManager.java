@@ -36,7 +36,7 @@ public class TestingBenchmarkRunManager extends A_RunManager {
     private void addExperimentInstance_32_20(){
 
         /*  Set Properties  */
-        InstanceProperties properties = new InstanceProperties( new MapDimensions(new int[]{32,32}, MapDimensions.MapOrientation.Y_HORIZONTAL_X_VERTICAL),
+        InstanceProperties properties = new InstanceProperties( new MapDimensions(new int[]{32,32}, MapDimensions.Enum_mapOrientation.Y_HORIZONTAL_X_VERTICAL),
                                                                 0.2,
                                                                 new int[]{5,10,15,20});
 

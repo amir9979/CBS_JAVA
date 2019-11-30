@@ -11,7 +11,7 @@ import java.util.*;
 public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
-    public static final MapDimensions.MapOrientation mapOrientation = MapDimensions.MapOrientation.X_HORIZONTAL_Y_VERTICAL;
+    public static final MapDimensions.Enum_mapOrientation ENUMMAP_ORIENTATION = MapDimensions.Enum_mapOrientation.X_HORIZONTAL_Y_VERTICAL;
 
 
     public static final String FILE_TYPE_MAP = ".map";
@@ -53,7 +53,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     private final char WALL = '@';
     private final char TREE = 'T';
 
-
+    /*  Mapping from char to Cell type */
     private HashMap<Character, Enum_MapCellType> cellTypeHashMap = new HashMap<Character, Enum_MapCellType>(){{
         put(EMPTY,Enum_MapCellType.EMPTY);
         put(WALL,Enum_MapCellType.WALL);
@@ -62,17 +62,10 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
 
 
-
-
-
-
-
     @Override
     public void prepareInstances(String instanceName, InstanceManager.InstancePath instancePath, InstanceProperties instanceProperties) {
 
-        if (!(instancePath instanceof InstanceManager.Moving_AI_Path)) {
-            return;
-        }
+        if (!(instancePath instanceof InstanceManager.Moving_AI_Path)) { return; }
 
         InstanceManager.Moving_AI_Path moving_ai_path = (InstanceManager.Moving_AI_Path) instancePath;
         if( instanceProperties == null ){ instanceProperties = new InstanceProperties(); }
@@ -80,9 +73,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
         MAPF_Instance mapf_instance = null;
         GraphMap graphMap = getMap(moving_ai_path, instanceProperties);
-        if( graphMap == null ){
-            return;
-        }
+        if( graphMap == null ){ return; }
 
 
         // create agent properties
@@ -98,26 +89,22 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
             Agent[] agents = getAgents(agentLinesQueue,numOfAgentsFromProperties[i]);
 
-            if (instanceName == null || agents == null) {
-                continue; // Invalid parameters
-            }
+            if (instanceName == null || agents == null) { continue; /* Invalid parameters */ }
 
             mapf_instance = new MAPF_Instance(instanceName, graphMap, agents);
             mapf_instance.setObstaclePercentage(instanceProperties.obstacles.getAsPercentage());
             this.instanceList.add(mapf_instance);
 
         }
-
     }
+
 
     // Returns an array of agents using the line queue
     private Agent[] getAgents(ArrayList<String> agentLinesList, int numOfAgents) {
 
-        if( agentLinesList == null ){
-            return null;
-        }
+        if( agentLinesList == null ){ return null; }
 
-        Agent[] arrayOfAgents = new Agent[numOfAgents];
+        Agent[] arrayOfAgents = new Agent[Math.min(numOfAgents,agentLinesList.size())];
         int numOfAgentsByBatches = this.getNumOfBatches(new int[]{numOfAgents});
 
         // Iterate over all the agents in numOfAgentsByBatches
@@ -130,7 +117,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
                 agentLinesList.remove(0);
             }
         }
-
         return arrayOfAgents;
     }
 
@@ -146,7 +132,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         int target_yValue = Integer.parseInt(splitLine[this.INDEX_AGENT_TARGET_YVALUE]);
         Coordinate_2D target = new Coordinate_2D(target_xValue, target_yValue);
 
-
         return new Agent(id, source, target);
     }
 
@@ -157,9 +142,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         // Open scenario file
         Reader reader = new Reader();
         Enum_IO enum_io = reader.openFile(moving_ai_path.scenarioPath);
-        if( !enum_io.equals(Enum_IO.OPENED) ){
-            return null; // couldn't open the file
-        }
+        if( !enum_io.equals(Enum_IO.OPENED) ){ return null; /* couldn't open the file */ }
 
 
         /*  =Get data from reader=  */
@@ -172,7 +155,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
             nextLine = reader.getNextLine(); // next line
             agentsLines.add(nextLine);
         }
-
         return agentsLines;
     }
 
@@ -181,10 +163,7 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
         Reader reader = new Reader();
         Enum_IO enum_io = reader.openFile(instancePath.path);
-        if( !enum_io.equals(Enum_IO.OPENED) ){
-            return null; // couldn't open the file
-        }
-
+        if( !enum_io.equals(Enum_IO.OPENED) ){ return null; /* couldn't open the file */ }
 
         /*  =Init values=  */
         GraphMap graphMap = null;
@@ -192,7 +171,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
         dimensionsFromProperties.setMapOrientation(this.getMapOrientation());
         MapDimensions dimensionsFromFile = new MapDimensions();
         dimensionsFromFile.setMapOrientation(this.getMapOrientation());
-
 
 
 
@@ -230,22 +208,14 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
 
                 // build map
                 graphMap = I_InstanceBuilder.buildGraphMap(mapAsStrings, this.SEPARATOR_MAP, dimensionsFromFile, this.cellTypeHashMap, instanceProperties.obstacles);
-
                 break;
             }
-
             nextLine = reader.getNextLine();
         }
 
         reader.closeFile(); // No more data in the file
-
         return graphMap;
-
     }
-
-
-
-
 
 
 
@@ -258,8 +228,8 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     }
 
     @Override
-    public MapDimensions.MapOrientation getMapOrientation() {
-        return mapOrientation;
+    public MapDimensions.Enum_mapOrientation getMapOrientation() {
+        return ENUMMAP_ORIENTATION;
     }
 
 
@@ -288,8 +258,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
     }
 
 
-
-
     private int getNumOfBatches(int[] values){
         if( values == null || values.length == 0){
             return this.defaultNumOfBatches; // default num of batches
@@ -304,10 +272,6 @@ public class InstanceBuilder_MovingAI implements I_InstanceBuilder {
             int addition = (division > (int)division ? 1 : 0);
             curBatch = curBatch + (int)division + addition;
         }
-
         return curBatch;
-
     }
-
-
 }

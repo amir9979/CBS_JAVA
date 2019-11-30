@@ -6,8 +6,7 @@ public class InstanceProperties {
 
     public final MapDimensions mapSize;
     public final ObstacleWrapper obstacles;
-    public final int[] numOfAgents; // done - array of num
-
+    public final int[] numOfAgents;
 
 
     public InstanceProperties() {
@@ -17,9 +16,9 @@ public class InstanceProperties {
     }
 
 
-    public InstanceProperties(MapDimensions.MapOrientation mapOrientation){
+    public InstanceProperties(MapDimensions.Enum_mapOrientation enummapOrientation){
         this();
-        this.mapSize.setMapOrientation(mapOrientation);
+        this.mapSize.setMapOrientation(enummapOrientation);
     }
 
 
@@ -41,7 +40,10 @@ public class InstanceProperties {
 
     public class ObstacleWrapper {
 
-        public double obstacleRate = -1;
+        public static final double defaultObstacleRate = -1;
+        private double obstacleRate = defaultObstacleRate;
+        private double minRate = 0;
+        private double maxRate = 1;
 
         public ObstacleWrapper(){}
 
@@ -79,6 +81,32 @@ public class InstanceProperties {
                 return -1;
             }
             return (int)Math.round(this.obstacleRate * 100); // Returns 15
+        }
+
+
+        /*  Min Max getters, setters */
+
+        public boolean isValidNumOfObstacle(int boardSize, int actualNumOfObstacle){
+
+            // Formula: floor( obstaclesRate * BoardSize) = actual numOfObstacles
+
+            int minNumOfObstacles = (int) Math.floor((this.minRate * boardSize));
+            int maxNumOfObstacles = (int) Math.floor((this.maxRate * boardSize));
+
+            if ( actualNumOfObstacle <= maxNumOfObstacles && actualNumOfObstacle >= minNumOfObstacles){
+                if( this.obstacleRate == defaultObstacleRate || this.obstacleRate == obstacleRate){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void setMinRate(double minRate) {
+            this.minRate = minRate;
+        }
+
+        public void setMaxRate(double maxRate) {
+            this.maxRate = maxRate;
         }
     }
 

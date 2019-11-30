@@ -14,7 +14,8 @@ import java.util.List;
  */
 public class RunParameters {
     /*  =Constants=  */
-    private static final long defaultTimeout = 1000*60*5 /*5 minutes*/;
+    private static final long defaultTimeout = 1000*60*15 /*15 minutes*/;
+//    private static final long defaultTimeout = 1000*60*5 /*5 minutes*/;
 
     /*  =Fields=  */
     /**

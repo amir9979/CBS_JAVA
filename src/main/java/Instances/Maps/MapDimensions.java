@@ -1,10 +1,8 @@
 package Instances.Maps;
 
-
-
 public class MapDimensions{
 
-    public enum MapOrientation{
+    public enum Enum_mapOrientation {
         /*  (X0,Y0)|(X1,Y0)
             (X0,Y1)|(X1,Y1)
         */
@@ -21,14 +19,14 @@ public class MapDimensions{
     public int xAxis_length;
     public int yAxis_length;
     public int zAxis_length;
-    public MapOrientation mapOrientation;
+    public Enum_mapOrientation mapOrientation;
 
 
     public MapDimensions(){
         this.numOfDimensions = 0; // Indicates unknown size
     }
 
-    public void setMapOrientation(MapOrientation mapOrientation) {
+    public void setMapOrientation(Enum_mapOrientation mapOrientation) {
         this.mapOrientation = mapOrientation;
     }
 
@@ -48,7 +46,7 @@ public class MapDimensions{
 
 
 
-    public MapDimensions(int[] dimensions, MapOrientation mapOrientation){
+    public MapDimensions(int[] dimensions, Enum_mapOrientation mapOrientation){
 
         this.setMapOrientation(mapOrientation);
 
@@ -56,10 +54,10 @@ public class MapDimensions{
             case 2:
                 this.numOfDimensions = 2;
 
-                if( this.mapOrientation.equals(MapOrientation.X_HORIZONTAL_Y_VERTICAL)){
+                if( this.mapOrientation.equals(Enum_mapOrientation.X_HORIZONTAL_Y_VERTICAL)){
                     this.yAxis_length = dimensions[0];
                     this.xAxis_length = dimensions[1];
-                }else if( this.mapOrientation.equals(MapOrientation.Y_HORIZONTAL_X_VERTICAL)){
+                }else if( this.mapOrientation.equals(Enum_mapOrientation.Y_HORIZONTAL_X_VERTICAL)){
                     this.xAxis_length = dimensions[0];
                     this.yAxis_length = dimensions[1];
                 }
@@ -70,7 +68,6 @@ public class MapDimensions{
                 // nicetohave - set for 3d
                 break;
         }
-
 
 
     }
@@ -93,7 +90,6 @@ public class MapDimensions{
         }
 
 
-
     }
 
 
@@ -103,11 +99,10 @@ public class MapDimensions{
         if (!(other instanceof MapDimensions)) return false;
         MapDimensions that = (MapDimensions) other;
         return  this.numOfDimensions    == that.numOfDimensions &&
-                this.mapOrientation     == that.mapOrientation &&
+                this.mapOrientation == that.mapOrientation &&
                 this.xAxis_length       == that.xAxis_length &&
                 this.yAxis_length       == that.yAxis_length &&
                 this.zAxis_length       == that.zAxis_length;
     }
-
 
 }
